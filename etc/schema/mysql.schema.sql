@@ -26,18 +26,20 @@ CREATE TABLE `certificate_issuer` (
 
 CREATE TABLE `certificate_subject_dn` (
   `certificate_id`  BIGINT        NOT NULL,
-  `cn_key`          VARCHAR(255)  NOT NULL,
+  `key`             VARCHAR(255)  NOT NULL,
   `value`           VARCHAR(255)  NOT NULL,
-  CONSTRAINT `certificate_subject_dn_pk` PRIMARY KEY (`certificate_id`, `cn_key`),
+  `order`           TINYINT NOT NULL,
+  CONSTRAINT `certificate_subject_dn_pk` PRIMARY KEY (`certificate_id`, `order`),
   CONSTRAINT `certificate_subject_dn_fk_certificate_id` FOREIGN KEY (`certificate_id`) REFERENCES `certificate`(`id`)
     ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `certificate_issuer_dn` (
   `certificate_id`  BIGINT        NOT NULL,
-  `cn_key`          VARCHAR(255)  NOT NULL,
+  `key`             VARCHAR(255)  NOT NULL,
   `value`           VARCHAR(255)  NOT NULL,
-  CONSTRAINT `certificate_issuer_dn_pk` PRIMARY KEY (`certificate_id`, `cn_key`),
+  `order`           TINYINT NOT NULL,
+  CONSTRAINT `certificate_issuer_dn_pk` PRIMARY KEY (`certificate_id`, `order`),
   CONSTRAINT `certificate_issuer_dn_fk_certificate_id` FOREIGN KEY (`certificate_id`) REFERENCES `certificate`(`id`)
     ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

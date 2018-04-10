@@ -2,14 +2,14 @@
 
 CREATE TABLE `certificate`(
   `id`                  BIGINT            NOT NULL AUTO_INCREMENT,
-  `der`                 VARBINARY(65535)  NOT NULL,
+  `der`                 BLOB  NOT NULL,
   `der_sha512_sum`      BINARY(64)        NOT NULL,
   `pubkey_algo`         VARCHAR(255)      NOT NULL,
   `pubkey_bits`         SMALLINT          NOT NULL,
   `signature_algo`      VARCHAR(255)      NOT NULL,
   `signature_hash_algo` VARCHAR(255)      NOT NULL,
-  `valid_start`         TIMESTAMP         NOT NULL,
-  `valid_end`           TIMESTAMP         NOT NULL,
+  `valid_start`         DATETIME         NOT NULL,
+  `valid_end`           DATETIME         NOT NULL,
   CONSTRAINT `certificate_pk` PRIMARY KEY (`id`),
   CONSTRAINT `certificate_uk_der_sha512_sum` UNIQUE (`der_sha512_sum`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -58,7 +58,7 @@ CREATE TABLE `certificate_chain` (
   `sni_name`  VARCHAR(255)  NOT NULL,
   `ctime`     TIMESTAMP     NOT NULL,
   CONSTRAINT `certificate_chain_pk` PRIMARY KEY (`id`),
-  CONSTRAINT `certificate_chain_uk_ip_port_sni_name_ctime` PRIMARY KEY (`ip`, `port`, `sni_name`, `ctime`)
+  CONSTRAINT `certificate_chain_uk_ip_port_sni_name_ctime` UNIQUE KEY (`ip`, `port`, `sni_name`, `ctime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `certificate_chain_link` (

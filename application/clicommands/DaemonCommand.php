@@ -3,7 +3,13 @@
 
 namespace Icinga\Module\X509\Clicommands;
 
+use DateTime;
+use Exception;
 use Icinga\Cli\Command;
+use ipl\Sql\Config;
+use ipl\Sql\Connection;
+use ipl\Sql\Insert;
+use ipl\Sql\Select;
 use React\EventLoop\Factory;
 use React\Socket\Connector;
 use React\Socket\TimeoutConnector;
@@ -36,7 +42,7 @@ class DaemonCommand extends Command
         for ($i = 0; $i < $ip_count; $i++) {
             $ip = DaemonCommand::numberToAddr($start + $i);
             foreach ($ports as $port) {
-                $target = new \stdClass();
+                $target = (object) [];
                 $target->ip = $ip;
                 $target->port = $port;
                 yield $target;
@@ -64,7 +70,7 @@ class DaemonCommand extends Command
         $fingerprint = openssl_x509_fingerprint($cert, 'sha512', true);
 
         $row = $this->db->select(
-            (new \ipl\Sql\Select())
+            (new Select())
                 ->columns(['id'])
                 ->from('certificate')
                 ->where(['der_sha512_sum = ?' => $fingerprint ])
@@ -79,16 +85,16 @@ class DaemonCommand extends Command
 
             $signaturePieces = explode('-', $certInfo['signatureTypeSN']);
 
-            $validStart = new \DateTime();
+            $validStart = new DateTime();
             $validStart->setTimestamp($certInfo['validFrom_time_t']);
             $validStart = $validStart->format('Y-m-d H:i:s');
 
-            $validEnd = new \DateTime();
+            $validEnd = new DateTime();
             $validEnd->setTimestamp($certInfo['validTo_time_t']);
             $validEnd = $validEnd->format('Y-m-d H:i:s');
 
             $this->db->insert(
-                (new \ipl\Sql\Insert())
+                (new Insert())
                     ->into('certificate')
                     ->columns(['der', 'der_sha512_sum', 'pubkey_algo', 'pubkey_bits', 'signature_algo', 'signature_hash_algo', 'valid_start', 'valid_end'])
                     ->values([$der, $fingerprint, '', 0, $signaturePieces[0], $signaturePieces[1], $validStart, $validEnd])
@@ -115,7 +121,7 @@ class DaemonCommand extends Command
                 list($type, $name) = explode(':', $san);
 
                 $this->db->insert(
-                    (new \ipl\Sql\Insert())
+                    (new Insert())
                         ->into('certificate_subject_alt_name')
                         ->columns(['certificate_id', 'type', 'value'])
                         ->values([$certId, $type, $name])
@@ -135,7 +141,7 @@ class DaemonCommand extends Command
 
             foreach ($values as $value) {
                 $this->db->insert(
-                    (new \ipl\Sql\Insert())
+                    (new Insert())
                         ->into("certificate_{$type}_dn")
                         ->columns(['certificate_id', '`key`', '`value`', '`order`'])
                         ->values([$certId, $key, $value, $index])
@@ -172,7 +178,7 @@ class DaemonCommand extends Command
                 var_dump($chain);
 
                 $res = $this->db->insert(
-                    (new \ipl\Sql\Insert())
+                    (new Insert())
                         ->into('certificate_chain')
                         ->columns(['ip', 'port', 'sni_name'])
                         ->values([inet_pton($target->ip), $target->port, ''])
@@ -186,7 +192,7 @@ class DaemonCommand extends Command
                     $certId = $this->findOrInsertCert($cert, $certInfo);
 
                     $this->db->insert(
-                        (new \ipl\Sql\Insert())
+                        (new Insert())
                             ->into('certificate_chain_link')
                             ->columns(['certificate_chain_id', '`order`', 'certificate_id'])
                             ->values([$chainId, $index, $certId])
@@ -195,7 +201,7 @@ class DaemonCommand extends Command
                     var_dump($certInfo);
                 }
             },
-            function (\Exception $exception) {
+            function (Exception $exception) {
                 $this->finishTarget();
 
                 //echo "Cannot connect to server: {$exception->getMessage()}\n";
@@ -212,14 +218,14 @@ class DaemonCommand extends Command
 
     public function indexAction()
     {
-        $config = new \ipl\Sql\Config([
+        $config = new Config([
             'db' => 'mysql',
             'host' => '127.0.0.1',
             'dbname' => 'certs',
             'username' => 'certs',
             'password' => '4RXNxt5jJy3S',
         ]);
-        $this->db = new \ipl\Sql\Connection($config);
+        $this->db = new Connection($config);
 
         $this->loop = Factory::create();
 

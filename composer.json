@@ -1,5 +1,12 @@
 {
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/Icinga/ipl-sql"
+        }
+    ],
     "require": {
+        "ipl/sql": "dev-master",
         "react/socket": "^0.8.10"
     }
 }

@@ -5,8 +5,10 @@ namespace Icinga\Module\X509\Clicommands;
 
 use DateTime;
 use Exception;
+use Icinga\Application\Config as IniConfig;
 use Icinga\Cli\Command;
-use ipl\Sql\Config;
+use Icinga\Data\ResourceFactory;
+use ipl\Sql\Config as DbConfig;
 use ipl\Sql\Connection;
 use ipl\Sql\Insert;
 use ipl\Sql\Select;
@@ -218,13 +220,9 @@ class DaemonCommand extends Command
 
     public function indexAction()
     {
-        $config = new Config([
-            'db' => 'mysql',
-            'host' => '127.0.0.1',
-            'dbname' => 'certs',
-            'username' => 'certs',
-            'password' => '4RXNxt5jJy3S',
-        ]);
+        $config = new DbConfig(ResourceFactory::getResourceConfig(
+            IniConfig::module('x509')->get('backend', 'resource')
+        ));
         $this->db = new Connection($config);
 
         $this->loop = Factory::create();

@@ -10,6 +10,7 @@ use Icinga\Cli\Command;
 use Icinga\Data\ResourceFactory;
 use ipl\Sql\Config as DbConfig;
 use ipl\Sql\Connection;
+use ipl\Sql\Expression;
 use ipl\Sql\Insert;
 use ipl\Sql\Select;
 use React\EventLoop\Factory;
@@ -102,14 +103,6 @@ class DaemonCommand extends Command
 
             $pubkeyDetails = openssl_pkey_get_details(openssl_pkey_get_public($cert));
 
-            $validStart = new DateTime();
-            $validStart->setTimestamp($certInfo['validFrom_time_t']);
-            $validStart = $validStart->format('Y-m-d H:i:s');
-
-            $validEnd = new DateTime();
-            $validEnd->setTimestamp($certInfo['validTo_time_t']);
-            $validEnd = $validEnd->format('Y-m-d H:i:s');
-
             $this->db->insert(
                 (new Insert())
                     ->into('certificate')
@@ -120,8 +113,8 @@ class DaemonCommand extends Command
                         'pubkey_bits'           => $pubkeyDetails['bits'],
                         'signature_algo'        => $signaturePieces[0],
                         'signature_hash_algo'   => $signaturePieces[1],
-                        'valid_start'           => $validStart,
-                        'valid_end'             => $validEnd
+                        'valid_start'           => new Expression('FROM_UNIXTIME(?)', $certInfo['validFrom_time_t']),
+                        'valid_end'             => new Expression('FROM_UNIXTIME(?)', $certInfo['validTo_time_t'])
                     ])
             );
 

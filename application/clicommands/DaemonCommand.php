@@ -20,6 +20,19 @@ use React\Socket\ConnectionInterface;
 
 class DaemonCommand extends Command
 {
+    /**
+     * Possible public key types
+     *
+     * @var string[]
+     */
+    protected $pubkeyTypes = [
+        -1                  => 'unknown',
+        OPENSSL_KEYTYPE_RSA => 'RSA',
+        OPENSSL_KEYTYPE_DSA => 'DSA',
+        OPENSSL_KEYTYPE_DH  => 'DH',
+        OPENSSL_KEYTYPE_EC  => 'EC'
+    ];
+
     private $db;
     private $loop;
     private $connector;
@@ -87,6 +100,8 @@ class DaemonCommand extends Command
 
             $signaturePieces = explode('-', $certInfo['signatureTypeSN']);
 
+            $pubkeyDetails = openssl_pkey_get_details(openssl_pkey_get_public($cert));
+
             $validStart = new DateTime();
             $validStart->setTimestamp($certInfo['validFrom_time_t']);
             $validStart = $validStart->format('Y-m-d H:i:s');
@@ -98,8 +113,16 @@ class DaemonCommand extends Command
             $this->db->insert(
                 (new Insert())
                     ->into('certificate')
-                    ->columns(['der', 'der_sha512_sum', 'pubkey_algo', 'pubkey_bits', 'signature_algo', 'signature_hash_algo', 'valid_start', 'valid_end'])
-                    ->values([$der, $fingerprint, '', 0, $signaturePieces[0], $signaturePieces[1], $validStart, $validEnd])
+                    ->values([
+                        'der'                   => $der,
+                        'der_sha512_sum'        => $fingerprint,
+                        'pubkey_algo'           => $this->pubkeyTypes[$pubkeyDetails['type']],
+                        'pubkey_bits'           => $pubkeyDetails['bits'],
+                        'signature_algo'        => $signaturePieces[0],
+                        'signature_hash_algo'   => $signaturePieces[1],
+                        'valid_start'           => $validStart,
+                        'valid_end'             => $validEnd
+                    ])
             );
 
             $certId = $this->db->lastInsertId();

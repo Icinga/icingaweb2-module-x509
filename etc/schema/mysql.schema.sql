@@ -68,6 +68,8 @@ CREATE TABLE `certificate_chain_link` (
   `order`                 TINYINT NOT NULL,
   `certificate_id`        BIGINT  NOT NULL,
   CONSTRAINT `certificate_chain_link_pk` PRIMARY KEY (`certificate_chain_id`, `order`),
-  CONSTRAINT `certificate_chain_link_fk_certificate_chain_id` FOREIGN KEY (`certificate_chain_id`) REFERENCES `certificate_chain`(`id`),
+  CONSTRAINT `certificate_chain_link_fk_certificate_chain_id` FOREIGN KEY (`certificate_chain_id`) REFERENCES `certificate_chain`(`id`)
+    ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT `certificate_chain_link_fk_certificate_id` FOREIGN KEY (`certificate_id`) REFERENCES `certificate`(`id`)
+    ON UPDATE CASCADE ON DELETE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

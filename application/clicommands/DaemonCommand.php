@@ -35,7 +35,11 @@ class DaemonCommand extends Command
         OPENSSL_KEYTYPE_EC  => 'EC'
     ];
 
+    /**
+     * @var Connection
+     */
     private $db;
+
     private $loop;
     private $connector;
     private $pendingTargets = 0;
@@ -200,29 +204,31 @@ class DaemonCommand extends Command
                 $chain = $options['ssl']['peer_certificate_chain'];
                 var_dump($chain);
 
-                $res = $this->db->insert(
-                    (new Insert())
-                        ->into('certificate_chain')
-                        ->columns(['ip', 'port', 'sni_name'])
-                        ->values([inet_pton($target->ip), $target->port, ''])
-                );
-
-                $chainId = $this->db->lastInsertId();
-
-                foreach ($chain as $index => $cert) {
-                    $certInfo = openssl_x509_parse($cert);
-
-                    $certId = $this->findOrInsertCert($cert, $certInfo);
-
-                    $this->db->insert(
+                $this->db->transaction(function () use ($target, $chain) {
+                    $res = $this->db->insert(
                         (new Insert())
-                            ->into('certificate_chain_link')
-                            ->columns(['certificate_chain_id', '`order`', 'certificate_id'])
-                            ->values([$chainId, $index, $certId])
+                            ->into('certificate_chain')
+                            ->columns(['ip', 'port', 'sni_name'])
+                            ->values([inet_pton($target->ip), $target->port, ''])
                     );
 
-                    var_dump($certInfo);
-                }
+                    $chainId = $this->db->lastInsertId();
+
+                    foreach ($chain as $index => $cert) {
+                        $certInfo = openssl_x509_parse($cert);
+
+                        $certId = $this->findOrInsertCert($cert, $certInfo);
+
+                        $this->db->insert(
+                            (new Insert())
+                                ->into('certificate_chain_link')
+                                ->columns(['certificate_chain_id', '`order`', 'certificate_id'])
+                                ->values([$chainId, $index, $certId])
+                        );
+
+                        var_dump($certInfo);
+                    }
+                });
             },
             function (Exception $exception) {
                 $this->finishTarget();

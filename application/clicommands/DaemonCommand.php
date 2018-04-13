@@ -133,6 +133,49 @@ class DaemonCommand extends Command
             $this->insertDn($certId, 'subject', $certInfo);
 
             $this->insertSANs($certId, $certInfo);
+
+            $this->db->run(
+                <<<EOQ
+INSERT INTO certificate_issuer(certificate_id, issuer_id)
+SELECT certificate_id, ?
+FROM certificate_issuer_dn ci
+GROUP BY certificate_id
+HAVING COUNT(*) = (
+  SELECT COUNT(*)
+  FROM certificate_subject_dn
+  WHERE certificate_id = ?
+) AND (
+  SELECT NOT MAX(NOT (i.key = s.key AND i.value = s.value))
+  FROM certificate_issuer_dn i
+  INNER JOIN certificate_subject_dn s ON i.order = s.order
+  WHERE i.certificate_id = ci.certificate_id AND s.certificate_id = ?
+)
+EOQ
+                ,
+                [$certId, $certId, $certId]
+            );
+
+            $this->db->run(
+                <<<EOQ
+INSERT INTO certificate_issuer(certificate_id, issuer_id)
+SELECT ?, certificate_id
+FROM certificate_subject_dn cs
+WHERE certificate_id != ?
+GROUP BY certificate_id
+HAVING COUNT(*) = (
+  SELECT COUNT(*)
+  FROM certificate_issuer_dn
+  WHERE certificate_id = ?
+) AND (
+  SELECT NOT MAX(NOT (i.key = s.key AND i.value = s.value))
+  FROM certificate_issuer_dn i
+  INNER JOIN certificate_subject_dn s ON i.order = s.order
+  WHERE s.certificate_id = cs.certificate_id AND i.certificate_id = ?
+)
+EOQ
+                ,
+                [$certId, $certId, $certId, $certId]
+            );
         } else {
             $certId = $row['id'];
         }

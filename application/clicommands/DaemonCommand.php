@@ -6,6 +6,7 @@ namespace Icinga\Module\X509\Clicommands;
 use DateTime;
 use Exception;
 use Icinga\Application\Config as IniConfig;
+use Icinga\Application\Config;
 use Icinga\Cli\Command;
 use Icinga\Data\ResourceFactory;
 use ipl\Sql\Config as DbConfig;
@@ -48,20 +49,24 @@ class DaemonCommand extends Command
         return inet_ntop(str_pad(gmp_export($num), 16, "\0", STR_PAD_LEFT));
     }
 
-    private static function generateTargets($cidr, $ports)
+    private static function generateTargets()
     {
-        $cidr = explode('/', $cidr);
-        $start_ip = $cidr[0];
-        $prefix = $cidr[1];
-        $ip_count = 1 << (128 - $prefix);
-        $start = DaemonCommand::addrToNumber($start_ip);
-        for ($i = 0; $i < $ip_count; $i++) {
-            $ip = DaemonCommand::numberToAddr($start + $i);
-            foreach ($ports as $port) {
-                $target = (object) [];
-                $target->ip = $ip;
-                $target->port = $port;
-                yield $target;
+        foreach (Config::module('x509', 'ipranges') as $cidr => $ports) {
+            $cidr = explode('/', $cidr);
+            $start_ip = $cidr[0];
+            $prefix = $cidr[1];
+            $ip_count = 1 << (128 - $prefix);
+            $start = DaemonCommand::addrToNumber($start_ip);
+            for ($i = 0; $i < $ip_count; $i++) {
+                $ip = DaemonCommand::numberToAddr($start + $i);
+                foreach ($ports as $start => $end) {
+                    foreach (range($start, $end) as $port) {
+                        $target = (object) [];
+                        $target->ip = $ip;
+                        $target->port = $port;
+                        yield $target;
+                    }
+                }
             }
         }
     }
@@ -251,10 +256,7 @@ class DaemonCommand extends Command
         ));
         $this->connector = new TimeoutConnector($secureConnector, 5.0, $this->loop);
 
-        //$ips = '192.168.3.0/24';
-        $ips = '::ffff:185.11.252.0/118';
-        $ports = [443, 5665, 8797];
-        $this->targets = DaemonCommand::generateTargets($ips, $ports);
+        $this->targets = self::generateTargets();
 
         // Start scanning the first couple of targets...
         for ($i = 0; $i < 256; $i++) {

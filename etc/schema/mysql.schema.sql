@@ -71,19 +71,3 @@ CREATE TABLE `certificate_chain_link` (
   CONSTRAINT `certificate_chain_link_fk_certificate_chain_id` FOREIGN KEY (`certificate_chain_id`) REFERENCES `certificate_chain`(`id`),
   CONSTRAINT `certificate_chain_link_fk_certificate_id` FOREIGN KEY (`certificate_id`) REFERENCES `certificate`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE `ip_range` (
-  `id`        BIGINT      NOT NULL AUTO_INCREMENT,
-  `ip`        BINARY(16)  NOT NULL,
-  `host_bits` TINYINT     NOT NULL,
-  CONSTRAINT `ip_range_pk` PRIMARY KEY (`id`),
-  CONSTRAINT `ip_range_uk_ip_host_bits` UNIQUE KEY (`ip`, `host_bits`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE `port_range` (
-  `ip_range_id` BIGINT        NOT NULL,
-  `start`       SMALLINT      NOT NULL,
-  `end`         SMALLINT      NOT NULL,
-  CONSTRAINT `port_range_pk` PRIMARY KEY (`ip_range_id`, `start`),
-  CONSTRAINT `port_range_fk_ip_range_id` FOREIGN KEY (`ip_range_id`) REFERENCES `ip_range`(`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;

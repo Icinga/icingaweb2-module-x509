@@ -1,0 +1,54 @@
+<?php
+/** @var \Icinga\Web\View $this */
+/** @var \Icinga\Web\Widget\Tabs $tabs */
+/** @var string[][] $ranges */
+?>
+<div class="controls">
+    <?= $tabs ?>
+</div>
+<div class="content">
+    <p><?= $this->qlink(
+        $this->translate('Add IP range'),
+        'x509/ipranges/add',
+        null,
+        [
+            'class'             => 'button-link',
+            'icon'              => 'plus',
+            'data-base-target'  => '_next'
+        ]
+    ) ?></p>
+
+    <?php if (empty($ranges)): ?>
+        <p><?= $this->escape($this->translate('No ranges configured')) ?></p>
+    <?php else: ?>
+        <table class="common-table table-row-selectable" data-base-target="_next">
+            <thead>
+                <tr>
+                    <th><?= $this->escape($this->translate('CIDR')) ?></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($ranges as $cidr => $ports): ?>
+                    <tr>
+                        <td><?= $this->qlink(
+                            $cidr,
+                            'x509/ipranges/edit',
+                            ['cidr' => $cidr],
+                            ['data-base-target' => '_next']
+                        ) ?></td>
+                        <td><?= $this->qlink(
+                            null,
+                            'x509/ipranges/remove',
+                            ['cidr' => $cidr],
+                            [
+                                'icon'              => 'cancel',
+                                'data-base-target'  => '_next'
+                            ]
+                        ) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+</div>

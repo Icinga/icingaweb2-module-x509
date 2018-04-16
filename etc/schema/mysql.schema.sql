@@ -2,7 +2,7 @@
 
 create table certificate
 (
-  id int auto_increment primary key,
+  id int unsigned auto_increment primary key,
   certificate blob not null,
   fingerprint binary(32) not null,
   version smallint not null,
@@ -17,7 +17,7 @@ create table certificate
 
 create table certificate_chain
 (
-  id int auto_increment primary key,
+  id int unsigned auto_increment primary key,
   ip binary(16) not null,
   port smallint(6) not null,
   sni_name varchar(255) not null,
@@ -27,17 +27,17 @@ create table certificate_chain
 
 create table certificate_chain_log
 (
-  id int auto_increment primary key,
-  certificate_chain_id int not null,
+  id int unsigned auto_increment primary key,
+  certificate_chain_id int unsigned not null,
   length smallint(6) not null,
   ctime timestamp not null default CURRENT_TIMESTAMP
 ) engine=InnoDB charset=utf8;
 
 create table certificate_chain_link
 (
-  certificate_chain_log_id int not null,
+  certificate_chain_log_id int unsigned not null,
   `order` tinyint not null,
-  certificate_id int not null,
+  certificate_id int unsigned not null,
   primary key (certificate_chain_log_id, `order`),
   constraint certificate_chain_link_fk_certificate_chain_id foreign key (certificate_chain_log_id) references certificate_chain_log (id),
   constraint certificate_chain_link_fk_certificate_id foreign key (certificate_id) references certificate (id)
@@ -47,7 +47,7 @@ create index certificate_chain_link_fk_certificate_id on certificate_chain_link 
 
 create table certificate_issuer_dn
 (
-  certificate_id int not null,
+  certificate_id int unsigned not null,
   `key` varchar(255) not null,
   value varchar(255) not null,
   `order` tinyint not null,
@@ -57,7 +57,7 @@ create table certificate_issuer_dn
 
 create table certificate_subject_alt_name
 (
-  certificate_id int not null,
+  certificate_id int unsigned not null,
   type varchar(255) not null,
   value varchar(255) not null,
   primary key (certificate_id, type, value),
@@ -66,7 +66,7 @@ create table certificate_subject_alt_name
 
 create table certificate_subject_dn
 (
-  certificate_id int not null,
+  certificate_id int unsigned not null,
   `key` varchar(255) not null,
   value varchar(255) not null,
   `order` tinyint not null,
@@ -76,7 +76,7 @@ create table certificate_subject_dn
 
 create table ip_range
 (
-  id        int auto_increment primary key,
+  id        int unsigned auto_increment primary key,
   ip        binary(16) not null,
   host_bits tinyint    not null,
   constraint ip_range_uk_ip_host_bits unique (ip, host_bits)
@@ -84,7 +84,7 @@ create table ip_range
 
 create table port_range
 (
-  ip_range_id int not null,
+  ip_range_id int unsigned not null,
   start smallint(6) not null,
   end smallint(6) not null,
   primary key (ip_range_id, start),

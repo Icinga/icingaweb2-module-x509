@@ -7,6 +7,6 @@
     ],
     "require": {
         "ipl/sql": "dev-master",
-        "react/socket": "^0.8.10"
+        "react/socket": "^0.7.2"
     }
 }

@@ -14,6 +14,7 @@ use ipl\Sql\Connection;
 use ipl\Sql\Expression;
 use ipl\Sql\Insert;
 use ipl\Sql\Select;
+use ipl\Sql\Update;
 use React\EventLoop\Factory;
 use React\Socket\Connector;
 use React\Socket\TimeoutConnector;
@@ -92,13 +93,13 @@ class DaemonCommand extends Command
     }
 
     private function findOrInsertCert($cert, $certInfo) {
-        $fingerprint = openssl_x509_fingerprint($cert, 'sha512', true);
+        $fingerprint = openssl_x509_fingerprint($cert, 'sha256', true);
 
         $row = $this->db->select(
             (new Select())
                 ->columns(['id'])
                 ->from('certificate')
-                ->where(['der_sha512_sum = ?' => $fingerprint ])
+                ->where(['fingerprint = ?' => $fingerprint ])
         )->fetch();
 
         if ($row === false) {
@@ -116,14 +117,14 @@ class DaemonCommand extends Command
                 (new Insert())
                     ->into('certificate')
                     ->values([
-                        'der'                   => $der,
-                        'der_sha512_sum'        => $fingerprint,
+                        'certificate'           => $der,
+                        'fingerprint'           => $fingerprint,
                         'pubkey_algo'           => $this->pubkeyTypes[$pubkeyDetails['type']],
                         'pubkey_bits'           => $pubkeyDetails['bits'],
                         'signature_algo'        => $signaturePieces[0],
                         'signature_hash_algo'   => $signaturePieces[1],
-                        'valid_start'           => new Expression('FROM_UNIXTIME(?)', $certInfo['validFrom_time_t']),
-                        'valid_end'             => new Expression('FROM_UNIXTIME(?)', $certInfo['validTo_time_t'])
+                        'valid_start'           => $certInfo['validFrom_time_t'],
+                        'valid_end'             => $certInfo['validTo_time_t']
                     ])
             );
 
@@ -133,50 +134,7 @@ class DaemonCommand extends Command
             $this->insertDn($certId, 'subject', $certInfo);
 
             $this->insertSANs($certId, $certInfo);
-
-            $this->db->run(
-                <<<EOQ
-INSERT INTO certificate_issuer(certificate_id, issuer_id)
-SELECT certificate_id, ?
-FROM certificate_issuer_dn ci
-GROUP BY certificate_id
-HAVING COUNT(*) = (
-  SELECT COUNT(*)
-  FROM certificate_subject_dn
-  WHERE certificate_id = ?
-) AND (
-  SELECT NOT MAX(NOT (i.key = s.key AND i.value = s.value))
-  FROM certificate_issuer_dn i
-  INNER JOIN certificate_subject_dn s ON i.order = s.order
-  WHERE i.certificate_id = ci.certificate_id AND s.certificate_id = ?
-)
-EOQ
-                ,
-                [$certId, $certId, $certId]
-            );
-
-            $this->db->run(
-                <<<EOQ
-INSERT INTO certificate_issuer(certificate_id, issuer_id)
-SELECT ?, certificate_id
-FROM certificate_subject_dn cs
-WHERE certificate_id != ?
-GROUP BY certificate_id
-HAVING COUNT(*) = (
-  SELECT COUNT(*)
-  FROM certificate_issuer_dn
-  WHERE certificate_id = ?
-) AND (
-  SELECT NOT MAX(NOT (i.key = s.key AND i.value = s.value))
-  FROM certificate_issuer_dn i
-  INNER JOIN certificate_subject_dn s ON i.order = s.order
-  WHERE s.certificate_id = cs.certificate_id AND i.certificate_id = ?
-)
-EOQ
-                ,
-                [$certId, $certId, $certId, $certId]
-            );
-        } else {
+            } else {
             $certId = $row['id'];
         }
 
@@ -235,7 +193,7 @@ EOQ
         $this->targets->next();
 
         $url = "tls://[{$target->ip}]:{$target->port}";
-        echo "Connecting to {$url}\n";
+        //echo "Connecting to {$url}\n";
         $this->pendingTargets++;
         $this->connector->connect($url)->then(
             function (ConnectionInterface $conn) use ($target) {
@@ -245,17 +203,41 @@ EOQ
                 $options = stream_context_get_options($stream);
                 echo "Connected to {$conn->getRemoteAddress()}\n";
                 $chain = $options['ssl']['peer_certificate_chain'];
-                var_dump($chain);
 
                 $this->db->transaction(function () use ($target, $chain) {
-                    $res = $this->db->insert(
-                        (new Insert())
-                            ->into('certificate_chain')
-                            ->columns(['ip', 'port', 'sni_name'])
-                            ->values([inet_pton($target->ip), $target->port, ''])
-                    );
+                    $row = $this->db->select(
+                        (new Select())
+                            ->columns(['id'])
+                            ->from('certificate_chain')
+                            ->where(['ip = ?' => inet_pton($target->ip), 'port = ?' => $target->port, 'sni_name = ?' => '' ])
+                    )->fetch();
 
-                    $chainId = $this->db->lastInsertId();
+                    if ($row === false) {
+                        $this->db->insert(
+                            (new Insert())
+                                ->into('certificate_chain')
+                                ->columns(['ip', 'port', 'sni_name'])
+                                ->values([inet_pton($target->ip), $target->port, ''])
+                        );
+                        $chainId = $this->db->lastInsertId();
+                    } else {
+                        $chainId = $row['id'];
+                    }
+
+                    $this->db->insert(
+                        (new Insert())
+                            ->into('certificate_chain_log')
+                            ->columns(['certificate_chain_id', 'length'])
+                            ->values([$chainId, count($chain)])
+                    );
+                    $chainLogId = $this->db->lastInsertId();
+
+                    $this->db->update(
+                        (new Update())
+                            ->table('certificate_chain')
+                            ->set(['latest_log_id' => $chainLogId])
+                            ->where(['id = ?' => $chainId])
+                    );
 
                     foreach ($chain as $index => $cert) {
                         $certInfo = openssl_x509_parse($cert);
@@ -265,11 +247,9 @@ EOQ
                         $this->db->insert(
                             (new Insert())
                                 ->into('certificate_chain_link')
-                                ->columns(['certificate_chain_id', '`order`', 'certificate_id'])
-                                ->values([$chainId, $index, $certId])
+                                ->columns(['certificate_chain_log_id', '`order`', 'certificate_id'])
+                                ->values([$chainLogId, $index, $certId])
                         );
-
-                        var_dump($certInfo);
                     }
                 });
             },
@@ -279,7 +259,9 @@ EOQ
                 //echo "Cannot connect to server: {$exception->getMessage()}\n";
                 //$loop->stop();
             }
-        );
+        )->otherwise(function($ex) {
+            var_dump($ex);
+        });
     }
 
     function finishTarget()

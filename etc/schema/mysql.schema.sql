@@ -1,75 +1,91 @@
 -- X509 module | (c) 2018 Icinga Development Team | GPLv2+
 
-CREATE TABLE `certificate`(
-  `id`                  BIGINT            NOT NULL AUTO_INCREMENT,
-  `der`                 BLOB  NOT NULL,
-  `der_sha512_sum`      BINARY(64)        NOT NULL,
-  `pubkey_algo`         VARCHAR(255)      NOT NULL,
-  `pubkey_bits`         SMALLINT          NOT NULL,
-  `signature_algo`      VARCHAR(255)      NOT NULL,
-  `signature_hash_algo` VARCHAR(255)      NOT NULL,
-  `valid_start`         DATETIME         NOT NULL,
-  `valid_end`           DATETIME         NOT NULL,
-  CONSTRAINT `certificate_pk` PRIMARY KEY (`id`),
-  CONSTRAINT `certificate_uk_der_sha512_sum` UNIQUE (`der_sha512_sum`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+create table certificate
+(
+  id int auto_increment primary key,
+  certificate blob not null,
+  fingerprint binary(32) not null,
+  pubkey_algo enum('unknown', 'RSA', 'DSA', 'DH', 'EC') not null,
+  pubkey_bits smallint(6) not null,
+  signature_algo varchar(255) not null,
+  signature_hash_algo varchar(255) not null,
+  valid_start bigint not null,
+  valid_end bigint not null,
+  constraint certificate_uk_fingerprint unique (fingerprint)
+) engine=InnoDB charset=utf8;
 
-CREATE TABLE `certificate_issuer` (
-  `certificate_id`  BIGINT  NOT NULL,
-  `issuer_id`       BIGINT  NOT NULL,
-  CONSTRAINT `certificate_issuer_pk` PRIMARY KEY (`certificate_id`, `issuer_id`),
-  CONSTRAINT `certificate_issuer_fk_certificate_id` FOREIGN KEY (`certificate_id`) REFERENCES `certificate`(`id`)
-    ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT `certificate_issuer_fk_issuer_id` FOREIGN KEY (`issuer_id`) REFERENCES `certificate`(`id`)
-    ON UPDATE CASCADE ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+create table certificate_chain
+(
+  id int auto_increment primary key,
+  ip binary(16) not null,
+  port smallint(6) not null,
+  sni_name varchar(255) not null,
+  latest_log_id int,
+  constraint certificate_chain_uk_ip_port_sni_name unique (ip, port, sni_name)
+) engine = InnoDB charset = utf8;
 
-CREATE TABLE `certificate_subject_dn` (
-  `certificate_id`  BIGINT        NOT NULL,
-  `key`             VARCHAR(255)  NOT NULL,
-  `value`           VARCHAR(255)  NOT NULL,
-  `order`           TINYINT NOT NULL,
-  CONSTRAINT `certificate_subject_dn_pk` PRIMARY KEY (`certificate_id`, `order`),
-  CONSTRAINT `certificate_subject_dn_fk_certificate_id` FOREIGN KEY (`certificate_id`) REFERENCES `certificate`(`id`)
-    ON UPDATE CASCADE ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+create table certificate_chain_log
+(
+  id int auto_increment primary key,
+  certificate_chain_id int not null,
+  length smallint(6) not null,
+  ctime timestamp not null default CURRENT_TIMESTAMP
+) engine=InnoDB charset=utf8;
 
-CREATE TABLE `certificate_issuer_dn` (
-  `certificate_id`  BIGINT        NOT NULL,
-  `key`             VARCHAR(255)  NOT NULL,
-  `value`           VARCHAR(255)  NOT NULL,
-  `order`           TINYINT NOT NULL,
-  CONSTRAINT `certificate_issuer_dn_pk` PRIMARY KEY (`certificate_id`, `order`),
-  CONSTRAINT `certificate_issuer_dn_fk_certificate_id` FOREIGN KEY (`certificate_id`) REFERENCES `certificate`(`id`)
-    ON UPDATE CASCADE ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+create table certificate_chain_link
+(
+  certificate_chain_log_id int not null,
+  `order` tinyint not null,
+  certificate_id int not null,
+  primary key (certificate_chain_log_id, `order`),
+  constraint certificate_chain_link_fk_certificate_chain_id foreign key (certificate_chain_log_id) references certificate_chain_log (id),
+  constraint certificate_chain_link_fk_certificate_id foreign key (certificate_id) references certificate (id)
+) engine=InnoDB charset=utf8;
 
-CREATE TABLE `certificate_subject_alt_name` (
-  `certificate_id`  BIGINT        NOT NULL,
-  `type`            VARCHAR(255)  NOT NULL,
-  `value`           VARCHAR(255)  NOT NULL,
-  CONSTRAINT `certificate_subject_alt_name_pk` PRIMARY KEY (`certificate_id`, `type`, `value`),
-  CONSTRAINT `certificate_subject_alt_name_fk_certificate_id` FOREIGN KEY (`certificate_id`) REFERENCES `certificate`(`id`)
-    ON UPDATE CASCADE ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+create index certificate_chain_link_fk_certificate_id on certificate_chain_link (certificate_id);
 
-CREATE TABLE `certificate_chain` (
-  `id`        BIGINT        NOT NULL AUTO_INCREMENT,
-  `ip`        BINARY(16)    NOT NULL,
-  `port`      SMALLINT      NOT NULL,
-  `sni_name`  VARCHAR(255)  NOT NULL,
-  `ctime`     TIMESTAMP     NOT NULL,
-  CONSTRAINT `certificate_chain_pk` PRIMARY KEY (`id`),
-  CONSTRAINT `certificate_chain_uk_ip_port_sni_name_ctime` UNIQUE KEY (`ip`, `port`, `sni_name`, `ctime`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+create table certificate_issuer_dn
+(
+  certificate_id int not null,
+  `key` varchar(255) not null,
+  value varchar(255) not null,
+  `order` tinyint not null,
+  primary key (certificate_id, `order`),
+  constraint certificate_issuer_dn_fk_certificate_id foreign key (certificate_id) references certificate (id) on update cascade on delete cascade
+) engine=InnoDB charset=utf8;
 
-CREATE TABLE `certificate_chain_link` (
-  `certificate_chain_id`  BIGINT  NOT NULL,
-  `order`                 TINYINT NOT NULL,
-  `certificate_id`        BIGINT  NOT NULL,
-  CONSTRAINT `certificate_chain_link_pk` PRIMARY KEY (`certificate_chain_id`, `order`),
-  CONSTRAINT `certificate_chain_link_fk_certificate_chain_id` FOREIGN KEY (`certificate_chain_id`) REFERENCES `certificate_chain`(`id`)
-    ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT `certificate_chain_link_fk_certificate_id` FOREIGN KEY (`certificate_id`) REFERENCES `certificate`(`id`)
-    ON UPDATE CASCADE ON DELETE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+create table certificate_subject_alt_name
+(
+  certificate_id int not null,
+  type varchar(255) not null,
+  value varchar(255) not null,
+  primary key (certificate_id, type, value),
+  constraint certificate_subject_alt_name_fk_certificate_id foreign key (certificate_id) references certificate (id) on update cascade on delete cascade
+) engine=InnoDB charset=utf8;
+
+create table certificate_subject_dn
+(
+  certificate_id int not null,
+  `key` varchar(255) not null,
+  value varchar(255) not null,
+  `order` tinyint not null,
+  primary key (certificate_id, `order`),
+  constraint certificate_subject_dn_fk_certificate_id foreign key (certificate_id) references certificate (id) on update cascade on delete cascade
+) engine=InnoDB charset=utf8;
+
+create table ip_range
+(
+  id        int auto_increment primary key,
+  ip        binary(16) not null,
+  host_bits tinyint    not null,
+  constraint ip_range_uk_ip_host_bits unique (ip, host_bits)
+) engine=InnoDB charset=utf8;
+
+create table port_range
+(
+  ip_range_id int not null,
+  start smallint(6) not null,
+  end smallint(6) not null,
+  primary key (ip_range_id, start),
+  constraint port_range_fk_ip_range_id foreign key (ip_range_id) references ip_range (id)
+) engine=InnoDB charset=utf8;

@@ -117,6 +117,7 @@ class DaemonCommand extends Command
                 (new Insert())
                     ->into('certificate')
                     ->values([
+                        'name'                  => $certInfo['name'],
                         'certificate'           => $der,
                         'fingerprint'           => $fingerprint,
                         'version'               => $certInfo['version'],

@@ -3,6 +3,7 @@
 create table certificate
 (
   id int unsigned auto_increment primary key,
+  name varchar(256) not null,
   certificate blob not null,
   fingerprint binary(32) not null,
   version smallint not null,

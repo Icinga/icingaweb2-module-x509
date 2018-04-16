@@ -75,7 +75,7 @@ class DaemonCommand extends Command
         }
     }
 
-    private static function pem2der(string $pem) {
+    private static function pem2der($pem) {
         $lines = explode("\n", $pem);
 
         $der = '';
@@ -183,7 +183,7 @@ EOQ
         return $certId;
     }
 
-    private function insertSANs(int $certId, array $certInfo) {
+    private function insertSANs($certId, array $certInfo) {
         if (isset($certInfo['extensions']['subjectAltName'])) {
             $names = explode(', ', $certInfo['extensions']['subjectAltName']);
 
@@ -200,7 +200,7 @@ EOQ
         }
     }
 
-    private function insertDn(int $certId, string $type, array $certInfo) {
+    private function insertDn($certId, $type, array $certInfo) {
         $index = 0;
         foreach ($certInfo[$type] as $key => $value) {
             if (!is_array($value)) {
@@ -235,7 +235,7 @@ EOQ
         $this->targets->next();
 
         $url = "tls://[{$target->ip}]:{$target->port}";
-        //echo 'Connecting to ' . $target . "\n";
+        echo "Connecting to {$url}\n";
         $this->pendingTargets++;
         $this->connector->connect($url)->then(
             function (ConnectionInterface $conn) use ($target) {

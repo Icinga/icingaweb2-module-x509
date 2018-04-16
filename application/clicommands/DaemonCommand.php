@@ -62,9 +62,9 @@ class DaemonCommand extends Command
             $ip_count = 1 << (128 - $prefix);
             $start = DaemonCommand::addrToNumber($start_ip);
             for ($i = 0; $i < $ip_count; $i++) {
-                $ip = DaemonCommand::numberToAddr($start + $i);
-                foreach ($ports as $start => $end) {
-                    foreach (range($start, $end) as $port) {
+                $ip = DaemonCommand::numberToAddr(gmp_add($start, $i));
+                foreach ($ports as $start_port => $end_port) {
+                    foreach (range($start_port, $end_port) as $port) {
                         $target = (object) [];
                         $target->ip = $ip;
                         $target->port = $port;

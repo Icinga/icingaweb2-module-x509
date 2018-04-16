@@ -119,6 +119,7 @@ class DaemonCommand extends Command
                     ->values([
                         'certificate'           => $der,
                         'fingerprint'           => $fingerprint,
+                        'version'               => $certInfo['version'],
                         'pubkey_algo'           => $this->pubkeyTypes[$pubkeyDetails['type']],
                         'pubkey_bits'           => $pubkeyDetails['bits'],
                         'signature_algo'        => $signaturePieces[0],

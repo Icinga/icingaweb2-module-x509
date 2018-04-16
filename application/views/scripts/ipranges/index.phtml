@@ -2,6 +2,9 @@
 /** @var \Icinga\Web\View $this */
 /** @var \Icinga\Web\Widget\Tabs $tabs */
 /** @var string[][] $ranges */
+
+use Icinga\Module\X509\IPAddressFormatter;
+
 ?>
 <div class="controls">
     <?= $tabs ?>
@@ -32,7 +35,7 @@
                 <?php foreach ($ranges as $cidr => $ports): ?>
                     <tr>
                         <td><?= $this->qlink(
-                            $cidr,
+                            Icinga\Module\X509\IPAddressFormatter::prettyPrintCidr($cidr),
                             'x509/ipranges/edit',
                             ['cidr' => $cidr],
                             ['data-base-target' => '_next']

@@ -4,6 +4,7 @@
 namespace Icinga\Module\X509\Forms\Config\Ipranges;
 
 use Icinga\Web\Form;
+use Icinga\Module\X509\IPAddressFormatter;
 
 class EditForm extends Form
 {
@@ -19,7 +20,7 @@ class EditForm extends Form
     {
         $this->createIpElements();
 
-        list($prefix, $bits) = explode('/', $this->currentCidr, 2);
+        list($prefix, $bits) = explode('/', IPAddressFormatter::prettyPrintCidr($this->currentCidr), 2);
 
         $this->getElement('prefix')->setValue($prefix);
         $this->getElement('bits')->setValue($bits);

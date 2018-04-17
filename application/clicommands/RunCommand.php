@@ -184,7 +184,7 @@ class RunCommand extends Command
             $names = explode(', ', $certInfo['extensions']['subjectAltName']);
 
             foreach ($names as $san) {
-                list($type, $name) = explode(':', $san);
+                list($type, $name) = explode(':', $san, 2);
 
                 $this->db->insert(
                     (new Insert())

@@ -7,6 +7,7 @@ use DateTime;
 use Exception;
 use Icinga\Application\Config as IniConfig;
 use Icinga\Application\Config;
+use Icinga\Application\Logger;
 use Icinga\Cli\Command;
 use Icinga\Data\ResourceFactory;
 use ipl\Sql\Config as DbConfig;
@@ -265,13 +266,13 @@ class RunCommand extends Command
         $this->targets->next();
 
         $url = "tls://[{$target->ip}]:{$target->port}";
-        //echo "Connecting to {$url}\n";
+        Logger::debug("Connecting to %s", $url);
         $this->pendingTargets++;
         $this->connector->connect($url)->then(
             function (ConnectionInterface $conn) use ($target) {
                 $this->finishTarget();
 
-                echo "Connected to {$conn->getRemoteAddress()}\n";
+                Logger::info("Connected to %s", $conn->getRemoteAddress());
 
                 $stream = $conn->stream;
                 $options = stream_context_get_options($stream);
@@ -330,6 +331,8 @@ class RunCommand extends Command
                 });
             },
             function (Exception $exception) use($target) {
+                Logger::debug("Cannot connect to server: %s", $exception->getMessage());
+
                 $this->db->update(
                     (new Update())
                         ->table('target')
@@ -344,7 +347,6 @@ class RunCommand extends Command
                 if ($this->finishedTargets % $step == 0) {
                     $this->updateJobStats();
                 }
-                //echo "Cannot connect to server: {$exception->getMessage()}\n";
                 //$loop->stop();
             }
         )->otherwise(function($ex) {
@@ -377,7 +379,7 @@ class RunCommand extends Command
     public function indexAction()
     {
         if ($this->job == '') {
-            echo "A job name must be specified with the --job option.\n";
+            Logger::warning("A job name must be specified with the --job option.");
             exit(1);
         }
 
@@ -399,7 +401,7 @@ class RunCommand extends Command
         $this->totalTargets = iterator_count(static::generateTargets($this->job));
 
         if ($this->totalTargets == 0) {
-            echo "The job '{$this->job} does not have any targets.\n";
+            Logger::warning("The job '%s' does not have any targets.", $this->job);
             exit(1);
         }
 
@@ -423,6 +425,6 @@ class RunCommand extends Command
 
         $this->loop->run();
 
-        echo "Scanned {$this->finishedTargets} targets.\n";
+        Logger::info("Scanned %s targets.", $this->finishedTargets);
     }
 }

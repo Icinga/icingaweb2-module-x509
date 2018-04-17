@@ -6,15 +6,15 @@ create table certificate
   name varchar(255) not null,
   certificate blob not null,
   fingerprint binary(32) not null,
-  version smallint not null,
+  version enum('1', '2', '3') not null,
   serial blob not null,
-  ca tinyint(1) not null,
+  ca enum('yes', 'no') not null,
   pubkey_algo enum('unknown', 'RSA', 'DSA', 'DH', 'EC') not null,
-  pubkey_bits smallint(6) not null,
+  pubkey_bits smallint(6) unsigned not null,
   signature_algo varchar(255) not null,
   signature_hash_algo varchar(255) not null,
-  valid_start bigint not null,
-  valid_end bigint not null,
+  valid_start bigint unsigned not null,
+  valid_end bigint unsigned not null,
   constraint certificate_uk_fingerprint unique (fingerprint)
 ) engine=InnoDB charset=utf8;
 
@@ -84,5 +84,5 @@ create table job_run
   total_targets int(11) not null default 0,
   finished_targets int(11) not null default 0,
   start_time timestamp not null default CURRENT_TIMESTAMP,
-  end_time timestamp
+  end_time timestamp null
 ) engine=InnoDB charset=utf8;

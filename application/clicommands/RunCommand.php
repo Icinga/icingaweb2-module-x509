@@ -265,9 +265,13 @@ class RunCommand extends Command
             function (ConnectionInterface $conn) use ($target) {
                 $this->finishTarget();
 
+                echo "Connected to {$conn->getRemoteAddress()}\n";
+
                 $stream = $conn->stream;
                 $options = stream_context_get_options($stream);
-                echo "Connected to {$conn->getRemoteAddress()}\n";
+
+                $conn->close();
+
                 $chain = $options['ssl']['peer_certificate_chain'];
 
                 $this->db->transaction(function () use($target, $chain) {

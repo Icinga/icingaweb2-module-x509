@@ -136,6 +136,7 @@ class RunCommand extends Command
                         'certificate'           => $der,
                         'fingerprint'           => $fingerprint,
                         'version'               => $certInfo['version'],
+                        'serial'                => gmp_export($certInfo['serialNumber']),
                         'pubkey_algo'           => $this->pubkeyTypes[$pubkeyDetails['type']],
                         'pubkey_bits'           => $pubkeyDetails['bits'],
                         'signature_algo'        => $signaturePieces[0],

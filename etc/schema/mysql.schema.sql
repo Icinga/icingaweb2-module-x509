@@ -42,7 +42,7 @@ create table certificate_chain_link
   `order` tinyint not null,
   certificate_id int unsigned not null,
   primary key (certificate_chain_id, `order`),
-  constraint certificate_chain_link_fk_certificate_chain_id foreign key (certificate_chain_id) references target (id),
+  constraint certificate_chain_link_fk_certificate_chain_id foreign key (certificate_chain_id) references certificate_chain (id),
   constraint certificate_chain_link_fk_certificate_id foreign key (certificate_id) references certificate (id)
 ) engine=InnoDB charset=utf8;
 

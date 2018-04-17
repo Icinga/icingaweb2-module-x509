@@ -107,6 +107,24 @@ class RunCommand extends Command
         return $der;
     }
 
+    private static function shortNameFromDN($dn) {
+        $pieces = explode('/', $dn);
+
+        foreach ($pieces as $piece) {
+            if (strpos($piece, '=') === false) {
+                continue;
+            }
+
+            list($key, $value) = explode('=', $piece, 2);
+
+            if ($key == 'CN') {
+                return $value;
+            }
+        }
+
+        return $dn;
+    }
+
     private function findOrInsertCert($cert, $certInfo) {
         $fingerprint = openssl_x509_fingerprint($cert, 'sha256', true);
 
@@ -151,7 +169,7 @@ class RunCommand extends Command
                 (new Insert())
                     ->into('certificate')
                     ->values([
-                        'name'                  => $certInfo['name'],
+                        'name'                  => static::shortNameFromDN($certInfo['name']),
                         'certificate'           => $der,
                         'fingerprint'           => $fingerprint,
                         'version'               => $certInfo['version'],

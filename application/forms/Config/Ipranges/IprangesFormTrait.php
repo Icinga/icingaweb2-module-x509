@@ -32,6 +32,15 @@ trait IprangesFormTrait
         $this->addElements([
             [
                 'text',
+                'job',
+                [
+                    'label'         => $this->translate('Job'),
+                    'description'   => $this->translate('Job name'),
+                    'required'      => true
+                ]
+            ],
+            [
+                'text',
                 'prefix',
                 [
                     'label'         => $this->translate('Prefix'),

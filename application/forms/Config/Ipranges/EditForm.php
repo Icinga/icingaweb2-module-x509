@@ -25,7 +25,15 @@ class EditForm extends Form
         $this->getElement('prefix')->setValue($prefix);
         $this->getElement('bits')->setValue($bits);
 
-        foreach ($this->iprangesConfig->getSection($this->currentCidr) as $start => $end) {
+        $config = $this->iprangesConfig->getSection($this->currentCidr);
+        $this->getElement('job')->setValue($config['job']);
+
+        foreach ($config as $start => $end) {
+            // Ew.
+            if ($start == 'job') {
+                continue;
+            }
+
             $this->addElements([
                 [
                     'number',
@@ -138,10 +146,13 @@ class EditForm extends Form
             }
         }
 
+        // Ew.
+        $rangesByStart['job'] = $this->getElement('job')->getValue();
+
         $cidr = $this->getCidr();
 
         $this->iprangesConfig
-            ->removeSection($this->currentCidr)
+            ->removeSection($cidr)
             ->setSection($cidr, $rangesByStart)
             ->saveIni();
 

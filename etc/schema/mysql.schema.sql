@@ -83,5 +83,6 @@ create table job_run
   name varchar(255) not null,
   total_targets int(11) not null default 0,
   finished_targets int(11) not null default 0,
-  ctime timestamp not null default CURRENT_TIMESTAMP
+  start_time timestamp not null default CURRENT_TIMESTAMP,
+  end_time timestamp
 ) engine=InnoDB charset=utf8;

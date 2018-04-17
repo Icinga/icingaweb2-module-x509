@@ -235,11 +235,17 @@ class RunCommand extends Command
         }
     }
 
-    private function updateJobStats() {
+    private function updateJobStats($finished = false) {
+        $fields = ['finished_targets' => $this->finishedTargets];
+
+        if ($finished) {
+            $fields['end_time'] = new Expression('NOW()');
+        }
+
         $this->db->update(
             (new Update())
                 ->table('job_run')
-                ->set(['finished_targets' => $this->finishedTargets])
+                ->set($fields)
                 ->where(['id = ?' => $this->jobId])
         );
     }
@@ -248,7 +254,7 @@ class RunCommand extends Command
     {
         if (!$this->targets->valid()) {
             if ($this->pendingTargets == 0) {
-                $this->updateJobStats();
+                $this->updateJobStats(true);
                 $this->loop->stop();
             }
 

@@ -24,9 +24,11 @@ class AddForm extends Form
     {
         $cidr = $this->getCidr();
 
+        $opts = [ 'job' => $this->getElement('job')->getValue() ];
+
         if (! $this->iprangesConfig->hasSection($cidr)) {
             $this->iprangesConfig
-                ->setSection($cidr)
+                ->setSection($cidr, $opts)
                 ->saveIni();
         }
 

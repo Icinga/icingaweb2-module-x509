@@ -128,6 +128,25 @@ class RunCommand extends Command
 
             $pubkeyDetails = openssl_pkey_get_details(openssl_pkey_get_public($cert));
 
+            $ca = true;
+
+            if (isset($certInfo['extensions'])) {
+                $extensions = &$certInfo['extensions'];
+                if (isset($extensions['basicConstraints'])) {
+                    $constraints = $extensions['basicConstraints'];
+
+                    $constraintPieces = explode(', ', $constraints);
+
+                    foreach ($constraintPieces as $constraintPiece) {
+                        list($key, $value) = explode(':', $constraintPiece, 2);
+
+                        if ($key == 'CA') {
+                            $ca = ($value == 'TRUE');
+                        }
+                    }
+                }
+            }
+
             $this->db->insert(
                 (new Insert())
                     ->into('certificate')
@@ -137,6 +156,7 @@ class RunCommand extends Command
                         'fingerprint'           => $fingerprint,
                         'version'               => $certInfo['version'],
                         'serial'                => gmp_export($certInfo['serialNumber']),
+                        'ca'                    => $ca ? 1 : 0,
                         'pubkey_algo'           => $this->pubkeyTypes[$pubkeyDetails['type']],
                         'pubkey_bits'           => $pubkeyDetails['bits'],
                         'signature_algo'        => $signaturePieces[0],

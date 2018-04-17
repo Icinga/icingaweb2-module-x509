@@ -8,6 +8,7 @@ create table certificate
   fingerprint binary(32) not null,
   version smallint not null,
   serial blob not null,
+  ca tinyint(1) not null,
   pubkey_algo enum('unknown', 'RSA', 'DSA', 'DH', 'EC') not null,
   pubkey_bits smallint(6) not null,
   signature_algo varchar(255) not null,

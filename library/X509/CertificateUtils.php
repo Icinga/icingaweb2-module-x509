@@ -191,7 +191,7 @@ class CertificateUtils
             (new Select())
                 ->from('dn')
                 ->columns('hash')
-                ->where([ 'hash = ?' => $hash ])
+                ->where([ 'hash = ?' => $hash, 'type = ?' => $type ])
                 ->limit(1)
         )->fetch();
 
@@ -211,8 +211,8 @@ class CertificateUtils
                 $db->insert(
                     (new Insert())
                         ->into("dn")
-                        ->columns(['hash', '`key`', '`value`', '`order`'])
-                        ->values([$hash, $key, $value, $index])
+                        ->columns(['hash', '`key`', '`value`', '`order`', 'type'])
+                        ->values([$hash, $key, $value, $index, $type])
                 );
                 $index++;
             }

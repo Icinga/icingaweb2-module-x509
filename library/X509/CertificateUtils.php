@@ -100,12 +100,17 @@ class CertificateUtils
             }
         }
 
+        $subjectDnHash = CertificateUtils::findOrInsertDn($db, $certInfo, 'subject');
+        $issuerDnHash = CertificateUtils::findOrInsertDn($db, $certInfo, 'issuer');
+
         $db->insert(
             (new Insert())
                 ->into('certificate')
                 ->values([
                     'subject'               => CertificateUtils::shortNameFromDN($certInfo['subject']),
+                    'subject_hash'          => $subjectDnHash,
                     'issuer'                => CertificateUtils::shortNameFromDN($certInfo['issuer']),
+                    'issuer_hash'           => $issuerDnHash,
                     'certificate'           => $der,
                     'fingerprint'           => $fingerprint,
                     'version'               => $certInfo['version'] + 1,
@@ -121,9 +126,6 @@ class CertificateUtils
         );
 
         $certId = $db->lastInsertId();
-
-        CertificateUtils::insertDn($db, $certId, 'issuer', $certInfo);
-        CertificateUtils::insertDn($db, $certId, 'subject', $certInfo);
 
         CertificateUtils::insertSANs($db, $certId, $certInfo);
         return $certId;
@@ -151,7 +153,7 @@ class CertificateUtils
                             'type = ?' => $type,
                             'value = ?' => $value
                         ])
-                );
+                )->fetch();
 
                 // Ignore duplicate SANs
                 if ($row !== false) {
@@ -168,9 +170,37 @@ class CertificateUtils
         }
     }
 
-    private static function insertDn($db, $certId, $type, array $certInfo) {
+    private static function findOrInsertDn($db, $certInfo, $type) {
+        $dn = $certInfo[$type];
+
+        $data = '';
+        foreach ($dn as $key => $value) {
+            if (!is_array($value)) {
+                $values = [$value];
+            } else {
+                $values = $value;
+            }
+
+            foreach ($values as $value) {
+                $data .= "{$key}=${value}, ";
+            }
+        }
+        $hash = hash('sha256', $data, true);
+
+        $row = $db->select(
+            (new Select())
+                ->from('dn')
+                ->columns('hash')
+                ->where([ 'hash = ?' => $hash ])
+                ->limit(1)
+        )->fetch();
+
+        if ($row !== false) {
+            return $row['hash'];
+        }
+
         $index = 0;
-        foreach ($certInfo[$type] as $key => $value) {
+        foreach ($dn as $key => $value) {
             if (!is_array($value)) {
                 $values = [$value];
             } else {
@@ -180,13 +210,14 @@ class CertificateUtils
             foreach ($values as $value) {
                 $db->insert(
                     (new Insert())
-                        ->into("certificate_{$type}_dn")
-                        ->columns(['certificate_id', '`key`', '`value`', '`order`'])
-                        ->values([$certId, $key, $value, $index])
+                        ->into("dn")
+                        ->columns(['hash', '`key`', '`value`', '`order`'])
+                        ->values([$hash, $key, $value, $index])
                 );
                 $index++;
             }
         }
-    }
 
+        return $hash;
+    }
 }

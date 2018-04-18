@@ -4,7 +4,9 @@ create table certificate
 (
   id int unsigned auto_increment primary key,
   subject varchar(255) not null,
+  subject_hash binary(32) not null,
   issuer varchar(255) not null,
+  issuer_hash binary(32) not null,
   certificate blob not null,
   fingerprint binary(32) not null,
   version enum('1', '2', '3') not null,
@@ -54,15 +56,15 @@ create table certificate_chain_link
 
 create index certificate_chain_link_fk_certificate_id on certificate_chain_link (certificate_id);
 
-create table certificate_issuer_dn
+create table dn
 (
-  certificate_id int unsigned not null,
+  hash binary(32),
   `key` varchar(255) not null,
   value varchar(255) not null,
   `order` tinyint not null,
+  type enum('issuer', 'subject') not null,
   ctime timestamp not null default CURRENT_TIMESTAMP,
-  primary key (certificate_id, `order`),
-  constraint certificate_issuer_dn_fk_certificate_id foreign key (certificate_id) references certificate (id) on update cascade on delete cascade
+  primary key (hash, `order`, type)
 ) engine=InnoDB charset=utf8mb4;
 
 create table certificate_subject_alt_name
@@ -73,17 +75,6 @@ create table certificate_subject_alt_name
   ctime timestamp not null default CURRENT_TIMESTAMP,
   primary key (certificate_id, type, value),
   constraint certificate_subject_alt_name_fk_certificate_id foreign key (certificate_id) references certificate (id) on update cascade on delete cascade
-) engine=InnoDB charset=utf8mb4;
-
-create table certificate_subject_dn
-(
-  certificate_id int unsigned not null,
-  `key` varchar(255) not null,
-  value varchar(255) not null,
-  `order` tinyint not null,
-  ctime timestamp not null default CURRENT_TIMESTAMP,
-  primary key (certificate_id, `order`),
-  constraint certificate_subject_dn_fk_certificate_id foreign key (certificate_id) references certificate (id) on update cascade on delete cascade
 ) engine=InnoDB charset=utf8mb4;
 
 create table job_run

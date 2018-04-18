@@ -10,6 +10,7 @@ use Icinga\Application\Config;
 use Icinga\Application\Logger;
 use Icinga\Cli\Command;
 use Icinga\Data\ResourceFactory;
+use Icinga\Module\X509\CertificateUtils;
 use ipl\Sql\Config as DbConfig;
 use ipl\Sql\Connection;
 use ipl\Sql\Expression;
@@ -24,19 +25,6 @@ use React\Socket\ConnectionInterface;
 
 class RunCommand extends Command
 {
-    /**
-     * Possible public key types
-     *
-     * @var string[]
-     */
-    protected $pubkeyTypes = [
-        -1                  => 'unknown',
-        OPENSSL_KEYTYPE_RSA => 'RSA',
-        OPENSSL_KEYTYPE_DSA => 'DSA',
-        OPENSSL_KEYTYPE_DH  => 'DH',
-        OPENSSL_KEYTYPE_EC  => 'EC'
-    ];
-
     /**
      * @var Connection
      */
@@ -88,150 +76,6 @@ class RunCommand extends Command
                         yield $target;
                     }
                 }
-            }
-        }
-    }
-
-    private static function pem2der($pem) {
-        $lines = explode("\n", $pem);
-
-        $der = '';
-
-        foreach ($lines as $line) {
-            if (strstr($line, '-----') === 0) {
-                continue;
-            }
-
-            $der .= base64_decode($line);
-        }
-
-        return $der;
-    }
-
-    private static function shortNameFromDN($dn) {
-        $pieces = explode('/', $dn);
-
-        foreach ($pieces as $piece) {
-            if (strpos($piece, '=') === false) {
-                continue;
-            }
-
-            list($key, $value) = explode('=', $piece, 2);
-
-            if ($key == 'CN') {
-                return $value;
-            }
-        }
-
-        return $dn;
-    }
-
-    private function findOrInsertCert($cert, $certInfo) {
-        $fingerprint = openssl_x509_fingerprint($cert, 'sha256', true);
-
-        $row = $this->db->select(
-            (new Select())
-                ->columns(['id'])
-                ->from('certificate')
-                ->where(['fingerprint = ?' => $fingerprint ])
-        )->fetch();
-
-        if ($row === false) {
-            $pem = null;
-            if (!openssl_x509_export($cert, $pem)) {
-                die("Failed to encode X.509 certificate.");
-            }
-            $der = RunCommand::pem2der($pem);
-
-            $signaturePieces = explode('-', $certInfo['signatureTypeSN']);
-
-            $pubkeyDetails = openssl_pkey_get_details(openssl_pkey_get_public($cert));
-
-            $ca = true;
-
-            if (isset($certInfo['extensions'])) {
-                $extensions = &$certInfo['extensions'];
-                if (isset($extensions['basicConstraints'])) {
-                    $constraints = $extensions['basicConstraints'];
-
-                    $constraintPieces = explode(', ', $constraints);
-
-                    foreach ($constraintPieces as $constraintPiece) {
-                        list($key, $value) = explode(':', $constraintPiece, 2);
-
-                        if ($key == 'CA') {
-                            $ca = ($value == 'TRUE');
-                        }
-                    }
-                }
-            }
-
-            $this->db->insert(
-                (new Insert())
-                    ->into('certificate')
-                    ->values([
-                        'name'                  => static::shortNameFromDN($certInfo['name']),
-                        'certificate'           => $der,
-                        'fingerprint'           => $fingerprint,
-                        'version'               => $certInfo['version'] + 1,
-                        'serial'                => gmp_export($certInfo['serialNumber']),
-                        'ca'                    => $ca ? 'yes' : 'no',
-                        'pubkey_algo'           => $this->pubkeyTypes[$pubkeyDetails['type']],
-                        'pubkey_bits'           => $pubkeyDetails['bits'],
-                        'signature_algo'        => $signaturePieces[0],
-                        'signature_hash_algo'   => $signaturePieces[1],
-                        'valid_start'           => $certInfo['validFrom_time_t'],
-                        'valid_end'             => $certInfo['validTo_time_t']
-                    ])
-            );
-
-            $certId = $this->db->lastInsertId();
-
-            $this->insertDn($certId, 'issuer', $certInfo);
-            $this->insertDn($certId, 'subject', $certInfo);
-
-            $this->insertSANs($certId, $certInfo);
-            } else {
-            $certId = $row['id'];
-        }
-
-        return $certId;
-    }
-
-    private function insertSANs($certId, array $certInfo) {
-        if (isset($certInfo['extensions']['subjectAltName'])) {
-            $names = explode(', ', $certInfo['extensions']['subjectAltName']);
-
-            foreach ($names as $san) {
-                list($type, $name) = explode(':', $san, 2);
-
-                $this->db->insert(
-                    (new Insert())
-                        ->into('certificate_subject_alt_name')
-                        ->columns(['certificate_id', 'type', 'value'])
-                        ->values([$certId, $type, $name])
-                );
-            }
-        }
-    }
-
-    private function insertDn($certId, $type, array $certInfo) {
-        $index = 0;
-        foreach ($certInfo[$type] as $key => $value) {
-            if (!is_array($value)) {
-                $values = [$value];
-            } else {
-                $values = $value;
-            }
-
-            foreach ($values as $value) {
-                $this->db->insert(
-                    (new Insert())
-                        ->into("certificate_{$type}_dn")
-                        ->columns(['certificate_id', '`key`', '`value`', '`order`'])
-                        ->values([$certId, $key, $value, $index])
-                );
-                $index++;
             }
         }
     }
@@ -319,7 +163,7 @@ class RunCommand extends Command
                     foreach ($chain as $index => $cert) {
                         $certInfo = openssl_x509_parse($cert);
 
-                        $certId = $this->findOrInsertCert($cert, $certInfo);
+                        $certId = CertificateUtils::findOrInsertCert($this->db, $cert, $certInfo);
 
                         $this->db->insert(
                             (new Insert())
@@ -398,7 +242,7 @@ class RunCommand extends Command
         ));
         $this->connector = new TimeoutConnector($secureConnector, 5.0, $this->loop);
 
-        $this->totalTargets = iterator_count(static::generateTargets($this->job));
+        $this->totalTargets = iterator_count(RunCommand::generateTargets($this->job));
 
         if ($this->totalTargets == 0) {
             Logger::warning("The job '%s' does not have any targets.", $this->job);
@@ -416,7 +260,7 @@ class RunCommand extends Command
 
         $this->jobId = $this->db->lastInsertId();
 
-        $this->targets = static::generateTargets($this->job);
+        $this->targets = RunCommand::generateTargets($this->job);
 
         // Start scanning the first couple of targets...
         for ($i = 0; $i < 256; $i++) {

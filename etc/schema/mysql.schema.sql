@@ -3,7 +3,8 @@
 create table certificate
 (
   id int unsigned auto_increment primary key,
-  name varchar(255) not null,
+  subject varchar(255) not null,
+  issuer varchar(255) not null,
   certificate blob not null,
   fingerprint binary(32) not null,
   version enum('1', '2', '3') not null,

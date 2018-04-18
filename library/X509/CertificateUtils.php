@@ -39,21 +39,18 @@ class CertificateUtils
     }
 
     private static function shortNameFromDN($dn) {
-        $pieces = explode('/', $dn);
-
-        foreach ($pieces as $piece) {
-            if (strpos($piece, '=') === false) {
-                continue;
+        if (isset($dn['CN'])) {
+            return $dn['CN'];
+        } else {
+            $result = '';
+            foreach ($dn as $key => $value) {
+                if ($result != '') {
+                    $result .= ', ';
+                }
+                $result .= "{$key}={$value}";
             }
-
-            list($key, $value) = explode('=', $piece, 2);
-
-            if ($key == 'CN') {
-                return $value;
-            }
+            return $result;
         }
-
-        return $dn;
     }
 
     public static function findOrInsertCert($db, $cert) {
@@ -107,7 +104,8 @@ class CertificateUtils
             (new Insert())
                 ->into('certificate')
                 ->values([
-                    'name'                  => CertificateUtils::shortNameFromDN($certInfo['name']),
+                    'subject'               => CertificateUtils::shortNameFromDN($certInfo['subject']),
+                    'issuer'                => CertificateUtils::shortNameFromDN($certInfo['issuer']),
                     'certificate'           => $der,
                     'fingerprint'           => $fingerprint,
                     'version'               => $certInfo['version'] + 1,

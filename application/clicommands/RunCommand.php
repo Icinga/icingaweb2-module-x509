@@ -288,8 +288,18 @@ class RunCommand extends Command
 
         $this->targets = RunCommand::generateTargets($this->job);
 
+        $parallel = Config::module('x509', 'config')->get('scan', 'parallel');
+        if ($parallel === null) {
+            $parallel = 256;
+        }
+
+        if ($parallel <= 0) {
+            Logger::warning("The 'parallel' option must be set to at least 1.");
+            exit(1);
+        }
+
         // Start scanning the first couple of targets...
-        for ($i = 0; $i < 256; $i++) {
+        for ($i = 0; $i < (integer)$parallel; $i++) {
             $this->startNextTarget();
         }
 

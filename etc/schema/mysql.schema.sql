@@ -1,6 +1,6 @@
 -- X509 module | (c) 2018 Icinga Development Team | GPLv2+
 
-create table certificate
+create table x509_certificate
 (
   id int unsigned auto_increment primary key,
   subject varchar(255) not null,
@@ -24,10 +24,10 @@ create table certificate
   ctime timestamp not null default CURRENT_TIMESTAMP,
   mtime timestamp null default null on update CURRENT_TIMESTAMP,
   constraint certificate_uk_fingerprint unique (fingerprint),
-  constraint certificate_issuer_certificate_id foreign key (issuer_certificate_id) references certificate (id)
+  constraint certificate_issuer_certificate_id foreign key (issuer_certificate_id) references x509_certificate (id)
 ) engine=InnoDB charset=utf8mb4;
 
-create table target
+create table x509_target
 (
   id int unsigned auto_increment primary key,
   ip binary(16) not null,
@@ -39,7 +39,7 @@ create table target
   constraint certificate_chain_uk_ip_port_sni_name unique (ip, port, sni_name)
 ) engine = InnoDB charset = utf8mb4;
 
-create table certificate_chain
+create table x509_certificate_chain
 (
   id int unsigned auto_increment primary key,
   target_id int unsigned not null,
@@ -47,20 +47,20 @@ create table certificate_chain
   ctime timestamp not null default CURRENT_TIMESTAMP
 ) engine=InnoDB charset=utf8mb4;
 
-create table certificate_chain_link
+create table x509_certificate_chain_link
 (
   certificate_chain_id int unsigned not null,
   `order` tinyint not null,
   certificate_id int unsigned not null,
   ctime timestamp not null default CURRENT_TIMESTAMP,
   primary key (certificate_chain_id, `order`),
-  constraint certificate_chain_link_fk_certificate_chain_id foreign key (certificate_chain_id) references certificate_chain (id),
-  constraint certificate_chain_link_fk_certificate_id foreign key (certificate_id) references certificate (id)
+  constraint certificate_chain_link_fk_certificate_chain_id foreign key (certificate_chain_id) references x509_certificate_chain (id),
+  constraint certificate_chain_link_fk_certificate_id foreign key (certificate_id) references x509_certificate (id)
 ) engine=InnoDB charset=utf8mb4;
 
-create index certificate_chain_link_fk_certificate_id on certificate_chain_link (certificate_id);
+create index certificate_chain_link_fk_certificate_id on x509_certificate_chain_link (certificate_id);
 
-create table dn
+create table x509_dn
 (
   hash binary(32),
   `key` varchar(255) not null,
@@ -71,17 +71,17 @@ create table dn
   primary key (hash, `order`, type)
 ) engine=InnoDB charset=utf8mb4;
 
-create table certificate_subject_alt_name
+create table x509_certificate_subject_alt_name
 (
   certificate_id int unsigned not null,
   type varchar(255) not null,
   value varchar(255) not null,
   ctime timestamp not null default CURRENT_TIMESTAMP,
   primary key (certificate_id, type, value),
-  constraint certificate_subject_alt_name_fk_certificate_id foreign key (certificate_id) references certificate (id) on update cascade on delete cascade
+  constraint certificate_subject_alt_name_fk_certificate_id foreign key (certificate_id) references x509_certificate (id) on update cascade on delete cascade
 ) engine=InnoDB charset=utf8mb4;
 
-create table job_run
+create table x509_job_run
 (
   id int unsigned auto_increment primary key,
   name varchar(255) not null,

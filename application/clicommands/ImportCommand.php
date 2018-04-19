@@ -108,7 +108,7 @@ class ImportCommand extends Command
 
                 $db->update(
                     (new Update())
-                        ->table('certificate')
+                        ->table('x509_certificate')
                         ->set([ 'trusted' => 'yes' ])
                         ->where([ 'id = ?' => $certId ])
                 );

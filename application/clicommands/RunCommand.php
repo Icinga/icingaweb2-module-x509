@@ -101,7 +101,7 @@ class RunCommand extends Command
 
         $this->db->update(
             (new Update())
-                ->table('job_run')
+                ->table('x509_job_run')
                 ->set($fields)
                 ->where(['id = ?' => $this->jobId])
         );
@@ -151,14 +151,14 @@ class RunCommand extends Command
                     $row = $this->db->select(
                         (new Select())
                             ->columns(['id'])
-                            ->from('target')
+                            ->from('x509_target')
                             ->where(['ip = ?' => inet_pton($target->ip), 'port = ?' => $target->port, 'sni_name = ?' => $target->hostname ])
                     )->fetch();
 
                     if ($row === false) {
                         $this->db->insert(
                             (new Insert())
-                                ->into('target')
+                                ->into('x509_target')
                                 ->columns(['ip', 'port', 'sni_name'])
                                 ->values([inet_pton($target->ip), $target->port, $target->hostname])
                         );
@@ -169,7 +169,7 @@ class RunCommand extends Command
 
                     $this->db->insert(
                         (new Insert())
-                            ->into('certificate_chain')
+                            ->into('x509_certificate_chain')
                             ->columns(['target_id', 'length'])
                             ->values([$targetId, count($chain)])
                     );
@@ -177,7 +177,7 @@ class RunCommand extends Command
 
                     $this->db->update(
                         (new Update())
-                            ->table('target')
+                            ->table('x509_target')
                             ->set(['latest_certificate_chain_id' => $chainId])
                             ->where(['id = ?' => $targetId])
                     );
@@ -189,7 +189,7 @@ class RunCommand extends Command
 
                         $this->db->insert(
                             (new Insert())
-                                ->into('certificate_chain_link')
+                                ->into('x509_certificate_chain_link')
                                 ->columns(['certificate_chain_id', '`order`', 'certificate_id'])
                                 ->values([$chainId, $index, $certId])
                         );
@@ -201,7 +201,7 @@ class RunCommand extends Command
 
                 $this->db->update(
                     (new Update())
-                        ->table('target')
+                        ->table('x509_target')
                         ->set(['latest_certificate_chain_id' => null])
                         ->where(['ip = ?' => inet_pton($target->ip), 'port = ?' => $target->port, 'sni_name = ?' => '' ])
                 );
@@ -277,7 +277,7 @@ class RunCommand extends Command
 
         $this->db->insert(
             (new Insert())
-                ->into('job_run')
+                ->into('x509_job_run')
                 ->values([
                     'name' => $this->job,
                     'total_targets' => $this->totalTargets

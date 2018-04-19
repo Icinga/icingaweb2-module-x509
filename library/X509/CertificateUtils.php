@@ -8,7 +8,6 @@ use Icinga\Module\X509\CertificateSignatureVerifier;
 use ipl\Sql\Insert;
 use ipl\Sql\Select;
 use ipl\Sql\Update;
-use phpseclib\File\X509;
 
 
 class CertificateUtils
@@ -70,7 +69,7 @@ class CertificateUtils
         $row = $db->select(
             (new Select())
                 ->columns(['id'])
-                ->from('certificate')
+                ->from('x509_certificate')
                 ->where(['fingerprint = ?' => $fingerprint ])
         )->fetch();
 
@@ -114,7 +113,7 @@ class CertificateUtils
 
         $db->insert(
             (new Insert())
-                ->into('certificate')
+                ->into('x509_certificate')
                 ->values([
                     'subject'               => CertificateUtils::shortNameFromDN($certInfo['subject']),
                     'subject_hash'          => $subjectDnHash,
@@ -155,7 +154,7 @@ class CertificateUtils
 
                 $row = $db->select(
                     (new Select())
-                        ->from('certificate_subject_alt_name')
+                        ->from('x509_certificate_subject_alt_name')
                         ->columns('certificate_id')
                         ->where([
                             'certificate_id = ?' => $certId,
@@ -171,7 +170,7 @@ class CertificateUtils
 
                 $db->insert(
                     (new Insert())
-                        ->into('certificate_subject_alt_name')
+                        ->into('x509_certificate_subject_alt_name')
                         ->columns(['certificate_id', 'type', 'value'])
                         ->values([$certId, $type, $value])
                 );
@@ -198,7 +197,7 @@ class CertificateUtils
 
         $row = $db->select(
             (new Select())
-                ->from('dn')
+                ->from('x509_dn')
                 ->columns('hash')
                 ->where([ 'hash = ?' => $hash, 'type = ?' => $type ])
                 ->limit(1)
@@ -219,7 +218,7 @@ class CertificateUtils
             foreach ($values as $value) {
                 $db->insert(
                     (new Insert())
-                        ->into("dn")
+                        ->into('x509_dn')
                         ->columns(['hash', '`key`', '`value`', '`order`', 'type'])
                         ->values([$hash, $key, $value, $index, $type])
                 );
@@ -233,7 +232,7 @@ class CertificateUtils
     public static function verifyCertificates($db) {
         $certs = $db->select(
             (new Select)
-                ->from('certificate')
+                ->from('x509_certificate')
                 ->columns(['id', 'subject', 'issuer_hash', 'certificate'])
                 ->where([ 'self_signed = ?' => 'no', 'issuer_certificate_id is null' ])
         );
@@ -244,7 +243,7 @@ class CertificateUtils
             $issuer_hash = $cert['issuer_hash'];
             $issuers = $db->select(
                 (new Select)
-                    ->from('certificate')
+                    ->from('x509_certificate')
                     ->columns([ 'id', 'subject', 'certificate' ])
                     ->where([ 'subject_hash = ?' => $issuer_hash ])
             );
@@ -305,7 +304,7 @@ class CertificateUtils
 
                 $db->update(
                     (new Update())
-                        ->table('certificate')
+                        ->table('x509_certificate')
                         ->set($opts)
                         ->where([ 'id = ?' => $cert['id'] ])
                 );

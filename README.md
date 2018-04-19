@@ -54,7 +54,8 @@ e.g.:
 
 `192.0.2.0/24,2001:db8::7e38/128`
 
-Port ranges are separates with `-`. If you only want to scan a single port you don't need to specify the second port:
+Port ranges are separated with dashes (`-`). If you only want to scan a single port you don't need to specify the second
+port:
 
 `443,5665-5669`
 

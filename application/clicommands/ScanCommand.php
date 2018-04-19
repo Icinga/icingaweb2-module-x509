@@ -24,7 +24,7 @@ use React\Socket\TimeoutConnector;
 use React\Socket\SecureConnector;
 use React\Socket\ConnectionInterface;
 
-class RunCommand extends Command
+class ScanCommand extends Command
 {
     /**
      * @var Connection
@@ -60,9 +60,9 @@ class RunCommand extends Command
             $start_ip = $pieces[0];
             $prefix = $pieces[1];
             $ip_count = 1 << (128 - $prefix);
-            $start = RunCommand::addrToNumber($start_ip);
+            $start = ScanCommand::addrToNumber($start_ip);
             for ($i = 0; $i < $ip_count; $i++) {
-                $ip = RunCommand::numberToAddr(gmp_add($start, $i));
+                $ip = ScanCommand::numberToAddr(gmp_add($start, $i));
                 foreach (StringHelper::trimSplit($jobDescription->get('ports')) as $portRange) {
                     $pieces = StringHelper::trimSplit($portRange, '-');
                     if (count($pieces) === 2) {
@@ -132,13 +132,13 @@ class RunCommand extends Command
         $this->targets->next();
 
         $url = "tls://[{$target->ip}]:{$target->port}";
-        Logger::debug("Connecting to %s", RunCommand::formatTarget($target));
+        Logger::debug("Connecting to %s", ScanCommand::formatTarget($target));
         $this->pendingTargets++;
         $this->getConnector($target->hostname)->connect($url)->then(
             function (ConnectionInterface $conn) use ($target) {
                 $this->finishTarget();
 
-                Logger::info("Connected to %s", RunCommand::formatTarget($target));
+                Logger::info("Connected to %s", ScanCommand::formatTarget($target));
 
                 $stream = $conn->stream;
                 $options = stream_context_get_options($stream);
@@ -268,7 +268,7 @@ class RunCommand extends Command
 
         $this->loop = Factory::create();
 
-        $this->totalTargets = iterator_count(RunCommand::generateTargets($this->job));
+        $this->totalTargets = iterator_count(ScanCommand::generateTargets($this->job));
 
         if ($this->totalTargets == 0) {
             Logger::warning("The job '%s' does not have any targets.", $this->job);
@@ -286,7 +286,7 @@ class RunCommand extends Command
 
         $this->jobId = $this->db->lastInsertId();
 
-        $this->targets = RunCommand::generateTargets($this->job);
+        $this->targets = ScanCommand::generateTargets($this->job);
 
         $parallel = Config::module('x509', 'config')->get('scan', 'parallel');
         if ($parallel === null) {

@@ -305,7 +305,7 @@ class ScanCommand extends Command
 
         $this->loop->run();
 
-        Logger::info("Scanned %s target%s.", $this->finishedTargets, $this->finishedTargets != 1 ? 's' : '');
+        printf("Scanned %s target%s.\n", $this->finishedTargets, $this->finishedTargets != 1 ? 's' : '');
 
         $verified = CertificateUtils::verifyCertificates($this->db);
         Logger::info("Checked certificate chain for %s certificate%s.", $verified, $verified != 1 ? 's' : '');

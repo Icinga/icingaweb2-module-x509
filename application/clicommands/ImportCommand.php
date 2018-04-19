@@ -117,7 +117,7 @@ class ImportCommand extends Command
             }
         });
 
-        Logger::info("Processed %d X.509 certificate%s.", $processed, $processed != 1 ? 's' : '');
+        printf("Processed %d X.509 certificate%s.\n", $processed, $processed != 1 ? 's' : '');
 
         $verified = CertificateUtils::verifyCertificates($db);
         Logger::info("Checked certificate chain for %s certificate%s.", $verified, $verified != 1 ? 's' : '');

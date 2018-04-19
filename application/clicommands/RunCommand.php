@@ -11,6 +11,7 @@ use Icinga\Application\Logger;
 use Icinga\Cli\Command;
 use Icinga\Data\ResourceFactory;
 use Icinga\Module\X509\CertificateUtils;
+use Icinga\Util\StringHelper;
 use ipl\Sql\Config as DbConfig;
 use ipl\Sql\Connection;
 use ipl\Sql\Expression;
@@ -50,6 +51,8 @@ class RunCommand extends Command
 
     private static function generateTargets($job)
     {
+        $hostnamesConfig = Config::module('x509', 'hostnames');
+
         foreach (Config::module('x509', 'ipranges') as $cidr => $ports) {
             // Ew.
             if ($ports['job'] != $job) {
@@ -70,10 +73,19 @@ class RunCommand extends Command
                     }
 
                     foreach (range($start_port, $end_port) as $port) {
-                        $target = (object) [];
-                        $target->ip = $ip;
-                        $target->port = $port;
-                        yield $target;
+                        $hostnames = StringHelper::trimSplit($hostnamesConfig->get($ip, 'hostnames'));
+
+                        if (!in_array('', $hostnames)) {
+                            $hostnames[] = '';
+                        }
+
+                        foreach ($hostnames as $hostname) {
+                            $target = (object)[];
+                            $target->ip = $ip;
+                            $target->port = $port;
+                            $target->hostname = $hostname;
+                            yield $target;
+                        }
                     }
                 }
             }
@@ -95,6 +107,16 @@ class RunCommand extends Command
         );
     }
 
+    private static function formatTarget($target) {
+        $result = "tls://[{$target->ip}]:{$target->port}";
+
+        if ($target->hostname !== '') {
+            $result .= " [SNI hostname: {$target->hostname}]";
+        }
+
+        return $result;
+    }
+
     private function startNextTarget()
     {
         if (!$this->targets->valid()) {
@@ -110,13 +132,13 @@ class RunCommand extends Command
         $this->targets->next();
 
         $url = "tls://[{$target->ip}]:{$target->port}";
-        Logger::debug("Connecting to %s", $url);
+        Logger::debug("Connecting to %s", RunCommand::formatTarget($target));
         $this->pendingTargets++;
-        $this->connector->connect($url)->then(
+        $this->getConnector($target->hostname)->connect($url)->then(
             function (ConnectionInterface $conn) use ($target) {
                 $this->finishTarget();
 
-                Logger::info("Connected to %s", $conn->getRemoteAddress());
+                Logger::info("Connected to %s", RunCommand::formatTarget($target));
 
                 $stream = $conn->stream;
                 $options = stream_context_get_options($stream);
@@ -130,7 +152,7 @@ class RunCommand extends Command
                         (new Select())
                             ->columns(['id'])
                             ->from('target')
-                            ->where(['ip = ?' => inet_pton($target->ip), 'port = ?' => $target->port, 'sni_name = ?' => '' ])
+                            ->where(['ip = ?' => inet_pton($target->ip), 'port = ?' => $target->port, 'sni_name = ?' => $target->hostname ])
                     )->fetch();
 
                     if ($row === false) {
@@ -138,7 +160,7 @@ class RunCommand extends Command
                             (new Insert())
                                 ->into('target')
                                 ->columns(['ip', 'port', 'sni_name'])
-                                ->values([inet_pton($target->ip), $target->port, ''])
+                                ->values([inet_pton($target->ip), $target->port, $target->hostname])
                         );
                         $targetId = $this->db->lastInsertId();
                     } else {
@@ -210,6 +232,18 @@ class RunCommand extends Command
         $this->job = $this->params->shift('job');
     }
 
+    private function getConnector($peerName) {
+        $simpleConnector = new Connector($this->loop);
+        $secureConnector = new SecureConnector($simpleConnector, $this->loop, array(
+            'verify_peer' => false,
+            'verify_peer_name' => false,
+            'capture_peer_cert_chain' => true,
+            'SNI_enabled' => true,
+            'peer_name' => $peerName
+        ));
+        return new TimeoutConnector($secureConnector, 5.0, $this->loop);
+    }
+
     /**
      * Scans IP and port ranges to find X.509 certificates.
      *
@@ -233,14 +267,6 @@ class RunCommand extends Command
         $this->db = new Connection($config);
 
         $this->loop = Factory::create();
-
-        $simpleConnector = new Connector($this->loop);
-        $secureConnector = new SecureConnector($simpleConnector, $this->loop, array(
-            'verify_peer' => false,
-            'verify_peer_name' => false,
-            'capture_peer_cert_chain' => true,
-        ));
-        $this->connector = new TimeoutConnector($secureConnector, 5.0, $this->loop);
 
         $this->totalTargets = iterator_count(RunCommand::generateTargets($this->job));
 

@@ -53,23 +53,23 @@ class RunCommand extends Command
     {
         $hostnamesConfig = Config::module('x509', 'hostnames');
 
-        foreach (Config::module('x509', 'ipranges') as $cidr => $ports) {
-            // Ew.
-            if ($ports['job'] != $job) {
-                continue;
-            }
+        $jobDescription = Config::module('x509', 'jobs')->getSection($job);
 
-            $cidr = explode('/', $cidr);
-            $start_ip = $cidr[0];
-            $prefix = $cidr[1];
+        foreach (StringHelper::trimSplit($jobDescription->get('cidrs')) as $cidr) {
+            $pieces = explode('/', $cidr);
+            $start_ip = $pieces[0];
+            $prefix = $pieces[1];
             $ip_count = 1 << (128 - $prefix);
             $start = RunCommand::addrToNumber($start_ip);
             for ($i = 0; $i < $ip_count; $i++) {
                 $ip = RunCommand::numberToAddr(gmp_add($start, $i));
-                foreach ($ports as $start_port => $end_port) {
-                    // Ew.
-                    if ($start_port == 'job') {
-                        continue;
+                foreach (StringHelper::trimSplit($jobDescription->get('ports')) as $portRange) {
+                    $pieces = StringHelper::trimSplit($portRange, '-');
+                    if (count($pieces) === 2) {
+                        list($start_port, $end_port) = $pieces;
+                    } else {
+                        $start_port = $pieces[0];
+                        $end_port = $pieces[0];
                     }
 
                     foreach (range($start_port, $end_port) as $port) {

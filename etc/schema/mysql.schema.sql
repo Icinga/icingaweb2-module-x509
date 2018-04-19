@@ -7,6 +7,9 @@ create table certificate
   subject_hash binary(32) not null,
   issuer varchar(255) not null,
   issuer_hash binary(32) not null,
+  issuer_certificate_id int unsigned null,
+  trusted enum('yes', 'no') not null default 'no',
+  self_signed enum('yes', 'no') not null default 'no',
   certificate blob not null,
   fingerprint binary(32) not null,
   version enum('1', '2', '3') not null,
@@ -20,7 +23,8 @@ create table certificate
   valid_end bigint unsigned not null,
   ctime timestamp not null default CURRENT_TIMESTAMP,
   mtime timestamp null default null on update CURRENT_TIMESTAMP,
-  constraint certificate_uk_fingerprint unique (fingerprint)
+  constraint certificate_uk_fingerprint unique (fingerprint),
+  constraint certificate_issuer_certificate_id foreign key (issuer_certificate_id) references certificate (id)
 ) engine=InnoDB charset=utf8mb4;
 
 create table target

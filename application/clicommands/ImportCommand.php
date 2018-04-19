@@ -10,6 +10,7 @@ use Icinga\Application\Config;
 use Icinga\Application\Logger;
 use Icinga\Cli\Command;
 use Icinga\Data\ResourceFactory;
+use Icinga\Module\X509\CertificateSignatureVerifier;
 use Icinga\Module\X509\CertificateUtils;
 use ipl\Sql\Config as DbConfig;
 use ipl\Sql\Connection;
@@ -103,12 +104,22 @@ class ImportCommand extends Command
                 }
 
                 $cert = openssl_x509_read($block->data);
-                CertificateUtils::findOrInsertCert($db, $cert);
+                $certId = CertificateUtils::findOrInsertCert($db, $cert, true);
+
+                $db->update(
+                    (new Update())
+                        ->table('certificate')
+                        ->set([ 'trusted' => 'yes' ])
+                        ->where([ 'id = ?' => $certId ])
+                );
 
                 $processed++;
             }
         });
 
-        Logger::info("Processed %d X.509 certificates.", $processed);
+        Logger::info("Processed %d X.509 certificate%s.", $processed, $processed != 1 ? 's' : '');
+
+        $verified = CertificateUtils::verifyCertificates($db);
+        Logger::info("Checked certificate chain for %s certificate%s.", $verified, $verified != 1 ? 's' : '');
     }
 }

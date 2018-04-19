@@ -4,8 +4,12 @@
 namespace Icinga\Module\X509;
 
 use Icinga\Application\Logger;
+use Icinga\Module\X509\CertificateSignatureVerifier;
 use ipl\Sql\Insert;
 use ipl\Sql\Select;
+use ipl\Sql\Update;
+use phpseclib\File\X509;
+
 
 class CertificateUtils
 {
@@ -28,7 +32,7 @@ class CertificateUtils
         $der = '';
 
         foreach ($lines as $line) {
-            if (strstr($line, '-----') === 0) {
+            if (strpos($line, '-----') === 0) {
                 continue;
             }
 
@@ -36,6 +40,11 @@ class CertificateUtils
         }
 
         return $der;
+    }
+
+    private static function der2pem($der) {
+        $block = chunk_split(base64_encode($der), 64, "\n");
+        return "-----BEGIN CERTIFICATE-----\n{$block}-----END CERTIFICATE-----";
     }
 
     private static function shortNameFromDN($dn) {
@@ -219,5 +228,92 @@ class CertificateUtils
         }
 
         return $hash;
+    }
+
+    public static function verifyCertificates($db) {
+        $certs = $db->select(
+            (new Select)
+                ->from('certificate')
+                ->columns(['id', 'subject', 'issuer_hash', 'certificate'])
+                ->where([ 'self_signed = ?' => 'no', 'issuer_certificate_id is null' ])
+        );
+
+        $count = 0;
+
+        foreach ($certs as $cert) {
+            $issuer_hash = $cert['issuer_hash'];
+            $issuers = $db->select(
+                (new Select)
+                    ->from('certificate')
+                    ->columns([ 'id', 'subject', 'certificate' ])
+                    ->where([ 'subject_hash = ?' => $issuer_hash ])
+            );
+
+            foreach ($issuers as $issuer) {
+                Logger::debug("Potential issuer for cert %d is %d", $cert['id'], $issuer['id']);
+
+                $issuerFile = tempnam('/tmp', 'issuer');
+
+                if ($issuerFile === false) {
+                    Logger::warn("Could not create temporary file in /tmp");
+                    continue;
+                }
+
+                $subjectFile = tempnam('/tmp', 'subject');
+
+                if ($subjectFile === false) {
+                    unlink($issuerFile);
+                    Logger::warn("Could not create temporary file in /tmp");
+                    continue;
+                }
+
+                if (file_put_contents($issuerFile, CertificateUtils::der2pem($issuer['certificate'])) === false) {
+                    unlink($issuerFile);
+                    unlink($subjectFile);
+                    Logger::warn("Could not write certificate file: %s", $issuerFile);
+                    continue;
+                }
+
+                if (file_put_contents($subjectFile, CertificateUtils::der2pem($cert['certificate'])) === false) {
+                    unlink($issuerFile);
+                    unlink($subjectFile);
+                    Logger::warn("Could not write certificate file: %s", $subjectFile);
+                    continue;
+                }
+
+                $command = sprintf('openssl verify -no_check_time -partial_chain -CAfile %s %s >/dev/null', escapeshellarg($issuerFile), escapeshellarg($subjectFile));
+
+                if (system($command, $status) === false) {
+                    unlink($issuerFile);
+                    unlink($subjectFile);
+                    Logger::warn("Could not run 'openssl verify'");
+                    continue;
+                }
+
+                unlink($issuerFile);
+                unlink($subjectFile);
+
+                if ($status !== 0) {
+                    continue;
+                }
+
+                if ($cert['id'] == $issuer['id']) {
+                    $opts = [ 'self_signed' => 'yes' ];
+                } else {
+                    $opts = [ 'issuer_certificate_id' => $issuer['id'] ];
+                }
+
+                $db->update(
+                    (new Update())
+                        ->table('certificate')
+                        ->set($opts)
+                        ->where([ 'id = ?' => $cert['id'] ])
+                );
+            }
+
+            $count++;
+        }
+
+        return $count;
     }
 }

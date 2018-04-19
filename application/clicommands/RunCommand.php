@@ -269,6 +269,9 @@ class RunCommand extends Command
 
         $this->loop->run();
 
-        Logger::info("Scanned %s targets.", $this->finishedTargets);
+        Logger::info("Scanned %s target%s.", $this->finishedTargets, $this->finishedTargets != 1 ? 's' : '');
+
+        $verified = CertificateUtils::verifyCertificates($this->db);
+        Logger::info("Checked certificate chain for %s certificate%s.", $verified, $verified != 1 ? 's' : '');
     }
 }

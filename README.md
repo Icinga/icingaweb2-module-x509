@@ -49,7 +49,7 @@ scanning for specific jobs.
 Each scan job can have one or more IP address ranges and one or more port ranges. The X.509 module scans each port in
 a job's port ranges for all the individual IP addresses in the IP ranges.
 
-IP address ranges have to be specified using the CIDR format. Multiple IP address ranges can be separates with commas,
+IP address ranges have to be specified using the CIDR format. Multiple IP address ranges can be separated with commas,
 e.g.:
 
 `192.0.2.0/24,2001:db8::7e38/128`

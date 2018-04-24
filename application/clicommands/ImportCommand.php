@@ -3,26 +3,14 @@
 
 namespace Icinga\Module\X509\Clicommands;
 
-use DateTime;
-use Exception;
 use Icinga\Application\Config as IniConfig;
-use Icinga\Application\Config;
 use Icinga\Application\Logger;
 use Icinga\Cli\Command;
 use Icinga\Data\ResourceFactory;
-use Icinga\Module\X509\CertificateSignatureVerifier;
 use Icinga\Module\X509\CertificateUtils;
 use ipl\Sql\Config as DbConfig;
 use ipl\Sql\Connection;
-use ipl\Sql\Expression;
-use ipl\Sql\Insert;
-use ipl\Sql\Select;
 use ipl\Sql\Update;
-use React\EventLoop\Factory;
-use React\Socket\Connector;
-use React\Socket\TimeoutConnector;
-use React\Socket\SecureConnector;
-use React\Socket\ConnectionInterface;
 
 class PEMBlock
 {

@@ -50,29 +50,23 @@ class ImportCommand extends Command
         }
     }
 
-    public function init()
-    {
-        $this->file = $this->params->shift('file');
-    }
-
     /**
-     * Imports X.509 certificates..
+     * Import all X.509 certificates from the given file and mark them as trusted
      *
-     * This command imports all X.509 certificates which are in the file specified by the --file parameter.
+     * USAGE:
      *
-     * USAGE
+     *   icingacli x509 import --file <file>
      *
-     * icingacli x509 import --file <name>
+     * EXAMPLES:
+     *
+     *   icingacli x509 import --file /etc/ssl/certs/ca-bundle.crt
      */
     public function indexAction()
     {
-        if ($this->file == '') {
-            Logger::warning("An X.509 certificate file must be specified with the --file parameter.");
-            exit(1);
-        }
+        $file = $this->params->getRequired('file');
 
-        if (!file_exists($this->file)) {
-            Logger::warning("The specified certificate file does not exist.");
+        if (! file_exists($file)) {
+            Logger::warning('The specified certificate file does not exist.');
             exit(1);
         }
 
@@ -81,7 +75,7 @@ class ImportCommand extends Command
         ));
         $db = new Connection($config);
 
-        $blocks = ImportCommand::readPEMFile($this->file);
+        $blocks = ImportCommand::readPEMFile($file);
 
         $processed = 0;
 

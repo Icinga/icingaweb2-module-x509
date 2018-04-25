@@ -25,7 +25,15 @@ class CertificateUtils
         OPENSSL_KEYTYPE_EC  => 'EC'
     ];
 
-    private static function pem2der($pem) {
+    /**
+     * Convert the given chunk from PEM to DER
+     *
+     * @param   string  $pem
+     *
+     * @return  string
+     */
+    private static function pem2der($pem)
+    {
         $lines = explode("\n", $pem);
 
         $der = '';
@@ -41,12 +49,31 @@ class CertificateUtils
         return $der;
     }
 
-    private static function der2pem($der) {
+    /**
+     * Convert the given chunk from DER to PEM
+     *
+     * @param   string  $der
+     *
+     * @return  string
+     */
+    private static function der2pem($der)
+    {
         $block = chunk_split(base64_encode($der), 64, "\n");
+
         return "-----BEGIN CERTIFICATE-----\n{$block}-----END CERTIFICATE-----";
     }
 
-    private static function shortNameFromDN($dn) {
+    /**
+     * Get the short name from the given DN
+     *
+     * If the given DN contains a CN, the CN is returned. Else, the DN is returned as string.
+     *
+     * @param   array   $dn
+     *
+     * @return  string  The CN if it exists or the full DN as string
+     */
+    private static function shortNameFromDN(array $dn)
+    {
         if (isset($dn['CN'])) {
             return $dn['CN'];
         } else {
@@ -58,6 +85,22 @@ class CertificateUtils
                 $result .= "{$key}={$value}";
             }
             return $result;
+        }
+    }
+
+    /**
+     * Split the given Subject Alternative Names into key-value pairs
+     *
+     * @param   string  $sans
+     *
+     * @return  \Generator
+     */
+    private static function splitSANs($sans)
+    {
+        preg_match_all('/(?:^|, )([^:]+):/', $sans, $keys);
+        $values = preg_split('/(^|, )[^:]+:\s*/', $sans);
+        for ($i = 0; $i < count($keys[1]); $i++) {
+            yield [$keys[1][$i], $values[$i + 1]];
         }
     }
 
@@ -137,14 +180,6 @@ class CertificateUtils
 
         CertificateUtils::insertSANs($db, $certId, $certInfo);
         return $certId;
-    }
-
-    private static function splitSANs($sans) {
-        preg_match_all('/(?:^|, )([^:]+):/', $sans, $keys);
-        $values = preg_split('/(^|, )[^:]+:/', $sans);
-        for ($i = 0; $i < count($keys[1]); $i++) {
-            yield [ $keys[1][$i], $values[$i + 1] ];
-        }
     }
 
     private static function insertSANs($db, $certId, array $certInfo) {

@@ -171,8 +171,8 @@ class CertificateUtils
                     'pubkey_bits'           => $pubkeyDetails['bits'],
                     'signature_algo'        => $signaturePieces[0],
                     'signature_hash_algo'   => $signaturePieces[1],
-                    'valid_start'           => $certInfo['validFrom_time_t'],
-                    'valid_end'             => $certInfo['validTo_time_t']
+                    'valid_from'            => $certInfo['validFrom_time_t'],
+                    'valid_to'              => $certInfo['validTo_time_t']
                 ])
         );
 

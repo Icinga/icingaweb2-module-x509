@@ -4,7 +4,6 @@
 namespace Icinga\Module\X509;
 
 use Icinga\Application\Logger;
-use Icinga\Module\X509\CertificateSignatureVerifier;
 use ipl\Sql\Connection;
 use ipl\Sql\Insert;
 use ipl\Sql\Select;

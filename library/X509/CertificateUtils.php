@@ -104,6 +104,28 @@ class CertificateUtils
         }
     }
 
+    /**
+     * Yield certificates in the given bundle
+     *
+     * @param   string  $file   Path to the bundle
+     *
+     * @return  \Generator
+     */
+    public static function parseBundle($file)
+    {
+        $content = file_get_contents($file);
+
+        $blocks = explode('-----BEGIN CERTIFICATE-----', $content);
+
+        foreach ($blocks as $block) {
+            $end = strrpos($block, '-----END CERTIFICATE-----');
+
+            if ($end !== false) {
+                yield '-----BEGIN CERTIFICATE-----' . substr($block, 0, $end) . '-----END CERTIFICATE-----';
+            }
+        }
+    }
+
     public static function findOrInsertCert($db, $cert) {
         $certInfo = openssl_x509_parse($cert);
 

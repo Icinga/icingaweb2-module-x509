@@ -5,6 +5,7 @@ namespace Icinga\Module\X509;
 
 use Icinga\Application\Logger;
 use Icinga\Module\X509\CertificateSignatureVerifier;
+use ipl\Sql\Connection;
 use ipl\Sql\Insert;
 use ipl\Sql\Select;
 use ipl\Sql\Update;
@@ -264,84 +265,88 @@ class CertificateUtils
         return $hash;
     }
 
-    public static function verifyCertificates($db) {
+   /**
+    * Verify certificates
+    *
+    * @param   Connection   $db   Connection to the X.509 database
+    *
+    * @return  int
+    */
+    public static function verifyCertificates(Connection $db)
+    {
         $certs = $db->select(
             (new Select)
                 ->from('x509_certificate')
                 ->columns(['id', 'subject', 'issuer_hash', 'certificate'])
-                ->where([ 'self_signed = ?' => 'no', 'issuer_certificate_id is null' ])
+                ->where(['issuer_certificate_id IS NULL'])
         );
+
+        $tempdir = sys_get_temp_dir();
+
+        $issuerFile = tempnam($tempdir, 'issuer');
+        $certFile = tempnam($tempdir, 'cert');
+
+        register_shutdown_function(function () use ($issuerFile, $certFile) {
+            if (is_resource($issuerFile)) {
+                unlink($issuerFile);
+            }
+
+            if (is_resource($certFile)) {
+                unlink($certFile);
+            }
+        });
+
+        if ($issuerFile === false || $certFile === false) {
+            Logger::error('Could not create temporary file in %s', $tempdir);
+            return 0;
+        }
 
         $count = 0;
 
         foreach ($certs as $cert) {
-            $issuer_hash = $cert['issuer_hash'];
             $issuers = $db->select(
                 (new Select)
                     ->from('x509_certificate')
-                    ->columns([ 'id', 'subject', 'certificate' ])
-                    ->where([ 'subject_hash = ?' => $issuer_hash ])
+                    ->columns(['id', 'subject', 'certificate'])
+                    ->where(['subject_hash = ?' => $cert['issuer_hash']])
             );
 
             foreach ($issuers as $issuer) {
-                Logger::debug("Potential issuer for cert %d is %d", $cert['id'], $issuer['id']);
+                Logger::debug('Potential issuer for cert %d is %d', $cert['id'], $issuer['id']);
 
-                $issuerFile = tempnam('/tmp', 'issuer');
-
-                if ($issuerFile === false) {
-                    Logger::warn("Could not create temporary file in /tmp");
+                if (file_put_contents($issuerFile, CertificateUtils::der2pem($issuer['certificate'])) === false
+                    || file_put_contents($certFile, CertificateUtils::der2pem($cert['certificate'])) === false
+                ) {
+                    Logger::warning('Can\'t write certificate file');
                     continue;
                 }
 
-                $subjectFile = tempnam('/tmp', 'subject');
+                $command = sprintf(
+                    'openssl verify -no_check_time -partial_chain -CAfile %s %s 2>&1',
+                    escapeshellarg($issuerFile),
+                    escapeshellarg($certFile)
+                );
 
-                if ($subjectFile === false) {
-                    unlink($issuerFile);
-                    Logger::warn("Could not create temporary file in /tmp");
+                $output = null;
+
+                exec($command, $output, $exitcode);
+
+                if ($exitcode !== 0) {
+                    Logger::warning('openssl verify failed for command %s: %s', $command, implode(PHP_EOL, $output));
                     continue;
                 }
 
-                if (file_put_contents($issuerFile, CertificateUtils::der2pem($issuer['certificate'])) === false) {
-                    unlink($issuerFile);
-                    unlink($subjectFile);
-                    Logger::warn("Could not write certificate file: %s", $issuerFile);
-                    continue;
-                }
+                $set = ['issuer_certificate_id' => $issuer['id']];
 
-                if (file_put_contents($subjectFile, CertificateUtils::der2pem($cert['certificate'])) === false) {
-                    unlink($issuerFile);
-                    unlink($subjectFile);
-                    Logger::warn("Could not write certificate file: %s", $subjectFile);
-                    continue;
-                }
-
-                $command = sprintf('openssl verify -no_check_time -partial_chain -CAfile %s %s >/dev/null', escapeshellarg($issuerFile), escapeshellarg($subjectFile));
-
-                if (system($command, $status) === false) {
-                    unlink($issuerFile);
-                    unlink($subjectFile);
-                    Logger::warn("Could not run 'openssl verify'");
-                    continue;
-                }
-
-                unlink($issuerFile);
-                unlink($subjectFile);
-
-                if ($status !== 0) {
-                    continue;
-                }
-
-                if ($cert['id'] == $issuer['id']) {
-                    $opts = [ 'self_signed' => 'yes' ];
-                } else {
-                    $opts = [ 'issuer_certificate_id' => $issuer['id'] ];
+                if ($cert['id'] === $issuer['id']) {
+                    $set['self_signed'] = 'yes';
                 }
 
                 $db->update(
                     (new Update())
                         ->table('x509_certificate')
-                        ->set($opts)
-                        ->where([ 'id = ?' => $cert['id'] ])
+                        ->set($set)
+                        ->where(['id = ?' => $cert['id']])
                 );
             }
 

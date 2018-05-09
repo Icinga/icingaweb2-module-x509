@@ -6,7 +6,7 @@ namespace Icinga\Module\X509\Forms\Config;
 use Icinga\Data\ResourceFactory;
 use Icinga\Forms\ConfigForm;
 
-class BackendForm extends ConfigForm
+class BackendConfigForm extends ConfigForm
 {
     public function init()
     {

@@ -4,7 +4,7 @@
 namespace Icinga\Module\X509\Controllers;
 
 use Icinga\Application\Config;
-use Icinga\Module\X509\Forms\Config\BackendForm;
+use Icinga\Module\X509\Forms\Config\BackendConfigForm;
 use Icinga\Web\Controller;
 
 class ConfigController extends Controller
@@ -12,16 +12,18 @@ class ConfigController extends Controller
     public function init()
     {
         $this->assertPermission('config/modules');
+
         parent::init();
     }
 
     public function backendAction()
     {
-        $form = new BackendForm();
-        $form->setIniConfig(Config::module('x509'))
-            ->handleRequest();
+        $form = (new BackendConfigForm())
+            ->setIniConfig(Config::module('x509'));
 
-        $this->view->form = $form;
+        $form->handleRequest();
+
         $this->view->tabs = $this->Module()->getConfigTabs()->activate('backend');
+        $this->view->form = $form;
     }
 }

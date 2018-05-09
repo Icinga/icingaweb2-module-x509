@@ -3,7 +3,7 @@
 
 namespace Icinga\Module\X509\Forms\Config;
 
-use Icinga\Application\Config;
+use Icinga\Data\ResourceFactory;
 use Icinga\Forms\ConfigForm;
 
 class BackendForm extends ConfigForm
@@ -16,20 +16,13 @@ class BackendForm extends ConfigForm
 
     public function createElements(array $formData)
     {
-        $resources = ['' => ''];
-        foreach (Config::app('resources') as $name => $resource) {
-            if ($resource->type === 'db') {
-                $resources[$name] = $name;
-            }
-        }
-
-        ksort($resources);
+        $dbResources = ResourceFactory::getResourceConfigs('db')->keys();
 
         $this->addElement('select', 'backend_resource', [
             'label'         => $this->translate('Database'),
             'description'   => $this->translate('Database resource'),
-            'required'      => true,
-            'multiOptions'  => $resources
+            'multiOptions'  => array_combine($dbResources, $dbResources),
+            'required'      => true
         ]);
     }
 }

@@ -1,10 +1,6 @@
-<?php
-/** @var \Icinga\Web\Widget\Tabs $tabs */
-/** @var \Icinga\Web\Form $form */
-?>
 <div class="controls">
-    <?= $tabs ?>
+    <?= /** @var \Icinga\Web\Widget\Tabs $tabs */ $tabs ?>
 </div>
 <div class="content">
-    <?= $form ?>
+    <?= /** @var \Icinga\Module\X509\Forms\Config\BackendConfigForm $form */ $form ?>
 </div>

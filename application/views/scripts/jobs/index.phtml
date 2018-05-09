@@ -1,0 +1,46 @@
+<div class="controls">
+    <?= /** @var \Icinga\Web\Widget\Tabs $tabs */ $tabs ?>
+</div>
+<div class="content">
+    <div class="actions">
+        <?= $this->qlink(
+            $this->translate('Create a New Job') ,
+            'x509/jobs/new',
+            null,
+            [
+                'class'             => 'button-link',
+                'data-base-target'  => '_next',
+                'icon'              => 'plus',
+                'title'             => $this->translate('Create a new job')
+            ]
+        ) ?>
+    </div>
+<?php /** @var \Icinga\Repository\RepositoryQuery $jobs */ if (! $jobs->hasResult()): ?>
+    <p><?= $this->escape($this->translate('No jobs configured yet.')) ?></p>
+<?php else: ?>
+    <table class="common-table table-row-selectable" data-base-target="_next">
+        <thead>
+            <tr>
+                <th><?= $this->escape($this->translate('Name')) ?></th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($jobs as $job): ?>
+            <tr>
+                <td><?= $this->qlink($job->name, 'x509/jobs/update', ['name' => $job->name]) ?></td>
+                <td class="icon-col"><?= $this->qlink(
+                        null,
+                        'x509/jobs/remove',
+                        array('name' => $job->name),
+                        array(
+                            'class' => 'action-link',
+                            'icon'  => 'cancel',
+                            'title' => $this->translate('Remove this job')
+                        )
+                    ) ?></td>
+            </tr>
+        <?php endforeach ?>
+        </tbody>
+    </table>
+<?php endif ?>
+</div>

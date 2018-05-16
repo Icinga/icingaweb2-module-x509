@@ -31,39 +31,6 @@ CREATE TABLE x509_certificate (
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-create table x509_target
-(
-  id int unsigned auto_increment primary key,
-  ip binary(16) not null,
-  port smallint(6) not null,
-  sni_name varchar(255) not null,
-  latest_certificate_chain_id int,
-  ctime timestamp not null default CURRENT_TIMESTAMP,
-  mtime timestamp null default null on update CURRENT_TIMESTAMP,
-  constraint certificate_chain_uk_ip_port_sni_name unique (ip, port, sni_name)
-) engine = InnoDB charset = utf8mb4;
-
-create table x509_certificate_chain
-(
-  id int unsigned auto_increment primary key,
-  target_id int unsigned not null,
-  length smallint(6) not null,
-  ctime timestamp not null default CURRENT_TIMESTAMP
-) engine=InnoDB charset=utf8mb4;
-
-create table x509_certificate_chain_link
-(
-  certificate_chain_id int unsigned not null,
-  `order` tinyint not null,
-  certificate_id int unsigned not null,
-  ctime timestamp not null default CURRENT_TIMESTAMP,
-  primary key (certificate_chain_id, `order`),
-  constraint certificate_chain_link_fk_certificate_chain_id foreign key (certificate_chain_id) references x509_certificate_chain (id),
-  constraint certificate_chain_link_fk_certificate_id foreign key (certificate_id) references x509_certificate (id)
-) engine=InnoDB charset=utf8mb4;
-
-create index certificate_chain_link_fk_certificate_id on x509_certificate_chain_link (certificate_id);
-
 create table x509_dn
 (
   hash binary(32),
@@ -85,14 +52,52 @@ create table x509_certificate_subject_alt_name
   constraint certificate_subject_alt_name_fk_certificate_id foreign key (certificate_id) references x509_certificate (id) on update cascade on delete cascade
 ) engine=InnoDB charset=utf8mb4;
 
-create table x509_job_run
-(
-  id int unsigned auto_increment primary key,
-  name varchar(255) not null,
-  total_targets int(11) not null default 0,
-  finished_targets int(11) not null default 0,
-  start_time timestamp not null default CURRENT_TIMESTAMP,
-  end_time timestamp null,
-  ctime timestamp not null default CURRENT_TIMESTAMP,
-  mtime timestamp null default null on update CURRENT_TIMESTAMP
-) engine=InnoDB charset=utf8mb4;
+CREATE TABLE x509_job_run (
+  id int(10) unsigned NOT NULL AUTO_INCREMENT,
+  name varchar(255) NOT NULL,
+  total_targets int(10) NOT NULL,
+  finished_targets int(10) NOT NULL,
+  start_time timestamp NULL DEFAULT NULL,
+  end_time timestamp NULL DEFAULT NULL,
+  ctime timestamp NULL DEFAULT NULL,
+  mtime timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE x509_target (
+  id int(10) unsigned NOT NULL AUTO_INCREMENT,
+  ip binary(16) NOT NULL,
+  port smallint(6) NOT NULL,
+  sni_name varchar(255) NOT NULL,
+  latest_certificate_chain_id int(10) unsigned NOT NULL,
+  ctime timestamp NULL DEFAULT NULL,
+  mtime timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY x509_idx_target_ip_port_sni_name (ip,port,sni_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
+
+CREATE TABLE x509_certificate_chain (
+  id int(10) unsigned NOT NULL AUTO_INCREMENT,
+  target_id int(10) unsigned NOT NULL,
+  length smallint(6) NOT NULL,
+  ctime timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE x509_certificate_chain_link (
+  certificate_chain_id int(10) unsigned NOT NULL,
+  certificate_id int(10) unsigned NOT NULL,
+  `order` tinyint(4) NOT NULL,
+  ctime timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (certificate_chain_id,certificate_id,`order`),
+  CONSTRAINT x509_fk_certificate_chain_link_certificate_chain_id
+    FOREIGN KEY (certificate_chain_id)
+    REFERENCES x509_certificate_chain (id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT x509_fk_certificate_chain_link_certificate_id
+    FOREIGN KEY (certificate_id)
+    REFERENCES x509_certificate (id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -1,14 +1,11 @@
 <?php
-/* X509 module | (c) 2018 Icinga Development Team | GPLv2+ */
+/* Icinga Web 2 X.509 module | (c) 2018 Icinga Development Team | GPLv2+ */
 
 namespace Icinga\Module\X509\Clicommands;
 
-use Icinga\Application\Config as IniConfig;
 use Icinga\Application\Logger;
-use Icinga\Cli\Command;
-use Icinga\Data\ResourceFactory;
+use Icinga\Module\X509\Command;
 use Icinga\Module\X509\CertificateUtils;
-use ipl\Sql\Config as DbConfig;
 use ipl\Sql\Connection;
 use ipl\Sql\Update;
 
@@ -34,11 +31,7 @@ class ImportCommand extends Command
             exit(1);
         }
 
-        $config = new DbConfig(ResourceFactory::getResourceConfig(
-            IniConfig::module('x509')->get('backend', 'resource')
-        ));
-
-        $db = new Connection($config);
+        $db = $this->getDb();
 
         $bundle = CertificateUtils::parseBundle($file);
 
@@ -47,6 +40,7 @@ class ImportCommand extends Command
         $db->transaction(function (Connection $db) use ($bundle, &$count) {
             foreach ($bundle as $data) {
                 $cert = openssl_x509_read($data);
+
                 $id = CertificateUtils::findOrInsertCert($db, $cert);
 
                 $db->update(
@@ -61,9 +55,5 @@ class ImportCommand extends Command
         });
 
         printf("Processed %d X.509 certificate%s.\n", $count, $count !== 1 ? 's' : '');
-
-        $verified = CertificateUtils::verifyCertificates($db);
-
-        Logger::info("Checked certificate chain for %s certificate%s.", $verified, $verified !== 1 ? 's' : '');
     }
 }

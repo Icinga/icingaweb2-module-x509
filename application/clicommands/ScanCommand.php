@@ -3,10 +3,9 @@
 
 namespace Icinga\Module\X509\Clicommands;
 
-use DateTime;
 use Exception;
-use Icinga\Application\Config as IniConfig;
 use Icinga\Application\Config;
+use Icinga\Application\Config as IniConfig;
 use Icinga\Application\Logger;
 use Icinga\Cli\Command;
 use Icinga\Data\ResourceFactory;
@@ -19,10 +18,10 @@ use ipl\Sql\Insert;
 use ipl\Sql\Select;
 use ipl\Sql\Update;
 use React\EventLoop\Factory;
-use React\Socket\Connector;
-use React\Socket\TimeoutConnector;
-use React\Socket\SecureConnector;
 use React\Socket\ConnectionInterface;
+use React\Socket\Connector;
+use React\Socket\SecureConnector;
+use React\Socket\TimeoutConnector;
 
 class ScanCommand extends Command
 {

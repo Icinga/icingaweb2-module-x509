@@ -1,5 +1,5 @@
 <?php
-/* X509 module | (c) 2018 Icinga Development Team | GPLv2+ */
+/* Icinga Web 2 X.509 module | (c) 2018 Icinga Development Team | GPLv2+ */
 
 namespace Icinga\Module\X509\Clicommands;
 
@@ -280,7 +280,8 @@ class ScanCommand extends Command
                 ->into('x509_job_run')
                 ->values([
                     'name' => $this->job,
-                    'total_targets' => $this->totalTargets
+                    'total_targets' => $this->totalTargets,
+                    'finished_targets' => 0
                 ])
         );
 
@@ -306,8 +307,5 @@ class ScanCommand extends Command
         $this->loop->run();
 
         printf("Scanned %s target%s.\n", $this->finishedTargets, $this->finishedTargets != 1 ? 's' : '');
-
-        $verified = CertificateUtils::verifyCertificates($this->db);
-        Logger::info("Checked certificate chain for %s certificate%s.", $verified, $verified != 1 ? 's' : '');
     }
 }

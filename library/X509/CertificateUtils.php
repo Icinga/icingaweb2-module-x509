@@ -126,7 +126,16 @@ class CertificateUtils
         }
     }
 
-    public static function findOrInsertCert($db, $cert) {
+    /**
+     * Find or insert the given certificate and return its ID
+     *
+     * @param   Connection  $db
+     * @param   mixed       $cert
+     *
+     * @return  int
+     */
+    public static function findOrInsertCert(Connection $db, $cert)
+    {
         $certInfo = openssl_x509_parse($cert);
 
         $fingerprint = openssl_x509_fingerprint($cert, 'sha256', true);
@@ -135,72 +144,60 @@ class CertificateUtils
             (new Select())
                 ->columns(['id'])
                 ->from('x509_certificate')
-                ->where(['fingerprint = ?' => $fingerprint ])
+                ->where(['fingerprint = ?' => $fingerprint])
         )->fetch();
 
         if ($row !== false) {
-            return $row['id'];
+            return (int) $row['id'];
         }
 
         Logger::debug("Importing certificate: %s", $certInfo['name']);
 
         $pem = null;
-        if (!openssl_x509_export($cert, $pem)) {
-            die("Failed to encode X.509 certificate.");
+        if (! openssl_x509_export($cert, $pem)) {
+            die('Failed to encode X.509 certificate.');
         }
         $der = CertificateUtils::pem2der($pem);
 
-        $signaturePieces = explode('-', $certInfo['signatureTypeSN']);
-
-        $pubkeyDetails = openssl_pkey_get_details(openssl_pkey_get_public($cert));
-
-        $ca = true;
-
-        if (isset($certInfo['extensions'])) {
-            $extensions = &$certInfo['extensions'];
-            if (isset($extensions['basicConstraints'])) {
-                $constraints = $extensions['basicConstraints'];
-
-                $constraintPieces = explode(', ', $constraints);
-
-                foreach ($constraintPieces as $constraintPiece) {
-                    list($key, $value) = explode(':', $constraintPiece, 2);
-
-                    if ($key == 'CA') {
-                        $ca = ($value == 'TRUE');
-                    }
-                }
+        $ca = false;
+        if (isset($certInfo['extensions']['basicConstraints'])) {
+            if (strpos($certInfo['extensions']['basicConstraints'], 'CA:TRUE') !== false) {
+                $ca = true;
             }
         }
 
-        $subjectDnHash = CertificateUtils::findOrInsertDn($db, $certInfo, 'subject');
-        $issuerDnHash = CertificateUtils::findOrInsertDn($db, $certInfo, 'issuer');
+        $subjectHash = CertificateUtils::findOrInsertDn($db, $certInfo, 'subject');
+        $issuerHash = CertificateUtils::findOrInsertDn($db, $certInfo, 'issuer');
+        $pubkey = openssl_pkey_get_details(openssl_pkey_get_public($cert));
+        $signature = explode('-', $certInfo['signatureTypeSN']);
 
         $db->insert(
             (new Insert())
                 ->into('x509_certificate')
                 ->values([
-                    'subject'               => CertificateUtils::shortNameFromDN($certInfo['subject']),
-                    'subject_hash'          => $subjectDnHash,
-                    'issuer'                => CertificateUtils::shortNameFromDN($certInfo['issuer']),
-                    'issuer_hash'           => $issuerDnHash,
-                    'certificate'           => $der,
-                    'fingerprint'           => $fingerprint,
-                    'version'               => $certInfo['version'] + 1,
-                    'serial'                => gmp_export($certInfo['serialNumber']),
-                    'ca'                    => $ca ? 'yes' : 'no',
-                    'pubkey_algo'           => CertificateUtils::$pubkeyTypes[$pubkeyDetails['type']],
-                    'pubkey_bits'           => $pubkeyDetails['bits'],
-                    'signature_algo'        => $signaturePieces[0],
-                    'signature_hash_algo'   => $signaturePieces[1],
-                    'valid_from'            => $certInfo['validFrom_time_t'],
-                    'valid_to'              => $certInfo['validTo_time_t']
-                ])
+                    'subject'             => CertificateUtils::shortNameFromDN($certInfo['subject']),
+                    'subject_hash'        => $subjectHash,
+                    'issuer'              => CertificateUtils::shortNameFromDN($certInfo['issuer']),
+                    'issuer_hash'         => $issuerHash,
+                    'version'             => $certInfo['version'] + 1,
+                    'self_signed'         => $subjectHash === $issuerHash ? 'yes' : 'no',
+                    'ca'                  => $ca ? 'yes' : 'no',
+                    'pubkey_algo'         => CertificateUtils::$pubkeyTypes[$pubkey['type']],
+                    'pubkey_bits'         => $pubkey['bits'],
+                    'signature_algo'      => $signature[0],
+                    'signature_hash_algo' => $signature[1],
+                    'valid_from'          => $certInfo['validFrom_time_t'],
+                    'valid_to'            => $certInfo['validTo_time_t'],
+                    'fingerprint'         => $fingerprint,
+                    'serial'              => gmp_export($certInfo['serialNumber']),
+                    'certificate'         => $der
+                ] )
         );
 
-        $certId = $db->lastInsertId();
+        $certId = (int) $db->lastInsertId();
 
         CertificateUtils::insertSANs($db, $certId, $certInfo);
+
         return $certId;
     }
 

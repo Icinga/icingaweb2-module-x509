@@ -13,3 +13,5 @@ $this->provideConfigTab('jobs', array(
     'label' => $this->translate('Jobs'),
     'url' => 'jobs'
 ));
+
+$this->provideCssFile('icons.css');

@@ -3,10 +3,25 @@
         {
             "type": "vcs",
             "url": "https://github.com/Icinga/ipl-sql"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/lippserd/ipl-html"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/lippserd/ipl-pagination"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/lippserd/ipl-translation"
         }
     ],
     "require": {
+        "ipl/html": "dev-master",
+        "ipl/pagination": "dev-master",
         "ipl/sql": "dev-master",
+        "ipl/translation": "dev-master",
         "react/socket": "^0.7.2"
     }
 }

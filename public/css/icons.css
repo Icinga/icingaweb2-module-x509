@@ -45,4 +45,4 @@
 
 .x509-icon-ca:before { content: '\e000'; }
 .x509-icon-self-signed:before { content: '\e001'; }
-.x509-certificate:before { content: '\e002'; }
+.x509-icon-cert:before { content: '\e002'; }

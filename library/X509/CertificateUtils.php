@@ -32,7 +32,7 @@ class CertificateUtils
      *
      * @return  string
      */
-    private static function pem2der($pem)
+    public static function pem2der($pem)
     {
         $lines = explode("\n", $pem);
 
@@ -56,7 +56,7 @@ class CertificateUtils
      *
      * @return  string
      */
-    private static function der2pem($der)
+    public static function der2pem($der)
     {
         $block = chunk_split(base64_encode($der), 64, "\n");
 

@@ -25,6 +25,8 @@ class CertificatesTable extends DataTable
                 }
             ],
 
+            'subject' => $this->translate('Certificate'),
+
             'ca' => [
                 'attributes' => ['class' => 'icon-col'],
                 'renderer' => function ($ca) {
@@ -32,7 +34,10 @@ class CertificatesTable extends DataTable
                         return null;
                     }
 
-                    return Html::tag('i', ['class' => 'icon x509-icon-ca']);
+                    return Html::tag(
+                        'i',
+                        ['class' => 'icon x509-icon-ca', 'title' => $this->translate('Is Certificate Authority')]
+                    );
                 }
             ],
 
@@ -43,11 +48,26 @@ class CertificatesTable extends DataTable
                         return null;
                     }
 
-                    return Html::tag('i', ['class' => 'icon x509-icon-self-signed']);
+                    return Html::tag(
+                        'i',
+                        ['class' => 'icon x509-icon-self-signed', 'title' => $this->translate('Is Self-Signed')]
+                    );
                 }
             ],
 
-            'subject' => $this->translate('Certificate'),
+            'trusted' => [
+                'attributes' => ['class' => 'icon-col'],
+                'renderer' => function ($trusted) {
+                    if ($trusted === 'no') {
+                        return null;
+                    }
+
+                    return Html::tag(
+                        'i',
+                        ['class' => 'icon icon-thumbs-up', 'title' => $this->translate('Is Trusted')]
+                    );
+                }
+            ],
 
             'issuer' => $this->translate('Issuer'),
 
@@ -55,6 +75,13 @@ class CertificatesTable extends DataTable
                 'label' => $this->translate('Signature Algorithm'),
                 'renderer' => function ($algo, $data) {
                     return "$algo {$data['signature_hash_algo']}";
+                }
+            ],
+
+            'pubkey_algo' => [
+                'label' => $this->translate('Public Key'),
+                'renderer' => function ($algo, $data) {
+                    return "$algo {$data['pubkey_bits']}";
                 }
             ],
 

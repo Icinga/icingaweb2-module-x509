@@ -33,7 +33,11 @@ class UsageTable extends DataTable
             'host' => [
                 'column' => 'ip',
                 'label' => $this->translate('Host'),
-                'renderer' => function ($ip) {
+                'renderer' => function ($ip, $data) {
+                    if (! empty($data['sni_name'])) {
+                        return $data['sni_name'];
+                    }
+
                     return gethostbyaddr(inet_ntop($ip));
                 }
             ],
@@ -47,14 +51,19 @@ class UsageTable extends DataTable
 
             'port' => $this->translate('Port'),
 
-            'sni_name' => $this->translate('SNI Name'),
-
             'subject' => $this->translate('Certificate'),
 
             'signature_algo' => [
                 'label' => $this->translate('Signature Algorithm'),
                 'renderer' => function ($algo, $data) {
                     return "$algo {$data['signature_hash_algo']}";
+                }
+            ],
+
+            'pubkey_algo' => [
+                'label' => $this->translate('Public Key'),
+                'renderer' => function ($algo, $data) {
+                    return "$algo {$data['pubkey_bits']}";
                 }
             ],
 

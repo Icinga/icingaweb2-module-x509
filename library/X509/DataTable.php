@@ -86,13 +86,13 @@ class DataTable extends BaseHtmlElement
         $cells = [];
 
         foreach ($this->columns as $key => $column) {
-            if (array_key_exists($key, $row)) {
+            if (! is_int($key) && array_key_exists($key, $row)) {
                 $data = $row[$key];
             } else {
                 if (isset($column['column']) && array_key_exists($column['column'], $row)) {
                     $data = $row[$column['column']];
                 } else {
-                    throw new \UnexpectedValueException();
+                    $data = null;
                 }
             }
 

@@ -35,7 +35,7 @@ class CertificatesController extends Controller
             'subject' => $this->translate('Subject'),
             'issuer' => $this->translate('Issuer'),
             'version' => $this->translate('Version'),
-            'self_signed' => $this->translate('Is Self-signed'),
+            'self_signed' => $this->translate('Is Self-Signed'),
             'ca' => $this->translate('Is Certificate Authority'),
             'trusted' => $this->translate('Is Trusted'),
             'pubkey_algo' => $this->translate('Public Key Algorithm'),

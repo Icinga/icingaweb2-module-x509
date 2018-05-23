@@ -7,7 +7,7 @@ use ipl\Html\Html;
 use ipl\Html\Text;
 use ipl\Translation\Translation;
 
-class Table extends BaseHtmlElement
+class DataTable extends BaseHtmlElement
 {
     use Translation;
 
@@ -21,7 +21,7 @@ class Table extends BaseHtmlElement
     protected $columns;
 
     /**
-     * The X.509 certificates to display
+     * The data to display
      *
      * @var array|\Traversable
      */
@@ -75,10 +75,10 @@ class Table extends BaseHtmlElement
                 $label = $column;
             }
 
-            $cells[] = Html::content('th', $label);
+            $cells[] = Html::tag('th', $label);
         }
 
-        return Html::content('thead', Html::content('tr', $cells));
+        return Html::tag('thead', Html::tag('tr', $cells));
     }
 
     protected function renderRow($row)
@@ -105,7 +105,7 @@ class Table extends BaseHtmlElement
             $cells[] = Html::tag('td', isset($column['attributes']) ? $column['attributes'] : null, $content);
         }
 
-        return Html::content('tr', $cells);
+        return Html::tag('tr', $cells);
     }
 
     protected function renderBody($data)
@@ -123,7 +123,7 @@ class Table extends BaseHtmlElement
         if (empty($rows)) {
             $colspan = count($this->columns);
 
-            $rows = Html::content('tr',
+            $rows = Html::tag('tr',
                 Html::tag(
                     'td',
                     ['colspan' => $colspan],
@@ -132,7 +132,7 @@ class Table extends BaseHtmlElement
             );
         }
 
-        return Html::content('tbody', $rows);
+        return Html::tag('tbody', $rows);
     }
 
     protected function assemble()

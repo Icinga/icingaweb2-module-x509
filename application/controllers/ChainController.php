@@ -34,6 +34,8 @@ class ChainController extends Controller
             $this->httpNotFound($this->translate('Certificate not found.'));
         }
 
+        $this->setTitle($this->translate('X.509 Certificate Chain'));
+
         $chainInfo = Html::tag('div');
         $chainInfo->add(Html::tag('dl', [
             Html::tag('dt', $this->translate('Host')),
@@ -53,8 +55,6 @@ class ChainController extends Controller
             $valid->getAttributes()->add('class', '-invalid');
             $valid->add(Html::tag('p', sprintf($this->translate('Certificate chain is invalid: %s.'), $cert['invalid_reason'])));
         }
-
-        $this->setTitle($this->translate('Certificate Chain'));
 
         $chainSselect = (new Sql\Select())
             ->from('x509_certificate c')

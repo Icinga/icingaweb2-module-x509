@@ -56,14 +56,14 @@ class UsageTable extends DataTable
             'signature_algo' => [
                 'label' => $this->translate('Signature Algorithm'),
                 'renderer' => function ($algo, $data) {
-                    return "$algo {$data['signature_hash_algo']}";
+                    return "{$data['signature_hash_algo']} with $algo";
                 }
             ],
 
             'pubkey_algo' => [
                 'label' => $this->translate('Public Key'),
                 'renderer' => function ($algo, $data) {
-                    return "$algo {$data['pubkey_bits']}";
+                    return "$algo {$data['pubkey_bits']} bits";
                 }
             ],
 

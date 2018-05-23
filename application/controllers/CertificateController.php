@@ -25,7 +25,7 @@ class CertificateController extends Controller
             $this->httpNotFound($this->translate('Certificate not found.'));
         }
 
-        $this->setTitle($this->translate('Certificate'));
+        $this->setTitle($this->translate('X.509 Certificate'));
 
         $this->view->certificateDetails = (new CertificateDetails())
             ->setCert($cert);

@@ -13,7 +13,7 @@ class UsageController extends Controller
 {
     public function indexAction()
     {
-        $this->setTitle($this->translate('Usage'));
+        $this->setTitle($this->translate('X.509 Certificate Usage'));
 
         $conn = $this->getDb();
 

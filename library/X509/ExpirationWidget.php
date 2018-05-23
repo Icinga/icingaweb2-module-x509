@@ -2,6 +2,7 @@
 
 namespace Icinga\Module\X509;
 
+use DateTime;
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
 use ipl\Html\Text;
@@ -53,7 +54,7 @@ class ExpirationWidget extends BaseHtmlElement
         }
 
         $this->add([
-            Html::content('span', (new \DateTime())->setTimestamp($to)->format('Y-m-d')),
+            Html::tag('span', (new DateTime())->setTimestamp($to)->format('Y-m-d')),
             Html::tag(
                 'span',
                 ['class' => 'certificate-days-remaining'],

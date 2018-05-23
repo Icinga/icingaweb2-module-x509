@@ -39,68 +39,68 @@ class CertificateDetails extends BaseHtmlElement
         $subject = Html::tag('dl');
         foreach ($cert['subject'] as $key => $value) {
             $subject->add([
-                Html::content('dt', $key),
-                Html::content('dd', $value)
+                Html::tag('dt', $key),
+                Html::tag('dd', $value)
             ]);
         }
 
         $issuer = Html::tag('dl');
         foreach ($cert['issuer'] as $key => $value) {
             $issuer->add([
-                Html::content('dt', $key),
-                Html::content('dd', $value)
+                Html::tag('dt', $key),
+                Html::tag('dd', $value)
             ]);
         }
 
         $certInfo = Html::tag('dl');
         $certInfo->add([
-            Html::content('dt', $this->translate('Serial Number')),
-            Html::content('dd', bin2hex($this->cert['serial'])),
-            Html::content('dt', $this->translate('Version')),
-            Html::content('dd', $this->cert['version']),
-            Html::content('dt', $this->translate('Signature Algorithm')),
-            Html::content('dd', $this->cert['signature_algo'] . ' with ' . $this->cert['signature_hash_algo']),
-            Html::content('dt', $this->translate('Not Valid Before')),
-            Html::content('dd', (new DateTime())->setTimestamp($this->cert['valid_from'])->format('l F jS, Y H:i:s e')),
-            Html::content('dt', $this->translate('Not Valid After')),
-            Html::content('dd', (new DateTime())->setTimestamp($this->cert['valid_to'])->format('l F jS, Y H:i:s e')),
+            Html::tag('dt', $this->translate('Serial Number')),
+            Html::tag('dd', bin2hex($this->cert['serial'])),
+            Html::tag('dt', $this->translate('Version')),
+            Html::tag('dd', $this->cert['version']),
+            Html::tag('dt', $this->translate('Signature Algorithm')),
+            Html::tag('dd', $this->cert['signature_algo'] . ' with ' . $this->cert['signature_hash_algo']),
+            Html::tag('dt', $this->translate('Not Valid Before')),
+            Html::tag('dd', (new DateTime())->setTimestamp($this->cert['valid_from'])->format('l F jS, Y H:i:s e')),
+            Html::tag('dt', $this->translate('Not Valid After')),
+            Html::tag('dd', (new DateTime())->setTimestamp($this->cert['valid_to'])->format('l F jS, Y H:i:s e')),
         ]);
 
         $pubkeyInfo = Html::tag('dl');
         $pubkeyInfo->add([
-            Html::content('dt', $this->translate('Algorithm')),
-            Html::content('dd', $this->cert['pubkey_algo']),
-            Html::content('dt', $this->translate('Key Size')),
-            Html::content('dd', $this->cert['pubkey_bits'])
+            Html::tag('dt', $this->translate('Algorithm')),
+            Html::tag('dd', $this->cert['pubkey_algo']),
+            Html::tag('dt', $this->translate('Key Size')),
+            Html::tag('dd', $this->cert['pubkey_bits'])
         ]);
 
         $extensions = Html::tag('dl');
         foreach ($cert['extensions'] as $key => $value) {
             $extensions->add([
-                Html::content('dt', ucwords(implode(' ', preg_split('/(?=[A-Z])/', $key)))),
-                Html::content('dd', $value)
+                Html::tag('dt', ucwords(implode(' ', preg_split('/(?=[A-Z])/', $key)))),
+                Html::tag('dd', $value)
             ]);
         }
 
         $fingerprints = Html::tag('dl');
         $fingerprints->add([
-            Html::content('dt', 'SHA-256'),
-            Html::content('dd', wordwrap(strtoupper(bin2hex($this->cert['fingerprint'])), 2, ' ', true))
+            Html::tag('dt', 'SHA-256'),
+            Html::tag('dd', wordwrap(strtoupper(bin2hex($this->cert['fingerprint'])), 2, ' ', true))
         ]);
 
         $this->add([
-            Html::content('h2', [Html::tag('i', ['class' => 'icon x509-icon-cert']), $this->cert['subject']]),
-            Html::content('h3', $this->translate('Subject Name')),
+            Html::tag('h2', [Html::tag('i', ['class' => 'icon x509-icon-cert']), $this->cert['subject']]),
+            Html::tag('h3', $this->translate('Subject Name')),
             $subject,
-            Html::content('h3', $this->translate('Issuer Name')),
+            Html::tag('h3', $this->translate('Issuer Name')),
             $issuer,
-            Html::content('h3', $this->translate('Certificate Info')),
+            Html::tag('h3', $this->translate('Certificate Info')),
             $certInfo,
-            Html::content('h3', $this->translate('Public Key Info')),
+            Html::tag('h3', $this->translate('Public Key Info')),
             $pubkeyInfo,
-            Html::content('h3', $this->translate('Extensions')),
+            Html::tag('h3', $this->translate('Extensions')),
             $extensions,
-            Html::content('h3', $this->translate('Fingerprints')),
+            Html::tag('h3', $this->translate('Fingerprints')),
             $fingerprints
         ]);
     }

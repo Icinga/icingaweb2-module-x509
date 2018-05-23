@@ -8,9 +8,12 @@ use ipl\Html\Html;
 /**
  * Table widget to display X.509 certificates
  */
-class CertificatesTable extends Table
+class CertificatesTable extends DataTable
 {
-    protected $defaultAttributes = ['class' => 'cert-table common-table table-row-selectable'];
+    protected $defaultAttributes = [
+        'class' => 'cert-table common-table table-row-selectable',
+        'data-base-target' => '_next'
+    ];
 
     protected function createColumns()
     {
@@ -69,7 +72,9 @@ class CertificatesTable extends Table
     {
         $tr = parent::renderRow($row);
 
-        $tr->getAttributes()->add(['href' => Url::fromPath('x509/certificate', ['cert' => $row['id']])]);
+        $url = Url::fromPath('x509/certificate', ['cert' => $row['id']]);
+
+        $tr->getAttributes()->add(['href' => $url->getAbsoluteUrl()]);
 
         return $tr;
     }

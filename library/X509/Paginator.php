@@ -257,7 +257,7 @@ class Paginator extends BaseHtmlElement
      * @param   int $pageSize   The number of items per page. If you want to stick to the defaults,
      *                          don't set this parameter
      *
-     * @return  Url The URL for paging
+     * @return  string
      */
     public function createUrl($page, $pageSize = null)
     {
@@ -267,7 +267,7 @@ class Paginator extends BaseHtmlElement
             $params[$this->getPageSizeParam()] = $pageSize;
         }
 
-        return $this->url->with($params);
+        return $this->url->with($params)->getAbsoluteUrl();
     }
 
     /**

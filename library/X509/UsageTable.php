@@ -9,11 +9,14 @@ use ipl\Translation\Translation;
 /**
  * Table widget to display X.509 certificate usage
  */
-class UsageTable extends Table
+class UsageTable extends DataTable
 {
     use Translation;
 
-    protected $defaultAttributes = ['class' => 'usage-table common-table table-row-selectable'];
+    protected $defaultAttributes = [
+        'class' => 'usage-table common-table table-row-selectable',
+        'data-base-target' => '_next'
+    ];
 
     public function createColumns()
     {
@@ -69,7 +72,9 @@ class UsageTable extends Table
     {
         $tr = parent::renderRow($row);
 
-        $tr->getAttributes()->add(['href' => Url::fromPath('x509/chain', ['cert' => $row['certificate_id'], 'target' => $row['target_id']])]);
+        $url = Url::fromPath('x509/chain', ['cert' => $row['certificate_id'], 'target' => $row['target_id']]);
+
+        $tr->getAttributes()->add(['href' => $url->getAbsoluteUrl()]);
 
         return $tr;
     }

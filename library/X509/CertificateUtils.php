@@ -66,6 +66,54 @@ class CertificateUtils
     }
 
     /**
+     * Format seconds to human-readable duration
+     *
+     * @param   int $seconds
+     *
+     * @return  string
+     */
+    public static function duration($seconds)
+    {
+        if ($seconds < 60) {
+            return "$seconds Seconds";
+        }
+
+        if ($seconds < 3600) {
+            $minutes = round($seconds / 60);
+
+            return "$minutes Minutes";
+        }
+
+        if ($seconds < 86400) {
+            $hours = round($seconds / 3600);
+
+            return "$hours Hours";
+        }
+
+        if ($seconds < 604800) {
+            $days = round($seconds / 86400);
+
+            return "$days Days";
+        }
+
+        if ($seconds < 2592000) {
+            $weeks = round($seconds / 604800);
+
+            return "$weeks Weeks";
+        }
+
+        if ($seconds < 31536000) {
+            $months = round($seconds / 2592000);
+
+            return "$months Months";
+        }
+
+        $years = round($seconds / 31536000);
+
+        return "$years Years";
+    }
+
+    /**
      * Get the short name from the given DN
      *
      * If the given DN contains a CN, the CN is returned. Else, the DN is returned as string.

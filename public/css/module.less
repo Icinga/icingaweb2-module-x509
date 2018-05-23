@@ -59,3 +59,35 @@
 .cert-table, .usage-table {
   width: 98%;
 }
+
+.cert-dashboard {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+}
+
+.cert-donut {
+  margin: auto;
+}
+
+.cert-chain {
+  .rounded-corners();
+
+  color: #fff;
+  font-size: 120%;
+  font-weight: @font-weight-bold;
+  padding: 0.75em;
+  text-align: center;
+
+  > p {
+    margin: 0;
+  }
+
+  &.-valid {
+    background-color: @color-ok;
+  }
+
+  &.-invalid {
+    background-color: @color-critical;
+  }
+}

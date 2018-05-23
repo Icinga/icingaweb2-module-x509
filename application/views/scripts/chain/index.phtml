@@ -1,0 +1,8 @@
+<?php if (! $this->compact): ?>
+<div class="controls">
+    <?= $this->tabs ?>
+</div>
+<?php endif ?>
+<div class="content">
+    <?= /** @var \ipl\Html\ValidHtml $chain */ $chain->render() ?>
+</div>

@@ -186,8 +186,8 @@ class CertificateUtils
                     'ca'                  => $ca ? 'yes' : 'no',
                     'pubkey_algo'         => CertificateUtils::$pubkeyTypes[$pubkey['type']],
                     'pubkey_bits'         => $pubkey['bits'],
-                    'signature_algo'      => $signature[0],
-                    'signature_hash_algo' => $signature[1],
+                    'signature_algo'      => array_shift($signature), // Support formats like RSA-SHA1 and
+                    'signature_hash_algo' => array_pop($signature),   // ecdsa-with-SHA384
                     'valid_from'          => $certInfo['validFrom_time_t'],
                     'valid_to'            => $certInfo['validTo_time_t'],
                     'fingerprint'         => $fingerprint,

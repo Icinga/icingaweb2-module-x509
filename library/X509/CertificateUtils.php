@@ -3,7 +3,9 @@
 
 namespace Icinga\Module\X509;
 
+use Exception;
 use Icinga\Application\Logger;
+use Icinga\File\Storage\TemporaryLocalFileStorage;
 use ipl\Sql\Connection;
 use ipl\Sql\Insert;
 use ipl\Sql\Select;
@@ -283,92 +285,117 @@ class CertificateUtils
         return $hash;
     }
 
-   /**
-    * Verify certificates
-    *
-    * @param   Connection   $db   Connection to the X.509 database
-    *
-    * @return  int
-    */
+    /**
+     * Verify certificates
+     *
+     * @param   Connection   $db   Connection to the X.509 database
+     *
+     * @return  int
+     */
     public static function verifyCertificates(Connection $db)
     {
-        $certs = $db->select(
+        $files = new TemporaryLocalFileStorage();
+
+        $caFile = uniqid('ca');
+
+        $cas = $db->select(
             (new Select)
                 ->from('x509_certificate')
-                ->columns(['id', 'subject', 'issuer_hash', 'certificate'])
-                ->where(['issuer_certificate_id IS NULL'])
+                ->columns(['certificate'])
+                ->where(['ca = ?' => 'yes', 'trusted = ?' => 'yes'])
         );
 
-        $tempdir = sys_get_temp_dir();
+        $contents = [];
 
-        $issuerFile = tempnam($tempdir, 'issuer');
-        $certFile = tempnam($tempdir, 'cert');
-
-        register_shutdown_function(function () use ($issuerFile, $certFile) {
-            if (is_resource($issuerFile)) {
-                unlink($issuerFile);
-            }
-
-            if (is_resource($certFile)) {
-                unlink($certFile);
-            }
-        });
-
-        if ($issuerFile === false || $certFile === false) {
-            Logger::error('Could not create temporary file in %s', $tempdir);
-            return 0;
+        foreach ($cas as $ca) {
+            $contents[] = static::der2pem($ca['certificate']);
         }
+
+        $files->create($caFile, implode("\n", $contents));
 
         $count = 0;
 
-        foreach ($certs as $cert) {
-            $issuers = $db->select(
-                (new Select)
-                    ->from('x509_certificate')
-                    ->columns(['id', 'subject', 'certificate'])
-                    ->where(['subject_hash = ?' => $cert['issuer_hash']])
+        $db->beginTransaction();
+
+        try {
+            $db->update(
+                (new Update())
+                    ->table('x509_certificate_chain')
+                    ->set(['valid' => 'no'])
             );
 
-            foreach ($issuers as $issuer) {
-                Logger::debug('Potential issuer for cert %d is %d', $cert['id'], $issuer['id']);
+            $chains = $db->select(
+                (new Select)
+                    ->from('x509_certificate_chain')
+                    ->columns('id')
+            );
 
-                if (file_put_contents($issuerFile, CertificateUtils::der2pem($issuer['certificate'])) === false
-                    || file_put_contents($certFile, CertificateUtils::der2pem($cert['certificate'])) === false
-                ) {
-                    Logger::warning('Can\'t write certificate file');
-                    continue;
+            foreach ($chains as $chain) {
+                ++$count;
+
+                $certs = $db->select(
+                    (new Select)
+                        ->from('x509_certificate c')
+                        ->columns('c.certificate')
+                        ->join('x509_certificate_chain_link ccl', 'ccl.certificate_id = c.id')
+                        ->where(['ccl.certificate_chain_id = ?' => $chain['id']])
+                        ->orderBy(['ccl.order' => 'DESC'])
+                );
+
+                $collection = [];
+
+                foreach ($certs as $cert) {
+                    $collection[] = CertificateUtils::der2pem($cert['certificate']);
+                }
+
+                $certFile = uniqid('cert');
+
+                $files->create($certFile, array_pop($collection));
+
+                $untrusted = '';
+                foreach ($collection as $intermediate) {
+                    $intermediateFile = uniqid('intermediate');
+                    $files->create($intermediateFile, $intermediate);
+                    $untrusted .= ' -untrusted ' . escapeshellarg($files->resolvePath($intermediateFile));
                 }
 
                 $command = sprintf(
-                    'openssl verify -no_check_time -partial_chain -CAfile %s %s 2>&1',
-                    escapeshellarg($issuerFile),
-                    escapeshellarg($certFile)
+                    'openssl verify -CAfile %s%s %s 2>&1',
+                    escapeshellarg($files->resolvePath($caFile)),
+                    $untrusted,
+                    escapeshellarg($files->resolvePath($certFile))
                 );
 
                 $output = null;
 
                 exec($command, $output, $exitcode);
 
+                $output = implode("\n", $output);
+
                 if ($exitcode !== 0) {
-                    Logger::warning('openssl verify failed for command %s: %s', $command, implode(PHP_EOL, $output));
-                    continue;
+                    Logger::warning('openssl verify failed for command %s: %s', $command, $output);
                 }
 
-                $set = ['issuer_certificate_id' => $issuer['id']];
+                preg_match('/^error \d+ at \d+ depth lookup:(.+)$/m', $output, $match);
 
-                if ($cert['id'] === $issuer['id']) {
-                    $set['self_signed'] = 'yes';
+                if (!empty($match)) {
+                    $set = ['invalid_reason' => $match[1]];
+                } else {
+                    $set = ['valid' => 'yes'];
                 }
 
                 $db->update(
                     (new Update())
-                        ->table('x509_certificate')
+                        ->table('x509_certificate_chain')
                         ->set($set)
-                        ->where(['id = ?' => $cert['id']])
+                        ->where(['id = ?' => $chain['id']])
                 );
             }
 
-            $count++;
+            $db->commitTransaction();
+        } catch (Exception $e) {
+            Logger::error($e);
+            $db->rollBackTransaction();
         }
 
         return $count;

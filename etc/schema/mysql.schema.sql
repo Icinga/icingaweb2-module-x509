@@ -30,6 +30,8 @@ CREATE TABLE x509_certificate_chain (
   id int(10) unsigned NOT NULL AUTO_INCREMENT,
   target_id int(10) unsigned NOT NULL,
   length smallint(6) NOT NULL,
+  valid enum('yes','no') NOT NULL DEFAULT 'no',
+  invalid_reason varchar(255) NULL DEFAULT NULL,
   ctime timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -1,0 +1,13 @@
+<?php if (! $this->compact): ?>
+    <div class="controls">
+        <?= $this->tabs ?>
+    </div>
+<?php endif ?>
+<div class="content">
+    <div class="cert-dashboard">
+        <?= $byCa->render() ?>
+        <?= $duration->render() ?>
+        <?= $keyStrength->render() ?>
+        <?= $sigAlgos->render() ?>
+    </div>
+</div>

@@ -32,7 +32,7 @@ class CertificatesController extends Controller
         $this->view->paginator = new Paginator(new SqlAdapter($conn, $select), Url::fromRequest());
 
         $sortAndFilterColumns = [
-            'subject' => $this->translate('Subject'),
+            'subject' => $this->translate('Certificate'),
             'issuer' => $this->translate('Issuer'),
             'version' => $this->translate('Version'),
             'self_signed' => $this->translate('Is Self-Signed'),

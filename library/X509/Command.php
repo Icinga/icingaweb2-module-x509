@@ -8,6 +8,9 @@ use ipl\Sql;
 
 class Command extends \Icinga\Cli\Command
 {
+    // Fix Web 2 issue where $configs is not properly initialized
+    protected $configs = [];
+
     /**
      * Get the connection to the X.509 database
      *

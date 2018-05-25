@@ -366,16 +366,11 @@ class CertificateUtils
         $db->beginTransaction();
 
         try {
-            $db->update(
-                (new Update())
-                    ->table('x509_certificate_chain')
-                    ->set(['valid' => 'no'])
-            );
-
             $chains = $db->select(
                 (new Select)
-                    ->from('x509_certificate_chain')
-                    ->columns('id')
+                    ->from('x509_certificate_chain c')
+                    ->join('x509_target t', ['t.latest_certificate_chain_id = c.id', 'c.valid = ?' => 'no'])
+                    ->columns('c.id')
             );
 
             foreach ($chains as $chain) {

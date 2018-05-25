@@ -4,6 +4,7 @@
 namespace Icinga\Module\X509\Clicommands;
 
 use Icinga\Application\Logger;
+use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
 use Icinga\Module\X509\Job;
 
@@ -48,6 +49,10 @@ class ScanCommand extends Command
                 $finishedTargets != 1 ? 's' : '',
                 $name
             );
+
+            $verified = CertificateUtils::verifyCertificates($db);
+
+            Logger::info("Checked %d certificate chain%s.", $verified, $verified !== 1 ? 's' : '');
         }
     }
 }

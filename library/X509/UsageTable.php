@@ -24,7 +24,7 @@ class UsageTable extends DataTable
             'valid' => [
                 'attributes' => ['class' => 'icon-col'],
                 'renderer' => function ($valid) {
-                    $icon = $valid === 'yes' ? 'check' : 'block';
+                    $icon = $valid === 'yes' ? 'check -ok' : 'block -critical';
 
                     return Html::tag('i', ['class' => "icon icon-{$icon}"]);
                 }

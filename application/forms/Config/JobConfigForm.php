@@ -36,8 +36,8 @@ class JobConfigForm extends RepositoryForm
                 'textarea',
                 'ports',
                 [
-                    'description'   => $this->translate('Comma-separated list of ports to scan  '),
-                    'label'         => $this->translate('Bits'),
+                    'description'   => $this->translate('Comma-separated list of ports to scan'),
+                    'label'         => $this->translate('Ports'),
                     'required'      => true
                 ]
             ]

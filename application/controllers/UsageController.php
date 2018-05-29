@@ -5,6 +5,7 @@ namespace Icinga\Module\X509\Controllers;
 use Icinga\Data\Filter\FilterExpression;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\FilterAdapter;
+use Icinga\Module\X509\Job;
 use Icinga\Module\X509\Paginator;
 use Icinga\Module\X509\SortAdapter;
 use Icinga\Module\X509\SqlFilter;
@@ -71,9 +72,9 @@ class UsageController extends Controller
                 $value = $filter->getExpression();
 
                 if (is_array($value)) {
-                    $value = array_map('inet_pton', $value);
+                    $value = array_map('Job::binary', $value);
                 } else {
-                    $value = inet_pton($value);
+                    $value = Job::binary($value);
                 }
 
                 $filter->setExpression($value);

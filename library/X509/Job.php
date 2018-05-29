@@ -55,12 +55,21 @@ class Job
         return new TimeoutConnector($secureConnector, 5.0, $this->loop);
     }
 
-    private static function addrToNumber($addr) {
-        return gmp_import(inet_pton($addr));
+    public static function binary($addr)
+    {
+        return str_pad(inet_pton($addr), 16, "\0", STR_PAD_LEFT);
     }
 
-    private static function numberToAddr($num) {
-        return inet_ntop(str_pad(gmp_export($num), 16, "\0", STR_PAD_LEFT));
+    private static function addrToNumber($addr) {
+        return gmp_import(static::binary($addr));
+    }
+
+    private static function numberToAddr($num, $ipv6 = true) {
+        if ((bool) $ipv6) {
+            return inet_ntop(str_pad(gmp_export($num), 16, "\0", STR_PAD_LEFT));
+        } else {
+            return inet_ntop(gmp_export($num));
+        }
     }
 
     private static function generateTargets(ConfigObject $jobDescription, Config $hostnamesConfig)
@@ -73,18 +82,20 @@ class Job
             }
             $start_ip = $pieces[0];
             $prefix = $pieces[1];
-            $subnet = 128;
-            if (substr($start_ip, 0, 2) === '::') {
-                if (strtoupper(substr($start_ip, 0, 7)) !== '::FFFF:') {
-                    $subnet = 32;
-                }
-            } elseif (strpos($start_ip, ':') === false) {
-                $subnet = 32;
-            }
+//            $subnet = 128;
+//            if (substr($start_ip, 0, 2) === '::') {
+//                if (strtoupper(substr($start_ip, 0, 7)) !== '::FFFF:') {
+//                    $subnet = 32;
+//                }
+//            } elseif (strpos($start_ip, ':') === false) {
+//                $subnet = 32;
+//            }
+            $ipv6 = filter_var($start_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false;
+            $subnet = $ipv6 ? 128 : 32;
             $ip_count = 1 << ($subnet - $prefix);
             $start = static::addrToNumber($start_ip);
             for ($i = 0; $i < $ip_count; $i++) {
-                $ip = static::numberToAddr(gmp_add($start, $i));
+                $ip = static::numberToAddr(gmp_add($start, $i), $ipv6);
                 foreach (StringHelper::trimSplit($jobDescription->get('ports')) as $portRange) {
                     $pieces = StringHelper::trimSplit($portRange, '-');
                     if (count($pieces) === 2) {
@@ -190,7 +201,7 @@ class Job
                         (new Select())
                             ->columns(['id'])
                             ->from('x509_target')
-                            ->where(['ip = ?' => inet_pton($target->ip), 'port = ?' => $target->port, 'hostname = ?' => $target->hostname ])
+                            ->where(['ip = ?' => static::binary($target->ip), 'port = ?' => $target->port, 'hostname = ?' => $target->hostname ])
                     )->fetch();
 
                     if ($row === false) {
@@ -198,7 +209,7 @@ class Job
                             (new Insert())
                                 ->into('x509_target')
                                 ->columns(['ip', 'port', 'hostname'])
-                                ->values([inet_pton($target->ip), $target->port, $target->hostname])
+                                ->values([static::binary($target->ip), $target->port, $target->hostname])
                         );
                         $targetId = $this->db->lastInsertId();
                     } else {
@@ -241,7 +252,7 @@ class Job
                     (new Update())
                         ->table('x509_target')
                         ->set(['latest_certificate_chain_id' => null])
-                        ->where(['ip = ?' => inet_pton($target->ip), 'port = ?' => $target->port, 'hostname = ?' => $target->hostname ])
+                        ->where(['ip = ?' => static::binary($target->ip), 'port = ?' => $target->port, 'hostname = ?' => $target->hostname ])
                 );
 
                 $this->finishTarget();

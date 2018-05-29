@@ -33,6 +33,11 @@ class UsageTable extends DataTable
             'ip' => [
                 'label' => $this->translate('IP'),
                 'renderer' => function ($ip) {
+                    $ipv4 = ltrim($ip);
+                    if (strlen($ipv4) === 4) {
+                        $ip = $ipv4;
+                    }
+
                     return inet_ntop($ip);
                 }
             ],

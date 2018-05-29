@@ -36,12 +36,18 @@ class ChainController extends Controller
 
         $this->setTitle($this->translate('X.509 Certificate Chain'));
 
+        $ip = $cert['ip'];
+        $ipv4 = ltrim($ip);
+        if (strlen($ipv4) === 4) {
+            $ip = $ipv4;
+        }
+
         $chainInfo = Html::tag('div');
         $chainInfo->add(Html::tag('dl', [
             Html::tag('dt', $this->translate('Host')),
             Html::tag('dd', $cert['hostname']),
             Html::tag('dt', $this->translate('IP')),
-            Html::tag('dd', inet_ntop($cert['ip'])),
+            Html::tag('dd', inet_ntop($ip)),
             Html::tag('dt', $this->translate('Port')),
             Html::tag('dd', $cert['port'])
         ]));

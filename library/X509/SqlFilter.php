@@ -26,8 +26,32 @@ class Quoter
  */
 class NoImplicitConnectDbConnection extends DbConnection
 {
+    protected $renderFilterCallback;
+
     public function __construct(ConfigObject $config = null)
     {
+    }
+
+    public function setRenderFilterCallback(callable $callback = null)
+    {
+        $this->renderFilterCallback = $callback;
+
+        return $this;
+    }
+
+    protected function renderFilterExpression(Filter $filter)
+    {
+        $hit = false;
+
+        if (isset($this->renderFilterCallback)) {
+            $hit = call_user_func($this->renderFilterCallback, $filter);
+        }
+
+        if ($hit !== false) {
+            return $hit;
+        }
+
+        return parent::renderFilterExpression($filter);
     }
 }
 
@@ -36,7 +60,7 @@ class NoImplicitConnectDbConnection extends DbConnection
  */
 class SqlFilter
 {
-    public static function apply($filter, Select $select)
+    public static function apply($filter, Select $select, callable $renderFilterCallback = null)
     {
         if (! $filter instanceof Filter) {
             $parts = [];
@@ -53,7 +77,7 @@ class SqlFilter
         }
 
         if (! $filter->isEmpty()) {
-            $conn = new NoImplicitConnectDbConnection();
+            $conn = (new NoImplicitConnectDbConnection())->setRenderFilterCallback($renderFilterCallback);
 
             $reflection = new ReflectionClass('\Icinga\Data\Db\DbConnection');
 

@@ -25,6 +25,10 @@ class Scheduler
 
         $expression = CronExpression::factory($cronSchedule);
 
+        if ($expression->isDue($now)) {
+            $this->loop->nextTick($callback);
+        }
+
         $nextRuns = $expression->getMultipleRunDates(2, $now);
 
         $interval = $nextRuns[0]->getTimestamp() - $now->getTimestamp();

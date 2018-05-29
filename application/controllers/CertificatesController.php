@@ -2,6 +2,7 @@
 
 namespace Icinga\Module\X509\Controllers;
 
+use Icinga\Data\Filter\FilterExpression;
 use Icinga\Module\X509\CertificatesTable;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\FilterAdapter;
@@ -60,7 +61,23 @@ class CertificatesController extends Controller
             ['subject', 'issuer'],
             ['format']
         );
-        SqlFilter::apply($filterAdapter->getFilter(), $select);
+        SqlFilter::apply($filterAdapter->getFilter(), $select, function (FilterExpression $filter) {
+            $column = $filter->getColumn();
+
+            if ($column === 'issuer_hash') {
+                $value = $filter->getExpression();
+
+                if (is_array($value)) {
+                    $value = array_map('hex2bin', $value);
+                } else {
+                    $value = hex2bin($value);
+                }
+
+                $filter->setExpression($value);
+            }
+
+            return false;
+        });
 
         $this->handleFormatRequest($conn, $select);
 

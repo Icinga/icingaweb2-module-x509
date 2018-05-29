@@ -2,6 +2,7 @@
 
 namespace Icinga\Module\X509\Controllers;
 
+use Icinga\Data\Filter\FilterExpression;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\FilterAdapter;
 use Icinga\Module\X509\Paginator;
@@ -16,7 +17,9 @@ class UsageController extends Controller
 {
     public function indexAction()
     {
-        $this->setTitle($this->translate('X.509 Certificate Usage'));
+        $this
+            ->initTabs()
+            ->setTitle($this->translate('X.509 Certificate Usage'));
 
         $conn = $this->getDb();
 
@@ -29,6 +32,8 @@ class UsageController extends Controller
             ->where(['ccl.order = ?' => 0]);
 
         $sortAndFilterColumns = [
+            'hostname' => $this->translate('Hostname'),
+            'ip' => $this->translate('IP'),
             'subject' => $this->translate('Certificate'),
             'issuer' => $this->translate('Issuer'),
             'version' => $this->translate('Version'),
@@ -56,12 +61,46 @@ class UsageController extends Controller
         $this->setupFilterControl(
             $filterAdapter,
             $sortAndFilterColumns,
-            ['subject'],
+            ['hostname', 'subject'],
             ['format']
         );
-        SqlFilter::apply($filterAdapter->getFilter(), $select);
+        SqlFilter::apply($filterAdapter->getFilter(), $select, function (FilterExpression $filter) {
+            $column = $filter->getColumn();
 
-        $this->handleFormatRequest($conn, $select);
+            if ($column === 'ip') {
+                $value = $filter->getExpression();
+
+                if (is_array($value)) {
+                    $value = array_map('inet_pton', $value);
+                } else {
+                    $value = inet_pton($value);
+                }
+
+                $filter->setExpression($value);
+            }
+
+            if ($column === 'issuer_hash') {
+                $value = $filter->getExpression();
+
+                if (is_array($value)) {
+                    $value = array_map('hex2bin', $value);
+                } else {
+                    $value = hex2bin($value);
+                }
+
+                $filter->setExpression($value);
+            }
+
+            return false;
+        });
+
+        $formatQuery = clone $select;
+        $formatQuery->resetColumns()->columns([
+            'valid', 'hostname', 'port', 'subject', 'issuer', 'version', 'self_signed', 'ca', 'trusted', 'pubkey_algo',  'pubkey_bits',
+            'signature_algo', 'signature_hash_algo', 'valid_from', 'valid_to'
+        ]);
+
+        $this->handleFormatRequest($conn, $formatQuery);
 
         $this->view->usageTable = (new UsageTable())->setData($conn->select($select));
     }

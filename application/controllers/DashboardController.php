@@ -5,6 +5,8 @@ namespace Icinga\Module\X509\Controllers;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\Donut;
+use Icinga\Web\Url;
+use ipl\Html\Html;
 use ipl\Sql\Select;
 
 class DashboardController extends Controller
@@ -28,12 +30,23 @@ class DashboardController extends Controller
             ->setHeading($this->translate('Certificates by CA'), 2)
             ->setData($byCa)
             ->setLabelCallback(function ($data) {
-                return $data['issuer'];
+                return Html::tag(
+                    'a',
+                    [
+                        'href' => Url::fromPath('x509/certificates', ['issuer' => $data['issuer']])->getAbsoluteUrl()
+                    ],
+                    $data['issuer']
+                );
             });
 
         $duration = $db->select((new Select())
             ->from('x509_certificate')
-            ->columns(['duration' => 'valid_to - valid_from', 'cnt' => 'COUNT(*)'])
+            ->columns([
+                'duration' => 'valid_to - valid_from',
+                'valid_from' => 'valid_from',
+                'valid_to' => 'valid_to',
+                'cnt' => 'COUNT(*)'
+            ])
             ->where(['ca = ?' => 'no'])
             ->groupBy('duration')
             ->orderBy('cnt', SORT_DESC)
@@ -44,7 +57,15 @@ class DashboardController extends Controller
             ->setHeading($this->translate('Certificates by Duration'), 2)
             ->setData($duration)
             ->setLabelCallback(function ($data) {
-                return CertificateUtils::duration($data['duration']);
+                return Html::tag(
+                    'a',
+                    [
+                        'href' => Url::fromPath(
+                            "x509/certificates?valid_from>={$data['valid_from']}&valid_to<={$data['valid_to']}&ca=no"
+                        )->getAbsoluteUrl()
+                    ],
+                    CertificateUtils::duration($data['duration'])
+                );
             });
 
         $keyStrength = $db->select((new Select())
@@ -59,7 +80,19 @@ class DashboardController extends Controller
             ->setHeading($this->translate('Key Strength'), 2)
             ->setData($keyStrength)
             ->setLabelCallback(function ($data) {
-                return "{$data['pubkey_algo']} {$data['pubkey_bits']} bits";
+                return Html::tag(
+                    'a',
+                    [
+                        'href' => Url::fromPath(
+                            'x509/certificates',
+                            [
+                                'pubkey_algo' => $data['pubkey_algo'],
+                                'pubkey_bits' => $data['pubkey_bits']
+                            ]
+                        )->getAbsoluteUrl()
+                    ],
+                    "{$data['pubkey_algo']} {$data['pubkey_bits']} bits"
+                );
             });
 
         $sigAlgos = $db->select((new Select())
@@ -74,7 +107,19 @@ class DashboardController extends Controller
             ->setHeading($this->translate('Signature Algorithms'), 2)
             ->setData($sigAlgos)
             ->setLabelCallback(function ($data) {
-                return "{$data['signature_hash_algo']} with {$data['signature_algo']}";
+                return Html::tag(
+                    'a',
+                    [
+                        'href' => Url::fromPath(
+                            'x509/certificates',
+                            [
+                                'signature_hash_algo' => $data['signature_hash_algo'],
+                                'signature_algo' => $data['signature_algo']
+                            ]
+                        )->getAbsoluteUrl()
+                    ],
+                    "{$data['signature_hash_algo']} with {$data['signature_algo']}"
+                );
             });
     }
 }

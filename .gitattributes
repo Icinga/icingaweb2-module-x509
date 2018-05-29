@@ -1,0 +1,2 @@
+# Exclude files related to Git when generating an archive
+.git* export-ignore

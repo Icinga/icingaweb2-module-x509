@@ -11,8 +11,6 @@ use ipl\Translation\Translation;
  */
 class UsageTable extends DataTable
 {
-    use Translation;
-
     protected $defaultAttributes = [
         'class' => 'usage-table common-table table-row-selectable',
         'data-base-target' => '_next'

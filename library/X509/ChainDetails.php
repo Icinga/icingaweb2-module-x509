@@ -11,8 +11,6 @@ use ipl\Translation\Translation;
  */
 class ChainDetails extends DataTable
 {
-    use Translation;
-
     protected $defaultAttributes = [
         'class' => 'cert-table common-table table-row-selectable',
         'data-base-target' => '_next'

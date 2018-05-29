@@ -1,29 +1,57 @@
-Icinga Web 2 X.509
-==================
+# Icinga Web 2 X.509 Module
 
 The X.509 module for Icinga Web 2 keeps track of certificates as they're deployed in a network environment. It does
 this by scanning a range of IP addresses and ports for TLS services and collects whatever certificates it finds
 along the way. The module's web frontend can be used to view scan results.
 
-Installation
-------------
+## Requirements
+
+* Icinga Web 2
+* MySQL
+* OpenSSL
+* php-gmp
+
+### Database Setup
+
+The module also needs a MySQL database with the schema that's provided in the `etc/schema/mysql.schema.sql` file.
+
+Example command for creating the MySQL database. Please change the password:
+
+```
+CREATE DATABASE x509;
+GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON x509.* TO 'x509'@'localhost' IDENTIFIED BY 'secret';
+```
+
+After, you can import the schema using the following command:
+
+```
+mysql -p -u x509 x509 < etc/schema/mysql.schema.sql
+```
+
+Note that if you're using a version of MySQL < 5.7, the following server options must be set:
+
+```
+innodb_file_format=barracuda
+innodb_file_per_table=1
+innodb_large_prefix=1
+```
+
+4. The next step involves telling the X.509 module which database resource to use. This can be done in
+`Configuration -> Modules -> x509 -> Backend`.
+
+## Installation
 
 1. You can install the X.509 module by extracting the installation archive in the `modules` directory for your
 Icinga Web 2.
 
 2. Log in with a privileged user in Icinga Web 2 and enable the module in `Configuration -> Modules -> x509`.
 
-3. The module also needs a MySQL database with the schema that's provided in the `etc/schema/mysql.schema.sql` file.
-Once you've set up the database you can create a new Icinga Web 2 resource for it using the
+3. Once you've set up the database, create a new Icinga Web 2 resource for it using the
 `Configuration -> Application -> Resources` menu.
-
-4. The next step involves telling the X.509 module which database resource to use. This can be done in
-`Configuration -> Modules -> x509 -> Backend`.
 
 This concludes the installation. You should now be able to import CA certificates and set up scan jobs:
 
-Importing CA certificates
--------------------------
+## Importing CA certificates
 
 The X.509 module tries to verify certificates using its own trust store. By default this trust store is empty and it
 is up to the Icinga Web 2 admin to import CA certificates into it.
@@ -37,11 +65,10 @@ $ icingacli x509 import --file /etc/ssl/certs/ca-certificates.crt
 Processed 148 X.509 certificates.
 ```
 
-Scan Jobs
----------
+## Scan Jobs
 
 The X.509 module needs to know which IP address ranges and ports to scan. These can be configured in
-`Configuration -> Modules -> x509 -> IP Ranges`.
+`Configuration -> Modules -> x509 -> Jobs`.
 
 Scan jobs have a name which uniquely identifies them, e.g. `lan`. These names are used by the CLI command to start
 scanning for specific jobs.
@@ -65,17 +92,4 @@ job which should be run:
 ```
 $ icingacli x509 scan --job lan
 Scanned 512 targets.
-```
-
-Cron
-----
-
-If you want scan jobs to be run periodically you can use the `cron(8)` daemon to run them on a schedule:
-
-```
-$ vi /etc/crontab
-[...]
-
-# Runs job 'lan' daily at 2:30 AM
-30 2 * * *   www-data   icingacli x509 scan --job lan
 ```

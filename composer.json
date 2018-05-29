@@ -22,6 +22,7 @@
         "ipl/pagination": "dev-master",
         "ipl/sql": "dev-master",
         "ipl/translation": "dev-master",
-        "react/socket": "^0.7.2"
+        "react/socket": "^0.7.2",
+        "dragonmantank/cron-expression": "^2.1 || ^1.2.1"
     }
 }

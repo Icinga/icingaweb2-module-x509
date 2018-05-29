@@ -1,0 +1,10 @@
+[Unit]
+Description=Icinga Web 2 X.509 Module Jobs Runner
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/icingacli x509 jobs run
+Restart=on-success
+
+[Install]
+WantedBy=multi-user.target

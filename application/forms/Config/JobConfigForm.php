@@ -40,7 +40,15 @@ class JobConfigForm extends RepositoryForm
                     'label'         => $this->translate('Ports'),
                     'required'      => true
                 ]
-            ]
+            ],
+            [
+                'text',
+                'schedule',
+                [
+                    'description'   => $this->translate('Job cron Schedule'),
+                    'label'         => $this->translate('Schedule')
+                ]
+            ],
         ]);
 
         $this->setTitle($this->translate('Create a new job'));

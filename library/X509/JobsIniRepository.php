@@ -10,7 +10,7 @@ use Icinga\Repository\IniRepository;
  */
 class JobsIniRepository extends IniRepository
 {
-    protected $queryColumns = array('jobs' => array('name', 'cidrs', 'ports'));
+    protected $queryColumns = array('jobs' => array('name', 'cidrs', 'ports', 'schedule'));
 
     protected $configs = array('jobs' => array(
         'module'    => 'x509',

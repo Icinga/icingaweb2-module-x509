@@ -7,26 +7,14 @@ along the way. The module's web frontend can be used to view scan results.
 ## Requirements
 
 * Icinga Web 2
+* icingacli
 * MySQL
 * OpenSSL
 * php-gmp
 
 ### Database Setup
 
-The module also needs a MySQL database with the schema that's provided in the `etc/schema/mysql.schema.sql` file.
-
-Example command for creating the MySQL database. Please change the password:
-
-```
-CREATE DATABASE x509;
-GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON x509.* TO 'x509'@'localhost' IDENTIFIED BY 'secret';
-```
-
-After, you can import the schema using the following command:
-
-```
-mysql -p -u x509 x509 < etc/schema/mysql.schema.sql
-```
+The module needs a MySQL database with the schema that's provided in the `etc/schema/mysql.schema.sql` file.
 
 Note that if you're using a version of MySQL < 5.7, the following server options must be set:
 
@@ -36,8 +24,18 @@ innodb_file_per_table=1
 innodb_large_prefix=1
 ```
 
-4. The next step involves telling the X.509 module which database resource to use. This can be done in
-`Configuration -> Modules -> x509 -> Backend`.
+Example command for creating the MySQL database. Please change the password:
+
+```
+CREATE DATABASE x509;
+GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON x509.* TO x509@localhost IDENTIFIED BY 'secret';
+```
+
+After, you can import the schema using the following command:
+
+```
+mysql -p -u root x509 < etc/schema/mysql.schema.sql
+```
 
 ## Installation
 
@@ -45,9 +43,13 @@ innodb_large_prefix=1
 Icinga Web 2.
 
 2. Log in with a privileged user in Icinga Web 2 and enable the module in `Configuration -> Modules -> x509`.
+Or use the `icingacli` and run `icingacli module enable x509`.
 
 3. Once you've set up the database, create a new Icinga Web 2 resource for it using the
 `Configuration -> Application -> Resources` menu.
+
+4. The next step involves telling the X.509 module which database resource to use. This can be done in
+`Configuration -> Modules -> x509 -> Backend`.
 
 This concludes the installation. You should now be able to import CA certificates and set up scan jobs:
 
@@ -61,8 +63,7 @@ with the `--file` option should contain a PEM-encoded list of X.509 certificates
 store:
 
 ```
-$ icingacli x509 import --file /etc/ssl/certs/ca-certificates.crt
-Processed 148 X.509 certificates.
+icingacli x509 import --file /etc/ssl/certs/ca-certificates.crt
 ```
 
 ## Scan Jobs
@@ -90,6 +91,58 @@ Scan jobs can be executed using the `icingacli x509 scan` CLI command. The `--jo
 job which should be run:
 
 ```
-$ icingacli x509 scan --job lan
-Scanned 512 targets.
+icingacli x509 scan --job lan
+```
+
+## Scheduling Jobs
+
+Each job may specify a `cron` compatible `schedule` to run periodically at the given interval. The `cron` format is as
+follows:
+
+```
+*    *    *    *    *
+-    -    -    -    -
+|    |    |    |    |
+|    |    |    |    |
+|    |    |    |    +----- day of week (0 - 6) (Sunday to Saturday)
+|    |    |    +---------- month (1 - 12)
+|    |    +--------------- day of month (1 - 31)
+|    +-------------------- hour (0 - 23)
++------------------------- minute (0 - 59)
+```
+
+Example definitions:
+
+Description                                                 | Definition
+------------------------------------------------------------| ----------
+Run once a year at midnight of 1 January                    | 0 0 1 1 *
+Run once a month at midnight of the first day of the month  | 0 0 1 * *
+Run once a week at midnight on Sunday morning               | 0 0 * * 0
+Run once a day at midnight                                  | 0 0 * * *
+Run once an hour at the beginning of the hour               | 0 * * * *
+
+Jobs are executed on CLI with the `jobs` command:
+
+```
+icingacli x509 robs run
+```
+
+This command runs all jobs which are currently due and schedules the next execution of all jobs.
+
+You may configure this command as `systemd` service. Just copy the example service definition from
+`config/systemd/icinga-x509.service` to `/etc/systemd/system/icinga-x509.service` and enable it afterwards:
+
+```
+systemctl enable icinga-x509.service
+```
+
+As an alternative if you want scan jobs to be run periodically, you can use the `cron(8)` daemon to run them on a
+schedule:
+
+```
+vi /etc/crontab
+[...]
+
+# Runs job 'lan' daily at 2:30 AM
+30 2 * * *   wwwdata   icingacli x509 scan --job lan
 ```

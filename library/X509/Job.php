@@ -78,7 +78,7 @@ class Job
                 if (strtoupper(substr($start_ip, 0, 7)) !== '::FFFF:') {
                     $subnet = 32;
                 }
-            } elseif (strpos($start_ip, ':' === false)) {
+            } elseif (strpos($start_ip, ':') === false) {
                 $subnet = 32;
             }
             $ip_count = 1 << ($subnet - $prefix);

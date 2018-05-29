@@ -363,6 +363,10 @@ class CertificateUtils
             $contents[] = static::der2pem($ca['certificate']);
         }
 
+        if (empty($contents)) {
+            throw new \RuntimeException('Trust store is empty');
+        }
+
         $files->create($caFile, implode("\n", $contents));
 
         $count = 0;

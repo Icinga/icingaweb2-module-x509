@@ -67,6 +67,10 @@ class Job
     {
         foreach (StringHelper::trimSplit($jobDescription->get('cidrs')) as $cidr) {
             $pieces = explode('/', $cidr);
+            if (count($pieces) !== 2) {
+                Logger::warning("CIDR '%s' is in the wrong format.", $cidr);
+                continue;
+            }
             $start_ip = $pieces[0];
             $prefix = $pieces[1];
             $subnet = 128;

@@ -32,7 +32,17 @@ class ScanCommand extends Command
 
         $snimap = $this->Config('sni');
 
+        $jobs = $this->Config('jobs');
+
+        if (! $jobs->hasSection($name)) {
+            $this->fail('Job not found.');
+        }
+
         $jobDescription = $this->Config('jobs')->getSection($name);
+
+        if (! strlen($jobDescription->get('cidrs'))) {
+            $this->fail('The job does not specify any CIDRs.');
+        }
 
         $db = $this->getDb();
 

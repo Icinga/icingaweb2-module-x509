@@ -82,10 +82,10 @@ CREATE TABLE x509_target (
   id int(10) unsigned NOT NULL AUTO_INCREMENT,
   ip binary(16) NOT NULL,
   `port` smallint(6) NOT NULL,
-  sni_name varchar(255) NOT NULL,
-  latest_certificate_chain_id int(10) unsigned NOT NULL,
+  hostname varchar(255) NULL DEFAULT NULL,
+  latest_certificate_chain_id int(10) unsigned NULL DEFAULT NULL,
   ctime timestamp NULL DEFAULT NULL,
   mtime timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY x509_idx_target_ip_port_sni_name (ip,`port`,sni_name)
+  UNIQUE KEY x509_idx_target_ip_port_hostname (ip,`port`,hostname)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;

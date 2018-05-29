@@ -30,17 +30,7 @@ class UsageTable extends DataTable
                 }
             ],
 
-            'host' => [
-                'column' => 'ip',
-                'label' => $this->translate('Host'),
-                'renderer' => function ($ip, $data) {
-                    if (! empty($data['sni_name'])) {
-                        return $data['sni_name'];
-                    }
-
-                    return gethostbyaddr(inet_ntop($ip));
-                }
-            ],
+            'hostname' => $this->translate('Hostname'),
 
             'ip' => [
                 'label' => $this->translate('IP'),

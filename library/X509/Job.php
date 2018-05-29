@@ -69,7 +69,15 @@ class Job
             $pieces = explode('/', $cidr);
             $start_ip = $pieces[0];
             $prefix = $pieces[1];
-            $ip_count = 1 << (128 - $prefix);
+            $subnet = 128;
+            if (substr($start_ip, 0, 2) === '::') {
+                if (strtoupper(substr($start_ip, 0, 7)) !== '::FFFF:') {
+                    $subnet = 32;
+                }
+            } elseif (strpos($start_ip, ':' === false)) {
+                $subnet = 32;
+            }
+            $ip_count = 1 << ($subnet - $prefix);
             $start = static::addrToNumber($start_ip);
             for ($i = 0; $i < $ip_count; $i++) {
                 $ip = static::numberToAddr(gmp_add($start, $i));
@@ -83,11 +91,10 @@ class Job
                     }
 
                     foreach (range($start_port, $end_port) as $port) {
-                        $hostnames = StringHelper::trimSplit($hostnamesConfig->get($ip, 'hostnames'));
+                        $hostnames = array_filter(StringHelper::trimSplit($hostnamesConfig->get($ip, 'hostnames')));
 
-                        //var_dump($hostnames);die;
-                        if (!in_array('', $hostnames)) {
-                            $hostnames[] = '';
+                        if (empty($hostnames)) {
+                            $hostnames[] = null;
                         }
 
                         foreach ($hostnames as $hostname) {
@@ -121,7 +128,7 @@ class Job
     private static function formatTarget($target) {
         $result = "tls://[{$target->ip}]:{$target->port}";
 
-        if ($target->hostname !== '') {
+        if ($target->hostname !== null) {
             $result .= " [SNI hostname: {$target->hostname}]";
         }
 
@@ -166,19 +173,27 @@ class Job
 
                 $chain = $options['ssl']['peer_certificate_chain'];
 
+                if ($target->hostname === null) {
+                    $hostname = gethostbyaddr($target->ip);
+
+                    if ($hostname !== false) {
+                        $target->hostname = $hostname;
+                    }
+                }
+
                 $this->db->transaction(function () use($target, $chain) {
                     $row = $this->db->select(
                         (new Select())
                             ->columns(['id'])
                             ->from('x509_target')
-                            ->where(['ip = ?' => inet_pton($target->ip), 'port = ?' => $target->port, 'sni_name = ?' => $target->hostname ])
+                            ->where(['ip = ?' => inet_pton($target->ip), 'port = ?' => $target->port, 'hostname = ?' => $target->hostname ])
                     )->fetch();
 
                     if ($row === false) {
                         $this->db->insert(
                             (new Insert())
                                 ->into('x509_target')
-                                ->columns(['ip', 'port', 'sni_name'])
+                                ->columns(['ip', 'port', 'hostname'])
                                 ->values([inet_pton($target->ip), $target->port, $target->hostname])
                         );
                         $targetId = $this->db->lastInsertId();
@@ -222,7 +237,7 @@ class Job
                     (new Update())
                         ->table('x509_target')
                         ->set(['latest_certificate_chain_id' => null])
-                        ->where(['ip = ?' => inet_pton($target->ip), 'port = ?' => $target->port, 'sni_name = ?' => '' ])
+                        ->where(['ip = ?' => inet_pton($target->ip), 'port = ?' => $target->port, 'hostname = ?' => $target->hostname ])
                 );
 
                 $this->finishTarget();
@@ -234,8 +249,9 @@ class Job
                 }
                 //$loop->stop();
             }
-        )->otherwise(function($ex) {
-            var_dump($ex);
+        )->otherwise(function (\Exception $e) {
+            echo $e->getMessage() . PHP_EOL;
+            echo $e->getTraceAsString() . PHP_EOL;
         });
     }
 

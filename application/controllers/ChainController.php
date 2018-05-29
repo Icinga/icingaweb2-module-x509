@@ -39,7 +39,7 @@ class ChainController extends Controller
         $chainInfo = Html::tag('div');
         $chainInfo->add(Html::tag('dl', [
             Html::tag('dt', $this->translate('Host')),
-            Html::tag('dd', ! empty($cert['sni_name']) ? $cert['sni_name'] : gethostbyaddr(inet_ntop($cert['ip']))),
+            Html::tag('dd', $cert['hostname']),
             Html::tag('dt', $this->translate('IP')),
             Html::tag('dd', inet_ntop($cert['ip'])),
             Html::tag('dt', $this->translate('Port')),

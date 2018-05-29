@@ -30,7 +30,7 @@ class ScanCommand extends Command
             $this->fail("The 'parallel' option must be set to at least 1.");
         }
 
-        $snimap = $this->Config('hostnames');
+        $snimap = $this->Config('sni');
 
         $jobDescription = $this->Config('jobs')->getSection($name);
 

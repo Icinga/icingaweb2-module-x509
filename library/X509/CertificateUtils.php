@@ -127,14 +127,18 @@ class CertificateUtils
         if (isset($dn['CN'])) {
             return $dn['CN'];
         } else {
-            $result = '';
+            $result = [];
             foreach ($dn as $key => $value) {
-                if ($result != '') {
-                    $result .= ', ';
+                if (is_array($value)) {
+                    foreach ($value as $item) {
+                        $result[] = "{$key}={$item}";
+                    }
+                } else {
+                    $result[] = "{$key}={$value}";
                 }
-                $result .= "{$key}={$value}";
             }
-            return $result;
+
+            return implode(', ', $result);
         }
     }
 

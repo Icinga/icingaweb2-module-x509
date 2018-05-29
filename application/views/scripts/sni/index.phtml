@@ -1,0 +1,46 @@
+<div class="controls">
+    <?= /** @var \Icinga\Web\Widget\Tabs $tabs */ $tabs ?>
+</div>
+<div class="content">
+    <div class="actions">
+        <?= $this->qlink(
+            $this->translate('Create a New SNI Map') ,
+            'x509/sni/new',
+            null,
+            [
+                'class'             => 'button-link',
+                'data-base-target'  => '_next',
+                'icon'              => 'plus',
+                'title'             => $this->translate('Create a new SNI map')
+            ]
+        ) ?>
+    </div>
+    <?php /** @var \Icinga\Repository\RepositoryQuery $sni */ if (! $sni->hasResult()): ?>
+        <p><?= $this->escape($this->translate('No SNI maps configured yet.')) ?></p>
+    <?php else: ?>
+        <table class="common-table table-row-selectable" data-base-target="_next">
+            <thead>
+            <tr>
+                <th><?= $this->escape($this->translate('IP')) ?></th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($sni as $data): ?>
+                <tr>
+                    <td><?= $this->qlink($data->ip, 'x509/sni/update', ['ip' => $data->ip]) ?></td>
+                    <td class="icon-col"><?= $this->qlink(
+                            null,
+                            'x509/sni/remove',
+                            array('ip' => $data->ip),
+                            array(
+                                'class' => 'action-link',
+                                'icon'  => 'cancel',
+                                'title' => $this->translate('Remove this SNI map')
+                            )
+                        ) ?></td>
+                </tr>
+            <?php endforeach ?>
+            </tbody>
+        </table>
+    <?php endif ?>
+</div>

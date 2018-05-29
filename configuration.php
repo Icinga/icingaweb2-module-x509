@@ -30,4 +30,10 @@ $this->provideConfigTab('jobs', array(
     'url' => 'jobs'
 ));
 
+$this->provideConfigTab('sni', array(
+    'title' => $this->translate('Configure SNI'),
+    'label' => $this->translate('SNI'),
+    'url' => 'sni'
+));
+
 $this->provideCssFile('icons.css');

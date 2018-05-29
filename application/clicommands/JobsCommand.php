@@ -12,11 +12,11 @@ use Icinga\Module\X509\Scheduler;
 class JobsCommand extends Command
 {
     /**
-     * Verify all currently collected X.509 certificates
+     * Run all configured jobs based on their schedule
      *
      * USAGE:
      *
-     *   icingacli x509 verify
+     *   icingacli x509 jobs run
      */
     public function runAction()
     {

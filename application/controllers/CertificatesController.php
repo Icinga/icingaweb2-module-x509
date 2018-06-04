@@ -24,11 +24,15 @@ class CertificatesController extends Controller
         $conn = $this->getDb();
 
         $select = (new Sql\Select())
-            ->from('x509_certificate')
+            ->from('x509_certificate c')
+            ->joinLeft('x509_certificate_subject_alt_name s', 's.certificate_id = c.id')
             ->columns([
-                'id', 'subject', 'issuer', 'version', 'self_signed', 'ca', 'trusted', 'pubkey_algo',  'pubkey_bits',
-                'signature_algo', 'signature_hash_algo', 'valid_from', 'valid_to'
-            ]);
+                'c.id', 'c.subject', 'c.issuer', 'c.version', 'c.self_signed', 'c.ca', 'c.trusted',
+                'c.pubkey_algo',  'c.pubkey_bits', 'c.signature_algo', 'c.signature_hash_algo',
+                'c.valid_from', 'c.valid_to',
+                'subject_alt_names' => "GROUP_CONCAT(CONCAT_WS(':', s.type, s.value) SEPARATOR ', ')"
+            ])
+            ->groupBy('c.id');
 
         $this->view->paginator = new Paginator(new SqlAdapter($conn, $select), Url::fromRequest());
 
@@ -79,7 +83,18 @@ class CertificatesController extends Controller
             return false;
         });
 
-        $this->handleFormatRequest($conn, $select);
+        $this->handleFormatRequest($conn, $select, function (\PDOStatement $stmt) {
+            foreach ($stmt as $cert) {
+                $cert['valid_from'] = (new \DateTime())
+                    ->setTimestamp($cert['valid_from'])
+                    ->format('l F jS, Y H:i:s e');
+                $cert['valid_to'] = (new \DateTime())
+                    ->setTimestamp($cert['valid_to'])
+                    ->format('l F jS, Y H:i:s e');
+
+                yield $cert;
+            }
+        });
 
         $this->view->certificatesTable = (new CertificatesTable())->setData($conn->select($select));
     }

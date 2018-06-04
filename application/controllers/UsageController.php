@@ -97,11 +97,29 @@ class UsageController extends Controller
 
         $formatQuery = clone $select;
         $formatQuery->resetColumns()->columns([
-            'valid', 'hostname', 'port', 'subject', 'issuer', 'version', 'self_signed', 'ca', 'trusted', 'pubkey_algo',  'pubkey_bits',
+            'valid', 'hostname', 'ip', 'port', 'subject', 'issuer', 'version', 'self_signed', 'ca', 'trusted', 'pubkey_algo',  'pubkey_bits',
             'signature_algo', 'signature_hash_algo', 'valid_from', 'valid_to'
         ]);
 
-        $this->handleFormatRequest($conn, $formatQuery);
+        $this->handleFormatRequest($conn, $formatQuery, function (\PDOStatement $stmt) {
+            foreach ($stmt as $usage) {
+                $usage['valid_from'] = (new \DateTime())
+                    ->setTimestamp($usage['valid_from'])
+                    ->format('l F jS, Y H:i:s e');
+                $usage['valid_to'] = (new \DateTime())
+                    ->setTimestamp($usage['valid_to'])
+                    ->format('l F jS, Y H:i:s e');
+
+                $ip = $usage['ip'];
+                $ipv4 = ltrim($ip);
+                if (strlen($ipv4) === 4) {
+                    $ip = $ipv4;
+                }
+                $usage['ip'] = inet_ntop($ip);
+
+                yield $usage;
+            }
+        });
 
         $this->view->usageTable = (new UsageTable())->setData($conn->select($select));
     }

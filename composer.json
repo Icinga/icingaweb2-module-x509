@@ -24,5 +24,8 @@
         "ipl/translation": "dev-master",
         "react/socket": "^0.7.2",
         "dragonmantank/cron-expression": "^2.1 || ^1.2.1"
+    },
+    "scripts": {
+        "git-archive": "git archive --format=tar --prefix=x509/ HEAD >icingaweb2-module-x509.tar && tar --transform 's,^,x509/,' --exclude-vcs -rf icingaweb2-module-x509.tar vendor composer.lock && gzip -f icingaweb2-module-x509.tar"
     }
 }

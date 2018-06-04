@@ -50,7 +50,7 @@ class Controller extends \Icinga\Web\Controller
         return $this;
     }
 
-    protected function handleFormatRequest(Sql\Connection $db, Sql\Select $select)
+    protected function handleFormatRequest(Sql\Connection $db, Sql\Select $select, callable $callback = null)
     {
         $desiredContentType = $this->getRequest()->getHeader('Accept');
         if ($desiredContentType === 'application/json') {
@@ -80,7 +80,9 @@ class Controller extends \Icinga\Web\Controller
                         'Content-Disposition',
                         'inline; filename=' . $this->getRequest()->getActionName() . '.json'
                     )
-                    ->appendBody(Json::encode($db->select($select)->fetchAll()))
+                    ->appendBody(
+                        Json::encode($callback !== null ? iterator_to_array($callback($db->select($select))) : $db->select($select)->fetchAll())
+                    )
                     ->sendResponse();
                 exit;
             case 'csv':
@@ -92,7 +94,9 @@ class Controller extends \Icinga\Web\Controller
                         'Content-Disposition',
                         'attachment; filename=' . $this->getRequest()->getActionName() . '.csv'
                     )
-                    ->appendBody((string) Csv::fromQuery($db->select($select)))
+                    ->appendBody(
+                        (string) Csv::fromQuery($callback !== null ? $callback($db->select($select)) : $db->select($select))
+                    )
                     ->sendResponse();
                 exit;
         }

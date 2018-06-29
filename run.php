@@ -1,4 +1,4 @@
 <?php
-/* X509 module | (c) 2018 Icinga Development Team | GPLv2+ */
+// Icinga Web 2 X.509 Module | (c) 2018 Icinga GmbH
 
 require_once __DIR__ . '/vendor/autoload.php';

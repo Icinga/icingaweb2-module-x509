@@ -226,26 +226,25 @@ class CertificateUtils
         $signature = explode('-', $certInfo['signatureTypeSN']);
 
         $db->insert(
-            (new Insert())
-                ->into('x509_certificate')
-                ->values([
-                    'subject'             => CertificateUtils::shortNameFromDN($certInfo['subject']),
-                    'subject_hash'        => $subjectHash,
-                    'issuer'              => CertificateUtils::shortNameFromDN($certInfo['issuer']),
-                    'issuer_hash'         => $issuerHash,
-                    'version'             => $certInfo['version'] + 1,
-                    'self_signed'         => $subjectHash === $issuerHash ? 'yes' : 'no',
-                    'ca'                  => $ca ? 'yes' : 'no',
-                    'pubkey_algo'         => CertificateUtils::$pubkeyTypes[$pubkey['type']],
-                    'pubkey_bits'         => $pubkey['bits'],
-                    'signature_algo'      => array_shift($signature), // Support formats like RSA-SHA1 and
-                    'signature_hash_algo' => array_pop($signature),   // ecdsa-with-SHA384
-                    'valid_from'          => $certInfo['validFrom_time_t'],
-                    'valid_to'            => $certInfo['validTo_time_t'],
-                    'fingerprint'         => $fingerprint,
-                    'serial'              => gmp_export($certInfo['serialNumber']),
-                    'certificate'         => $der
-                ] )
+            'x509_certificate',
+            [
+                'subject'             => CertificateUtils::shortNameFromDN($certInfo['subject']),
+                'subject_hash'        => $subjectHash,
+                'issuer'              => CertificateUtils::shortNameFromDN($certInfo['issuer']),
+                'issuer_hash'         => $issuerHash,
+                'version'             => $certInfo['version'] + 1,
+                'self_signed'         => $subjectHash === $issuerHash ? 'yes' : 'no',
+                'ca'                  => $ca ? 'yes' : 'no',
+                'pubkey_algo'         => CertificateUtils::$pubkeyTypes[$pubkey['type']],
+                'pubkey_bits'         => $pubkey['bits'],
+                'signature_algo'      => array_shift($signature), // Support formats like RSA-SHA1 and
+                'signature_hash_algo' => array_pop($signature),   // ecdsa-with-SHA384
+                'valid_from'          => $certInfo['validFrom_time_t'],
+                'valid_to'            => $certInfo['validTo_time_t'],
+                'fingerprint'         => $fingerprint,
+                'serial'              => gmp_export($certInfo['serialNumber']),
+                'certificate'         => $der
+            ]
         );
 
         $certId = (int) $db->lastInsertId();
@@ -277,10 +276,12 @@ class CertificateUtils
                 }
 
                 $db->insert(
-                    (new Insert())
-                        ->into('x509_certificate_subject_alt_name')
-                        ->columns(['certificate_id', 'type', 'value'])
-                        ->values([$certId, $type, $value])
+                    'x509_certificate_subject_alt_name',
+                    [
+                        'certificate_id' => $certId,
+                        'type' => $type,
+                        'value' => $value
+                    ]
                 );
             }
         }
@@ -325,10 +326,14 @@ class CertificateUtils
 
             foreach ($values as $value) {
                 $db->insert(
-                    (new Insert())
-                        ->into('x509_dn')
-                        ->columns(['hash', '`key`', '`value`', '`order`', 'type'])
-                        ->values([$hash, $key, $value, $index, $type])
+                    'x509_dn',
+                    [
+                        'hash'    => $hash,
+                        '`key`'   => $key,
+                        '`value`' => $value,
+                        '`order`' => $index,
+                        'type'    => $type
+                    ]
                 );
                 $index++;
             }
@@ -436,10 +441,9 @@ class CertificateUtils
                 }
 
                 $db->update(
-                    (new Update())
-                        ->table('x509_certificate_chain')
-                        ->set($set)
-                        ->where(['id = ?' => $chain['id']])
+                    'x509_certificate_chain',
+                    $set,
+                    ['id = ?' => $chain['id']]
                 );
             }
 

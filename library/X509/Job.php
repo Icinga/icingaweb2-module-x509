@@ -134,10 +134,9 @@ class Job
         }
 
         $this->db->update(
-            (new Update())
-                ->table('x509_job_run')
-                ->set($fields)
-                ->where(['id = ?' => $this->jobId])
+            'x509_job_run',
+            $fields,
+            ['id = ?' => $this->jobId]
         );
     }
 
@@ -207,10 +206,12 @@ class Job
 
                     if ($row === false) {
                         $this->db->insert(
-                            (new Insert())
-                                ->into('x509_target')
-                                ->columns(['ip', 'port', 'hostname'])
-                                ->values([static::binary($target->ip), $target->port, $target->hostname])
+                            'x509_target',
+                            [
+                                'ip'       => static::binary($target->ip),
+                                'port'     => $target->port,
+                                'hostname' => $target->hostname
+                            ]
                         );
                         $targetId = $this->db->lastInsertId();
                     } else {
@@ -218,18 +219,19 @@ class Job
                     }
 
                     $this->db->insert(
-                        (new Insert())
-                            ->into('x509_certificate_chain')
-                            ->columns(['target_id', 'length'])
-                            ->values([$targetId, count($chain)])
+                        'x509_certificate_chain',
+                        [
+                            'target_id' => $targetId,
+                            'length'    => count($chain)
+                        ]
                     );
+
                     $chainId = $this->db->lastInsertId();
 
                     $this->db->update(
-                        (new Update())
-                            ->table('x509_target')
-                            ->set(['latest_certificate_chain_id' => $chainId])
-                            ->where(['id = ?' => $targetId])
+                        'x509_target',
+                        ['latest_certificate_chain_id' => $chainId],
+                        ['id = ?' => $targetId]
                     );
 
                     foreach ($chain as $index => $cert) {
@@ -238,10 +240,12 @@ class Job
                         $certId = CertificateUtils::findOrInsertCert($this->db, $cert, $certInfo);
 
                         $this->db->insert(
-                            (new Insert())
-                                ->into('x509_certificate_chain_link')
-                                ->columns(['certificate_chain_id', '`order`', 'certificate_id'])
-                                ->values([$chainId, $index, $certId])
+                            'x509_certificate_chain_link',
+                            [
+                                'certificate_chain_id' => $chainId,
+                                '`order`'              => $index,
+                                'certificate_id'       => $certId
+                            ]
                         );
                     }
                 });
@@ -250,10 +254,9 @@ class Job
                 Logger::debug("Cannot connect to server: %s", $exception->getMessage());
 
                 $this->db->update(
-                    (new Update())
-                        ->table('x509_target')
-                        ->set(['latest_certificate_chain_id' => null])
-                        ->where(['ip = ?' => static::binary($target->ip), 'port = ?' => $target->port, 'hostname = ?' => $target->hostname ])
+                    'x509_target',
+                    ['latest_certificate_chain_id' => null],
+                    ['ip = ?' => static::binary($target->ip), 'port = ?' => $target->port, 'hostname = ?' => $target->hostname ]
                 );
 
                 $this->finishTarget();
@@ -290,13 +293,12 @@ class Job
         $this->targets = static::generateTargets($this->jobDescription, $this->snimap);
 
         $this->db->insert(
-            (new Insert())
-                ->into('x509_job_run')
-                ->values([
-                    'name' => $this->name,
-                    'total_targets' => $this->totalTargets,
-                    'finished_targets' => 0
-                ])
+            'x509_job_run',
+            [
+                'name'             => $this->name,
+                'total_targets'    => $this->totalTargets,
+                'finished_targets' => 0
+            ]
         );
 
         $this->jobId = $this->db->lastInsertId();

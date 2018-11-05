@@ -21,7 +21,7 @@ class DashboardController extends Controller
         $byCa = $db->select((new Select())
             ->from('x509_certificate c')
             ->columns(['c.issuer', 'c.subject_hash', 'c.issuer_hash', 'cnt' => 'COUNT(*)'])
-            ->join('x509_certificate i', ['i.subject_hash = c.issuer_hash', 'i.ca' => 'yes'])
+            ->join('x509_certificate i', ['i.subject_hash = c.issuer_hash', 'i.ca = ?' => 'yes'])
             ->groupBy(['c.issuer_hash'])
             ->orderBy('cnt', SORT_DESC)
             ->limit(5)

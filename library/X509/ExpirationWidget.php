@@ -3,10 +3,9 @@
 
 namespace Icinga\Module\X509;
 
-use DateTime;
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
-use ipl\Html\Text;
+use ipl\Html\HtmlString;
 use ipl\Translation\Translation;
 
 class ExpirationWidget extends BaseHtmlElement
@@ -55,11 +54,10 @@ class ExpirationWidget extends BaseHtmlElement
         }
 
         $this->add([
-            Html::tag('span', (new DateTime())->setTimestamp($to)->format('Y-m-d')),
             Html::tag(
                 'span',
-                ['class' => 'certificate-days-remaining'],
-                sprintf($this->translate('%d days remaining'), $daysRemaining)
+                ['class' => '', 'style' => 'font-size: 0.9em;'],
+                sprintf($this->translate('in %d days'), $daysRemaining)
             ),
             Html::tag(
                 'div',
@@ -67,7 +65,7 @@ class ExpirationWidget extends BaseHtmlElement
                 Html::tag(
                     'div',
                     ['style' => "width: {$ratio}%;", 'class' => "bg-stateful {$state}"],
-                    new Text('&nbsp;', true)
+                    new HtmlString('&nbsp;')
                 )
             )
         ]);

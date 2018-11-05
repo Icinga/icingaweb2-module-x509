@@ -23,7 +23,7 @@ class Table extends BaseHtmlElement
         $this->rows[] = $row;
     }
 
-    protected function renderContent()
+    public function renderContent()
     {
         $tbody = Html::tag('tbody');
 

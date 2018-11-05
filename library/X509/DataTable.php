@@ -5,7 +5,7 @@ namespace Icinga\Module\X509;
 
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
-use ipl\Html\Text;
+use ipl\Html\HtmlString;
 use ipl\Translation\Translation;
 
 class DataTable extends BaseHtmlElement
@@ -70,7 +70,7 @@ class DataTable extends BaseHtmlElement
                 if (isset($column['label'])) {
                     $label = $column['label'];
                 } else {
-                    $label = new Text('&nbsp;', true);
+                    $label = new HtmlString('&nbsp;');
                 }
             } else {
                 $label = $column;

@@ -16,9 +16,13 @@ use ipl\Sql\Sql;
  */
 class Quoter
 {
-    public function quote($value)
+    public function quote($identifier, $quoteCharacter = '"')
     {
-        return Sql::quoteIdentifier($value);
+        if (strlen($quoteCharacter) === 1) {
+            return $quoteCharacter . $identifier . $quoteCharacter;
+        } else {
+            return $quoteCharacter[0] . $identifier . $quoteCharacter[1];
+        }
     }
 }
 

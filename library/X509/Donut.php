@@ -5,6 +5,7 @@ namespace Icinga\Module\X509;
 
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
+use ipl\Html\HtmlString;
 use ipl\Html\Text;
 
 class Donut extends BaseHtmlElement
@@ -87,6 +88,6 @@ class Donut extends BaseHtmlElement
             );
         }
 
-        $this->add([Html::tag("h{$this->headingLevel}", $this->heading), new Text($donut->render(), true), $legend]);
+        $this->add([Html::tag("h{$this->headingLevel}", $this->heading), new HtmlString($donut->render()), $legend]);
     }
 }

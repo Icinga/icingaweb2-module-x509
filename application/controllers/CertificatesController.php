@@ -7,11 +7,11 @@ use Icinga\Data\Filter\FilterExpression;
 use Icinga\Module\X509\CertificatesTable;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\FilterAdapter;
-use Icinga\Module\X509\Paginator;
 use Icinga\Module\X509\SortAdapter;
 use Icinga\Module\X509\SqlFilter;
 use Icinga\Web\Url;
-use ipl\Pagination\SqlAdapter;
+use ipl\Pagination\Adapter\SqlAdapter;
+use ipl\Pagination\Paginator;
 use ipl\Sql;
 
 class CertificatesController extends Controller

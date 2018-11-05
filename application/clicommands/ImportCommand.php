@@ -44,10 +44,9 @@ class ImportCommand extends Command
                 $id = CertificateUtils::findOrInsertCert($db, $cert);
 
                 $db->update(
-                    (new Update())
-                        ->table('x509_certificate')
-                        ->set(['trusted' => 'yes'])
-                        ->where(['id = ?' => $id])
+                    'x509_certificate',
+                    ['trusted' => 'yes'],
+                    ['id = ?' => $id]
                 );
 
                 $count++;

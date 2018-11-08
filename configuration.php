@@ -1,5 +1,5 @@
 <?php
-// Icinga Web 2 X.509 Module | (c) 2018 Icinga GmbH
+// Icinga Web 2 X.509 Module | (c) 2018 Icinga GmbH | GPLv2
 
 /** @var \Icinga\Application\Modules\Module $this */
 

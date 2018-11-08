@@ -6,15 +6,18 @@ along the way. The module's web frontend can be used to view scan results.
 
 ## Requirements
 
-* Icinga Web 2
-* icingacli
-* MySQL
-* OpenSSL
+* Icinga Web 2 (&gt;= 2.5)
+* PHP (&gt;= 5.6, preferably 7.x)
 * php-gmp
+* OpenSSL
+* MySQL or MariaDB
+* Icinga Web 2 modules:
+  * [reactbundle](https://github.com/Icinga/icingaweb2-module-reactbundle) (>= 0.4) (Icinga Web 2 module)
+  * [Icinga PHP Library (ipl)](https://github.com/Icinga/icingaweb2-module-ipl) (>= 0.1) (Icinga Web 2 module)
 
 ### Database Setup
 
-The module needs a MySQL database with the schema that's provided in the `etc/schema/mysql.schema.sql` file.
+The module needs a MySQL/MariaDB database with the schema that's provided in the `etc/schema/mysql.schema.sql` file.
 
 Note that if you're using a version of MySQL < 5.7, the following server options must be set:
 
@@ -24,7 +27,7 @@ innodb_file_per_table=1
 innodb_large_prefix=1
 ```
 
-Example command for creating the MySQL database. Please change the password:
+Example command for creating the MySQL/MariaDB database. Please change the password:
 
 ```
 CREATE DATABASE x509;
@@ -80,7 +83,7 @@ a job's port ranges for all the individual IP addresses in the IP ranges.
 IP address ranges have to be specified using the CIDR format. Multiple IP address ranges can be separated with commas,
 e.g.:
 
-`192.0.2.0/24,2001:db8::7e38/128`
+`192.0.2.0/24,10.0.10.0/24`
 
 Port ranges are separated with dashes (`-`). If you only want to scan a single port you don't need to specify the second
 port:

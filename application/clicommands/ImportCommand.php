@@ -4,10 +4,9 @@
 namespace Icinga\Module\X509\Clicommands;
 
 use Icinga\Application\Logger;
-use Icinga\Module\X509\Command;
 use Icinga\Module\X509\CertificateUtils;
+use Icinga\Module\X509\Command;
 use ipl\Sql\Connection;
-use ipl\Sql\Update;
 
 class ImportCommand extends Command
 {

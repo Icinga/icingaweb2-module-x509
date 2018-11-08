@@ -4,8 +4,8 @@
 namespace Icinga\Module\X509\Clicommands;
 
 use Icinga\Application\Logger;
-use Icinga\Module\X509\Command;
 use Icinga\Module\X509\CertificateUtils;
+use Icinga\Module\X509\Command;
 use Icinga\Module\X509\Job;
 use Icinga\Module\X509\Scheduler;
 

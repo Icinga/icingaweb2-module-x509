@@ -2,21 +2,6 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/Icinga/ipl-stdlib",
-            "no-api":true
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/Icinga/ipl-sql",
-            "no-api":true
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/Icinga/ipl-html",
-            "no-api":true
-        },
-        {
-            "type": "vcs",
             "url": "https://github.com/lippserd/ipl-pagination",
             "no-api":true
         },
@@ -27,12 +12,8 @@
         }
     ],
     "require": {
-        "ipl/stdlib": "dev-master",
-        "ipl/html": "dev-master",
         "ipl/pagination": "dev-master",
-        "ipl/sql": "dev-master",
         "ipl/translation": "dev-master",
-        "react/socket": "^0.7.2",
         "dragonmantank/cron-expression": "^2.1 || ^1.2.1"
     },
     "scripts": {

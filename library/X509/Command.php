@@ -3,6 +3,7 @@
 
 namespace Icinga\Module\X509;
 
+use Icinga\Application\Icinga;
 use Icinga\Data\ResourceFactory;
 use ipl\Sql;
 
@@ -10,6 +11,14 @@ class Command extends \Icinga\Cli\Command
 {
     // Fix Web 2 issue where $configs is not properly initialized
     protected $configs = [];
+
+    public function init()
+    {
+        $mm = Icinga::app()->getModuleManager();
+        foreach ($mm->getModule($this->getModuleName())->getDependencies() as $module => $_) {
+            $mm->loadModule($module);
+        }
+    }
 
     /**
      * Get the connection to the X.509 database

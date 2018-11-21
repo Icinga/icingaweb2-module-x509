@@ -2,7 +2,13 @@
 
 The X.509 module for Icinga Web 2 keeps track of certificates as they're deployed in a network environment. It does
 this by scanning a range of IP addresses and ports for TLS services and collects whatever certificates it finds
-along the way. The module's web frontend can be used to view scan results.
+along the way. The module's web frontend can be used to view scan results:
+
+![X.509 Dashboard](doc/res/x509-dashboard.png "X.509 Dashboard")
+
+![X.509 Certificates](doc/res/x509-certificates.png "X.509 Certificates")
+
+![X.509 Usage](doc/res/x509-usage.png "X.509 Usage")
 
 ## Requirements
 

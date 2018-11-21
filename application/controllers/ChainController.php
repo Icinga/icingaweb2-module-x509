@@ -3,7 +3,6 @@
 
 namespace Icinga\Module\X509\Controllers;
 
-use Icinga\Module\X509\CertificateDetails;
 use Icinga\Module\X509\ChainDetails;
 use Icinga\Module\X509\Controller;
 use ipl\Html\Attribute;

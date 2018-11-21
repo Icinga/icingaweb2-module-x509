@@ -75,7 +75,7 @@ class UsageTable extends DataTable
     {
         $tr = parent::renderRow($row);
 
-        $url = Url::fromPath('x509/chain', ['cert' => $row['certificate_id'], 'target' => $row['target_id']]);
+        $url = Url::fromPath('x509/chain', ['id' => $row['certificate_chain_id']]);
 
         $tr->getAttributes()->add(['href' => $url->getAbsoluteUrl()]);
 

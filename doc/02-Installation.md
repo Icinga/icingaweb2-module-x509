@@ -39,7 +39,7 @@ mysql -p -u root x509 < etc/schema/mysql.schema.sql
 
 ## Installation
 
-1. Just drop this module to a `x509` subfolder in your Icinga Web 2 module path and enable it in the frontend.
+1. Just drop this module to a `x509` subfolder in your Icinga Web 2 module path.
 
 2. Run `composer install` in the x509 directory.
 

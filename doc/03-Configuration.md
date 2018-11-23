@@ -71,7 +71,7 @@ Run once an hour at the beginning of the hour               | 0 * * * *
 Jobs are executed on CLI with the `jobs` command:
 
 ```
-icingacli x509 robs run
+icingacli x509 jobs run
 ```
 
 This command runs all jobs which are currently due and schedules the next execution of all jobs.

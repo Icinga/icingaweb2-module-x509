@@ -16,7 +16,7 @@
 
 The module needs a MySQL/MariaDB database with the schema that's provided in the `etc/schema/mysql.schema.sql` file.
 
-Note that if you're using a version of MySQL < 5.7, the following server options must be set:
+Note that if you're using a version of MySQL < 5.7 or MariaDB < 10.2, the following server options must be set:
 
 ```
 innodb_file_format=barracuda

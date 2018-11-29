@@ -9,7 +9,6 @@ use Icinga\Data\ConfigObject;
 use Icinga\Data\Db\DbConnection;
 use Icinga\Data\Filter\Filter;
 use ipl\Sql\Select;
-use ipl\Sql\Sql;
 
 /**
  * @internal

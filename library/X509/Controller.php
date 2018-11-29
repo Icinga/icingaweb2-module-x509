@@ -25,7 +25,11 @@ class Controller extends \Icinga\Web\Controller
             $this->Config()->get('backend', 'resource')
         ));
 
-        $config->options = [PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
+        $config->options = [
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION SQL_MODE='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE"
+                . ",ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'"
+        ];
 
         $conn = new Sql\Connection($config);
 

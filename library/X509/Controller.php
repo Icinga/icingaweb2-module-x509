@@ -25,7 +25,7 @@ class Controller extends \Icinga\Web\Controller
             $this->Config()->get('backend', 'resource')
         ));
 
-        $config->attributes = [PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
+        $config->options = [PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
 
         $conn = new Sql\Connection($config);
 

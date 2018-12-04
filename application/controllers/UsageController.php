@@ -47,7 +47,8 @@ class UsageController extends Controller
             'signature_algo' => $this->translate('Signature Algorithm'),
             'signature_hash_algo' => $this->translate('Signature Hash Algorithm'),
             'valid_from' => $this->translate('Valid From'),
-            'valid_to' => $this->translate('Valid To')
+            'valid_to' => $this->translate('Valid To'),
+            'valid' => $this->translate('Chain Is Valid')
         ];
 
         $this->view->paginator = new Paginator(new SqlAdapter($conn, $select), Url::fromRequest());

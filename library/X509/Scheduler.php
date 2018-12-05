@@ -27,7 +27,7 @@ class Scheduler
         $expression = CronExpression::factory($cronSchedule);
 
         if ($expression->isDue($now)) {
-            $this->loop->nextTick($callback);
+            $this->loop->futureTick($callback);
         }
 
         $nextRuns = $expression->getMultipleRunDates(2, $now);

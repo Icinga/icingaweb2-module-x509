@@ -1,0 +1,11 @@
+{
+  "autoload": {
+    "psr-4": {
+      "ipl\\Translation\\": "src/"
+    }
+  },
+  "name": "ipl/translation",
+  "require": {
+    "php": ">=5.6"
+  }
+}

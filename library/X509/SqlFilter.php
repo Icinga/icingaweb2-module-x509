@@ -3,7 +3,6 @@
 
 namespace Icinga\Module\X509;
 
-use Exception;
 use ReflectionClass;
 use Icinga\Data\ConfigObject;
 use Icinga\Data\Db\DbConnection;
@@ -64,20 +63,10 @@ class NoImplicitConnectDbConnection extends DbConnection
  */
 class SqlFilter
 {
-    public static function apply($filter, Select $select, callable $renderFilterCallback = null)
+    public static function apply(Select $select, Filter $filter = null, callable $renderFilterCallback = null)
     {
-        if (! $filter instanceof Filter) {
-            $parts = [];
-
-            foreach ($filter as $filterString) {
-                try {
-                    $parts[] = Filter::fromQueryString($filterString);
-                } catch (Exception $e) {
-                    continue;
-                }
-            }
-
-            $filter = Filter::matchAny($parts);
+        if ($filter === null || $filter->isEmpty()) {
+            return;
         }
 
         if (! $filter->isEmpty()) {

@@ -11,12 +11,10 @@ use Icinga\Data\Filterable;
  */
 class FilterAdapter implements Filterable
 {
+    /**
+     * @var Filter
+     */
     protected $filter;
-
-    public function __construct()
-    {
-        $this->filter = Filter::matchAll();
-    }
 
     public function applyFilter(Filter $filter)
     {
@@ -38,7 +36,11 @@ class FilterAdapter implements Filterable
     public function addFilter(Filter $filter)
     {
         if (! $filter->isEmpty()) {
-            $this->filter->addFilter($filter);
+            if ($this->filter === null) {
+                $this->filter = $filter;
+            } else {
+                $this->filter->andFilter($filter);
+            }
         }
 
         return $this;
@@ -46,7 +48,7 @@ class FilterAdapter implements Filterable
 
     public function where($condition, $value = null)
     {
-        $this->filter->addFilter(Filter::expression($condition, '=', $value));
+        $this->addFilter(Filter::expression($condition, '=', $value));
 
         return $this;
     }

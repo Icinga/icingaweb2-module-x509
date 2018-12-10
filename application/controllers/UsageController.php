@@ -67,7 +67,7 @@ class UsageController extends Controller
             ['hostname', 'subject'],
             ['format']
         );
-        SqlFilter::apply($filterAdapter->getFilter(), $select, function (FilterExpression $filter) {
+        SqlFilter::apply($select, $filterAdapter->getFilter(), function (FilterExpression $filter) {
             $column = $filter->getColumn();
 
             if ($column === 'ip') {

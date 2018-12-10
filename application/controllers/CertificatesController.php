@@ -26,14 +26,11 @@ class CertificatesController extends Controller
 
         $select = (new Sql\Select())
             ->from('x509_certificate c')
-            ->joinLeft('x509_certificate_subject_alt_name s', 's.certificate_id = c.id')
             ->columns([
                 'c.id', 'c.subject', 'c.issuer', 'c.version', 'c.self_signed', 'c.ca', 'c.trusted',
                 'c.pubkey_algo',  'c.pubkey_bits', 'c.signature_algo', 'c.signature_hash_algo',
                 'c.valid_from', 'c.valid_to',
-                'subject_alt_names' => "GROUP_CONCAT(CONCAT_WS(':', s.type, s.value) SEPARATOR ', ')"
-            ])
-            ->groupBy('c.id');
+            ]);
 
         $this->view->paginator = new Paginator(new SqlAdapter($conn, $select), Url::fromRequest());
 
@@ -49,7 +46,8 @@ class CertificatesController extends Controller
             'signature_algo' => $this->translate('Signature Algorithm'),
             'signature_hash_algo' => $this->translate('Signature Hash Algorithm'),
             'valid_from' => $this->translate('Valid From'),
-            'valid_to' => $this->translate('Valid To')
+            'valid_to' => $this->translate('Valid To'),
+            'duration' => $this->translate('Duration')
         ];
 
         $this->setupSortControl(
@@ -79,6 +77,13 @@ class CertificatesController extends Controller
                 }
 
                 $filter->setExpression($value);
+            }
+
+            if ($column === 'duration') {
+                $expr = clone $filter;
+                $expr->setColumn('(valid_to - valid_from)');
+
+                return $expr;
             }
 
             return false;

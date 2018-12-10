@@ -19,10 +19,10 @@ class DashboardController extends Controller
         $db = $this->getDb();
 
         $byCa = $db->select((new Select())
-            ->from('x509_certificate c')
-            ->columns(['c.issuer', 'c.subject_hash', 'c.issuer_hash', 'cnt' => 'COUNT(*)'])
-            ->join('x509_certificate i', ['i.subject_hash = c.issuer_hash', 'i.ca = ?' => 'yes'])
-            ->groupBy(['c.issuer_hash'])
+            ->from('x509_certificate i')
+            ->columns(['i.subject', 'cnt' => 'COUNT(*)'])
+            ->join('x509_certificate c', ['c.issuer_hash = i.subject_hash', 'i.ca = ?' => 'yes'])
+            ->groupBy(['i.id'])
             ->orderBy('cnt', SORT_DESC)
             ->limit(5)
         );
@@ -34,9 +34,9 @@ class DashboardController extends Controller
                 return Html::tag(
                     'a',
                     [
-                        'href' => Url::fromPath('x509/certificates', ['issuer' => $data['issuer']])->getAbsoluteUrl()
+                        'href' => Url::fromPath('x509/certificates', ['issuer' => $data['subject']])->getAbsoluteUrl()
                     ],
-                    $data['issuer']
+                    $data['subject']
                 );
             });
 
@@ -44,12 +44,10 @@ class DashboardController extends Controller
             ->from('x509_certificate')
             ->columns([
                 'duration' => 'valid_to - valid_from',
-                'valid_from' => 'valid_from',
-                'valid_to' => 'valid_to',
                 'cnt' => 'COUNT(*)'
             ])
             ->where(['ca = ?' => 'no'])
-            ->groupBy('duration')
+            ->groupBy(['duration'])
             ->orderBy('cnt', SORT_DESC)
             ->limit(5)
         );
@@ -62,7 +60,7 @@ class DashboardController extends Controller
                     'a',
                     [
                         'href' => Url::fromPath(
-                            "x509/certificates?valid_from>={$data['valid_from']}&valid_to<={$data['valid_to']}&ca=no"
+                            "x509/certificates?duration={$data['duration']}&ca=no"
                         )->getAbsoluteUrl()
                     ],
                     CertificateUtils::duration($data['duration'])

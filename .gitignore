@@ -4,6 +4,6 @@
 # Except those related to Git
 !.git*
 
-# Exclude composer related files
+# Exclude composer related files - should be added via git add -f
 composer.lock
 vendor/

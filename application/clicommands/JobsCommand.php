@@ -6,6 +6,7 @@ namespace Icinga\Module\X509\Clicommands;
 use Icinga\Application\Logger;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\Hook\SniHook;
 use Icinga\Module\X509\Job;
 use Icinga\Module\X509\Scheduler;
 
@@ -26,8 +27,6 @@ class JobsCommand extends Command
             $this->fail("The 'parallel' option must be set to at least 1.");
         }
 
-        $snimap = $this->Config('sni');
-
         $scheduler = new Scheduler();
 
         $defaultSchedule = $this->Config()->get('jobs', 'default_schedule');
@@ -42,7 +41,7 @@ class JobsCommand extends Command
                 continue;
             }
 
-            $job = new Job($name, $db, $jobDescription, $snimap, $parallel);
+            $job = new Job($name, $db, $jobDescription, SniHook::getAll(), $parallel);
 
             $scheduler->add($name, $schedule, function () use ($job, $name, $db) {
                 $finishedTargets = $job->run();

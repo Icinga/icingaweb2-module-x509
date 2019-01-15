@@ -35,7 +35,7 @@ class Job
     private $parallel;
     private $name;
 
-    public function __construct($name, Connection $db, ConfigObject $jobDescription, Config $snimap, $parallel)
+    public function __construct($name, Connection $db, ConfigObject $jobDescription, array $snimap, $parallel)
     {
         $this->db = $db;
         $this->jobDescription = $jobDescription;
@@ -73,7 +73,7 @@ class Job
         }
     }
 
-    private static function generateTargets(ConfigObject $jobDescription, Config $hostnamesConfig)
+    private static function generateTargets(ConfigObject $jobDescription, array $hostnamesConfig)
     {
         foreach (StringHelper::trimSplit($jobDescription->get('cidrs')) as $cidr) {
             $pieces = explode('/', $cidr);
@@ -107,7 +107,7 @@ class Job
                     }
 
                     foreach (range($start_port, $end_port) as $port) {
-                        $hostnames = array_filter(StringHelper::trimSplit($hostnamesConfig->get($ip, 'hostnames')));
+                        $hostnames = isset($hostnamesConfig[$ip]) ? $hostnamesConfig[$ip] : [];
 
                         if (empty($hostnames)) {
                             $hostnames[] = null;

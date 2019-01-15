@@ -47,7 +47,7 @@ class CertificatesController extends Controller
             'signature_hash_algo' => $this->translate('Signature Hash Algorithm'),
             'valid_from' => $this->translate('Valid From'),
             'valid_to' => $this->translate('Valid To'),
-            'duration' => $this->translate('Duration')
+            'valid_to-valid_from' => $this->translate('Duration')
         ];
 
         $this->setupSortControl(
@@ -77,13 +77,6 @@ class CertificatesController extends Controller
                 }
 
                 $filter->setExpression($value);
-            }
-
-            if ($column === 'duration') {
-                $expr = clone $filter;
-                $expr->setColumn('(valid_to - valid_from)');
-
-                return $expr;
             }
 
             return false;

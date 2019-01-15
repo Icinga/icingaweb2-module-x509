@@ -1,5 +1,5 @@
 <?php
-// Icinga Web 2 X.509 Module | (c) 2018 Icinga GmbH | GPLv2
+// Icinga Web 2 X.509 Module | (c) 2018 Icinga GmbH | GPLv2+
 
 namespace Icinga\Module\X509\Controllers;
 

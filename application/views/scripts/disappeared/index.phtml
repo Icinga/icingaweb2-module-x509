@@ -10,5 +10,10 @@
 </div>
 <?php endif ?>
 <div class="content">
+    <?php
+    if (isset($cleanupForm)) {
+        echo $cleanupForm;
+    }
+    ?>
     <?= /** @var \Icinga\Module\X509\DisappearedTable $usageTable */ $usageTable->render() ?>
 </div>

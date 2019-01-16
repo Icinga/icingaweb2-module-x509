@@ -8,6 +8,7 @@ use Icinga\Data\Filter\FilterExpression;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\DisappearedTable;
 use Icinga\Module\X509\FilterAdapter;
+use Icinga\Module\X509\Forms\CleanupDisappearedServersForm;
 use Icinga\Module\X509\Job;
 use Icinga\Module\X509\SortAdapter;
 use Icinga\Module\X509\SqlFilter;
@@ -84,5 +85,10 @@ class DisappearedController extends Controller
         });
 
         $this->view->usageTable = (new DisappearedTable())->setData($conn->select($select));
+
+        if ($this->hasPermission('config/x509')) {
+            $this->view->cleanupForm = (new CleanupDisappearedServersForm())->setDb($conn);
+            $this->view->cleanupForm->handleRequest();
+        }
     }
 }

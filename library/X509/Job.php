@@ -218,36 +218,74 @@ class Job
                         $targetId = $row['id'];
                     }
 
-                    $this->db->insert(
-                        'x509_certificate_chain',
-                        [
-                            'target_id' => $targetId,
-                            'length'    => count($chain)
-                        ]
-                    );
+                    $chainUptodate = false;
 
-                    $chainId = $this->db->lastInsertId();
+                    $lastChain = $this->db->select(
+                        (new Select())
+                            ->columns(['id'])
+                            ->from('x509_certificate_chain')
+                            ->where(['target_id = ?' => $targetId])
+                            ->orderBy('id', SORT_DESC)
+                            ->limit(1)
+                    )->fetch();
+
+                    if ($lastChain !== false) {
+                        $lastFingerprints = $this->db->select(
+                            (new Select())
+                                ->columns(['c.fingerprint'])
+                                ->from('x509_certificate_chain_link l')
+                                ->join('x509_certificate c', 'l.certificate_id = c.id')
+                                ->where(['l.certificate_chain_id = ?' => $lastChain[0]])
+                                ->orderBy('l.`order`')
+                        )->fetchAll();
+
+                        foreach ($lastFingerprints as &$lastFingerprint) {
+                            $lastFingerprint = $lastFingerprint[0];
+                        }
+
+                        $currentFingerprints = [];
+
+                        foreach ($chain as $cert) {
+                            $currentFingerprints[] = openssl_x509_fingerprint($cert, 'sha256', true);
+                        }
+
+                        $chainUptodate = $currentFingerprints === $lastFingerprints;
+                    }
+
+                    if ($chainUptodate) {
+                        $chainId = $lastChain[0];
+                    } else {
+                        $this->db->insert(
+                            'x509_certificate_chain',
+                            [
+                                'target_id' => $targetId,
+                                'length'    => count($chain)
+                            ]
+                        );
+
+                        $chainId = $this->db->lastInsertId();
+
+                        foreach ($chain as $index => $cert) {
+                            $certInfo = openssl_x509_parse($cert);
+
+                            $certId = CertificateUtils::findOrInsertCert($this->db, $cert, $certInfo);
+
+                            $this->db->insert(
+                                'x509_certificate_chain_link',
+                                [
+                                    'certificate_chain_id' => $chainId,
+                                    '`order`'              => $index,
+                                    'certificate_id'       => $certId
+                                ]
+                            );
+                        }
+                    }
 
                     $this->db->update(
                         'x509_target',
                         ['latest_certificate_chain_id' => $chainId],
                         ['id = ?' => $targetId]
                     );
-
-                    foreach ($chain as $index => $cert) {
-                        $certInfo = openssl_x509_parse($cert);
-
-                        $certId = CertificateUtils::findOrInsertCert($this->db, $cert, $certInfo);
-
-                        $this->db->insert(
-                            'x509_certificate_chain_link',
-                            [
-                                'certificate_chain_id' => $chainId,
-                                '`order`'              => $index,
-                                'certificate_id'       => $certId
-                            ]
-                        );
-                    }
                 });
             },
             function (\Exception $exception) use($target) {

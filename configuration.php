@@ -19,6 +19,11 @@ $section->add(N_('Certificate Usage'), array(
     'priority'  => 20
 ));
 
+$section->add(N_('Disappeared Servers'), array(
+    'url'       => 'x509/disappeared',
+    'priority'  => 30
+));
+
 $this->provideConfigTab('backend', array(
     'title' => $this->translate('Configure the database backend'),
     'label' => $this->translate('Backend'),

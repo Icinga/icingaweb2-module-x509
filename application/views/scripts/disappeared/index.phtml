@@ -1,0 +1,14 @@
+<?php if (! $this->compact): ?>
+<div class="controls">
+    <?= $this->tabs ?>
+    <?= /** @var \Icinga\Module\X509\Paginator $paginator */ $paginator->render() ?>
+    <div class="sort-controls-container">
+        <?= $this->limiter ?>
+        <?= $this->sortBox ?>
+    </div>
+    <?= $this->filterEditor ?>
+</div>
+<?php endif ?>
+<div class="content">
+    <?= /** @var \Icinga\Module\X509\DisappearedTable $usageTable */ $usageTable->render() ?>
+</div>

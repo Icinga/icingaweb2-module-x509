@@ -30,7 +30,14 @@ class DisappearedTable extends DataTable
                 }
             ],
 
-            'port' => $this->translate('Port')
+            'port' => $this->translate('Port'),
+
+            'last_seen' => [
+                'label' => $this->translate('Last seen'),
+                'renderer' => function ($lastSeen) {
+                    return new TimeAgoWidget($lastSeen);
+                }
+            ]
         ];
     }
 }

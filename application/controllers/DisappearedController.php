@@ -3,6 +3,7 @@
 
 namespace Icinga\Module\X509\Controllers;
 
+use DateTime;
 use Icinga\Data\Filter\FilterExpression;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\DisappearedTable;
@@ -32,7 +33,8 @@ class DisappearedController extends Controller
 
         $sortAndFilterColumns = [
             'hostname' => $this->translate('Hostname'),
-            'ip' => $this->translate('IP')
+            'ip' => $this->translate('IP'),
+            'last_seen' => $this->translate('Last seen')
         ];
 
         $this->view->paginator = new Paginator(new SqlAdapter($conn, $select), Url::fromRequest());
@@ -62,10 +64,14 @@ class DisappearedController extends Controller
         });
 
         $formatQuery = clone $select;
-        $formatQuery->resetColumns()->columns(['hostname', 'ip', 'port']);
+        $formatQuery->resetColumns()->columns(['hostname', 'ip', 'port', 'last_seen']);
 
         $this->handleFormatRequest($conn, $formatQuery, function (PDOStatement $stmt) {
             foreach ($stmt as $usage) {
+                $usage['last_seen'] = (new DateTime())
+                    ->setTimestamp($usage['last_seen'])
+                    ->format('l F jS, Y H:i:s e');
+
                 $ip = $usage['ip'];
                 $ipv4 = ltrim($ip);
                 if (strlen($ipv4) === 4) {

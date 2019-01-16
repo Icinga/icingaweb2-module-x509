@@ -84,6 +84,7 @@ CREATE TABLE x509_target (
   `port` smallint(6) NOT NULL,
   hostname varchar(255) NULL DEFAULT NULL,
   latest_certificate_chain_id int(10) unsigned NULL DEFAULT NULL,
+  last_seen bigint(20) unsigned NOT NULL,
   ctime timestamp NULL DEFAULT NULL,
   mtime timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),

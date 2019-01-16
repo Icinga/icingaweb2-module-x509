@@ -208,9 +208,10 @@ class Job
                         $this->db->insert(
                             'x509_target',
                             [
-                                'ip'       => static::binary($target->ip),
-                                'port'     => $target->port,
-                                'hostname' => $target->hostname
+                                'ip'        => static::binary($target->ip),
+                                'port'      => $target->port,
+                                'hostname'  => $target->hostname,
+                                'last_seen' => 0
                             ]
                         );
                         $targetId = $this->db->lastInsertId();
@@ -230,7 +231,7 @@ class Job
 
                     $this->db->update(
                         'x509_target',
-                        ['latest_certificate_chain_id' => $chainId],
+                        ['latest_certificate_chain_id' => $chainId, 'last_seen' => time()],
                         ['id = ?' => $targetId]
                     );
 

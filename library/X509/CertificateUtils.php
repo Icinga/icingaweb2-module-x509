@@ -125,7 +125,8 @@ class CertificateUtils
     private static function shortNameFromDN(array $dn)
     {
         if (isset($dn['CN'])) {
-            return $dn['CN'];
+            $cn = (array) $dn['CN'];
+            return $cn[0];
         } else {
             $result = [];
             foreach ($dn as $key => $value) {

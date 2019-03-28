@@ -13,13 +13,20 @@ class SortAdapter implements Sortable
 {
     protected $select;
 
-    public function __construct(Sql\Select $select)
+    protected $callback;
+
+    public function __construct(Sql\Select $select, \Closure $callback = null)
     {
         $this->select = $select;
+        $this->callback = $callback;
     }
 
     public function order($field, $direction = null)
     {
+        if ($this->callback !== null) {
+            $field = call_user_func($this->callback, $field) ?: $field;
+        }
+
         if ($direction === null) {
             $this->select->orderBy($field);
         } else {

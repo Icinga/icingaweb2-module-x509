@@ -52,7 +52,11 @@ class CertificatesController extends Controller
 
         $this->setupSortControl(
             $sortAndFilterColumns,
-            new SortAdapter($select)
+            new SortAdapter($select, function ($field) {
+                if ($field === 'duration') {
+                    return '(valid_to - valid_from)';
+                }
+            })
         );
 
         $this->setupLimitControl();

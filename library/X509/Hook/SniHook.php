@@ -21,6 +21,8 @@ abstract class SniHook
      */
     public static function getAll()
     {
+        // This is implemented as map of maps to avoid duplicates,
+        // the caller is expected to handle it as map of sequences though
         $sni = [];
 
         foreach (Hook::all('X509\Sni') as $hook) {

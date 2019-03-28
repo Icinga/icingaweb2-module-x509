@@ -27,10 +27,8 @@ abstract class SniHook
 
         foreach (Hook::all('X509\Sni') as $hook) {
             /** @var self $hook */
-            foreach ($hook->getSniMap() as $ip => $hostnames) {
-                foreach ($hostnames as $hostname) {
-                    $sni[$ip][$hostname] = $hostname;
-                }
+            foreach ($hook->getHosts() as $ip => $hostname) {
+                $sni[$ip][$hostname] = $hostname;
             }
         }
 
@@ -44,11 +42,9 @@ abstract class SniHook
     }
 
     /**
-     * Return the SNI map
+     * Aggregate pairs of ip => hostname
      *
-     * ['192.0.2.1' => ['example.com', 'mail.example.com']]
-     *
-     * @return string[][]
+     * @return \Generator
      */
-    abstract public function getSniMap();
+    abstract public function getHosts();
 }

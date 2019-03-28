@@ -35,20 +35,6 @@ abstract class SniHook
     }
 
     /**
-     * Constructor
-     *
-     * Instead of overriding this one override {@link init}
-     */
-    final public function __construct()
-    {
-        $this->init();
-    }
-
-    protected function init()
-    {
-    }
-
-    /**
      * Return the SNI map
      *
      * ['192.0.2.1' => ['example.com', 'mail.example.com']]

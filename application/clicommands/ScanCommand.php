@@ -6,6 +6,7 @@ namespace Icinga\Module\X509\Clicommands;
 use Icinga\Application\Logger;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\Hook\SniHook;
 use Icinga\Module\X509\Job;
 
 class ScanCommand extends Command
@@ -30,8 +31,6 @@ class ScanCommand extends Command
             $this->fail("The 'parallel' option must be set to at least 1.");
         }
 
-        $snimap = $this->Config('sni');
-
         $jobs = $this->Config('jobs');
 
         if (! $jobs->hasSection($name)) {
@@ -46,7 +45,7 @@ class ScanCommand extends Command
 
         $db = $this->getDb();
 
-        $job = new Job($name, $db, $jobDescription, $snimap, $parallel);
+        $job = new Job($name, $db, $jobDescription, SniHook::getAll(), $parallel);
 
         $finishedTargets = $job->run();
 

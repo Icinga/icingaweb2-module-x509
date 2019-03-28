@@ -93,3 +93,12 @@ vi /etc/crontab
 # Runs job 'lan' daily at 2:30 AM
 30 2 * * *   wwwdata   icingacli x509 scan --job lan
 ```
+
+## Server Name Identification
+
+In case you are serving multiple virtual hosts under a single IP you can configure those in
+`Configuration -> Modules -> x509 -> SNI`.
+
+Each entry defines an IP with multiple hostnames associated with it. These are then utilized when jobs run.
+
+Modules may also provide sources for SNI. At this time the module monitoring is the only one with known support.

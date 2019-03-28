@@ -14,10 +14,7 @@ class Command extends \Icinga\Cli\Command
 
     public function init()
     {
-        $mm = Icinga::app()->getModuleManager();
-        foreach ($mm->getModule($this->getModuleName())->getDependencies() as $module => $_) {
-            $mm->loadModule($module);
-        }
+        Icinga::app()->getModuleManager()->loadEnabledModules();
     }
 
     /**

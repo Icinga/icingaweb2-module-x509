@@ -3,7 +3,9 @@
 
 namespace Icinga\Module\X509\Hook;
 
+use Icinga\Application\Config;
 use Icinga\Application\Hook;
+use Icinga\Util\StringHelper;
 
 /**
  * Hook for SNI maps
@@ -28,6 +30,12 @@ abstract class SniHook
                         $sni[$ip][$hostname] = $hostname;
                     }
                 }
+            }
+        }
+
+        foreach (Config::module('x509', 'sni') as $ip => $config) {
+            foreach (array_filter(StringHelper::trimSplit($config->get('hostnames', []))) as $hostname) {
+                $sni[$ip][$hostname] = $hostname;
             }
         }
 

@@ -5,6 +5,7 @@ namespace Icinga\Module\X509\Hook;
 
 use Icinga\Application\Config;
 use Icinga\Application\Hook;
+use Icinga\Data\Filter\Filter;
 use Icinga\Util\StringHelper;
 
 /**
@@ -44,7 +45,9 @@ abstract class SniHook
     /**
      * Aggregate pairs of ip => hostname
      *
+     * @param   Filter  $filter
+     *
      * @return \Generator
      */
-    abstract public function getHosts();
+    abstract public function getHosts(Filter $filter = null);
 }

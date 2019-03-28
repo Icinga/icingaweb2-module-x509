@@ -24,11 +24,10 @@ abstract class SniHook
         $sni = [];
 
         foreach (Hook::all('X509\Sni') as $hook) {
-            if ($hook instanceof self) {
-                foreach ($hook->getSniMap() as $ip => $hostnames) {
-                    foreach ($hostnames as $hostname) {
-                        $sni[$ip][$hostname] = $hostname;
-                    }
+            /** @var self $hook */
+            foreach ($hook->getSniMap() as $ip => $hostnames) {
+                foreach ($hostnames as $hostname) {
+                    $sni[$ip][$hostname] = $hostname;
                 }
             }
         }

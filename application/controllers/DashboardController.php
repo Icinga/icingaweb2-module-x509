@@ -3,6 +3,7 @@
 
 namespace Icinga\Module\X509\Controllers;
 
+use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\Donut;
@@ -16,7 +17,12 @@ class DashboardController extends Controller
     {
         $this->setTitle($this->translate('X.509 Dashboard'));
 
-        $db = $this->getDb();
+        try {
+            $db = $this->getDb();
+        } catch (ConfigurationError $_) {
+            $this->render('missing-resource', null, true);
+            return;
+        }
 
         $byCa = $db->select((new Select())
             ->from('x509_certificate i')

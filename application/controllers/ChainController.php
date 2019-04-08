@@ -3,6 +3,7 @@
 
 namespace Icinga\Module\X509\Controllers;
 
+use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\ChainDetails;
 use Icinga\Module\X509\Controller;
 use ipl\Html\Attribute;
@@ -16,7 +17,12 @@ class ChainController extends Controller
     {
         $id = $this->params->getRequired('id');
 
-        $conn = $this->getDb();
+        try {
+            $conn = $this->getDb();
+        } catch (ConfigurationError $_) {
+            $this->render('missing-resource', null, true);
+            return;
+        }
 
         $chainSelect = (new Sql\Select())
             ->from('x509_certificate_chain ch')

@@ -4,6 +4,7 @@
 namespace Icinga\Module\X509\Controllers;
 
 use Icinga\Data\Filter\FilterExpression;
+use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\FilterAdapter;
 use Icinga\Module\X509\Job;
@@ -23,7 +24,12 @@ class UsageController extends Controller
             ->initTabs()
             ->setTitle($this->translate('X.509 Certificate Usage'));
 
-        $conn = $this->getDb();
+        try {
+            $conn = $this->getDb();
+        } catch (ConfigurationError $_) {
+            $this->render('missing-resource', null, true);
+            return;
+        }
 
         $select = (new Sql\Select())
             ->from('x509_target t')

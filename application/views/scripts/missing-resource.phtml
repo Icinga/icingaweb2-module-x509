@@ -1,0 +1,12 @@
+<div class="controls">
+    <?= $this->tabs ?>
+</div>
+<div class="content">
+    <h2><?= $this->translate('Database not configured') ?></h2>
+    <p data-base-target="_next"><?= sprintf(
+        $this->translate('You seem to not have configured a database resource yet. Please create one %1$shere%3$s and then set it in this %2$smodule\'s configuration%3$s.'),
+        '<a class="action-link" href="' . $this->href('config/resource') . '">',
+        '<a class="action-link" href="' . $this->href('x509/config/backend') . '">',
+        '</a>'
+    ) ?></p>
+</div>

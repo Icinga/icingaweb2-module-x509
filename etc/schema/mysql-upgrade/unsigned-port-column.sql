@@ -1,0 +1,1 @@
+ALTER TABLE x509_target MODIFY COLUMN `port` smallint unsigned NOT NULL;

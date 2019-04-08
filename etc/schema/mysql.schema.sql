@@ -81,7 +81,7 @@ CREATE TABLE x509_job_run (
 CREATE TABLE x509_target (
   id int(10) unsigned NOT NULL AUTO_INCREMENT,
   ip binary(16) NOT NULL,
-  `port` smallint(6) NOT NULL,
+  `port` smallint unsigned NOT NULL,
   hostname varchar(255) NULL DEFAULT NULL,
   latest_certificate_chain_id int(10) unsigned NULL DEFAULT NULL,
   ctime timestamp NULL DEFAULT NULL,

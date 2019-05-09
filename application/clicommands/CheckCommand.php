@@ -13,6 +13,44 @@ class CheckCommand extends Command
     const UNIT_PERCENT = 'percent';
     const UNIT_INTERVAL = 'interval';
 
+    /**
+     * Check a host's certificate
+     *
+     * This command utilizes this module's database to check if the given host serves valid certificates.
+     *
+     * USAGE
+     *
+     * icingacli x509 check host [options]
+     *
+     * OPTIONS
+     *
+     *   --ip                   A hosts IP address
+     *   --host                 A hosts name
+     *   --port                 The port to check in particular
+     *   --warning              The warning threshold [25%]
+     *   --critical             The critical threshold [10%]
+     *   --allow-self-signed    Ignore if a certificate or its issuer has been
+     *                          self-signed
+     *
+     * EXAMPLES
+     *
+     *   icingacli x509 check host --ip 10.0.10.78
+     *   icingacli x509 check host --host mail.example.org
+     *   icingacli x509 check host --host mail.example.org --port 993
+     *
+     * THRESHOLD DEFINITION
+     *
+     *   Thresholds can either be defined relative (in percent) or absolute
+     *   (time interval). Time intervals consist of a digit and an accompanying
+     *   unit (e.g. "3M" are three months). Supported units are:
+     *
+     *     Year: y, Y
+     *     Month: M
+     *     Day: d, D
+     *     Hour: h, H
+     *     Minute: m
+     *     Second: s, S
+     */
     public function hostAction()
     {
         $ip = $this->params->get('ip');
@@ -115,6 +153,13 @@ class CheckCommand extends Command
         exit($state);
     }
 
+    /**
+     * Parse the given threshold definition
+     *
+     * @param   string  $threshold
+     *
+     * @return  array
+     */
     protected function splitThreshold($threshold)
     {
         $match = preg_match('/(\d+)([%\w]{1})/', $threshold, $matches);
@@ -156,6 +201,16 @@ class CheckCommand extends Command
         return [new \DateInterval($intervalSpec), self::UNIT_INTERVAL];
     }
 
+    /**
+     * Convert the given threshold information to a DateTime object
+     *
+     * @param   \DateTime           $from
+     * @param   \DateTime           $to
+     * @param   int|\DateInterval   $thresholdValue
+     * @param   string              $thresholdUnit
+     *
+     * @return  \DateTime
+     */
     protected function thresholdToDateTime(\DateTime $from, \DateTime $to, $thresholdValue, $thresholdUnit)
     {
         $to = clone $to;

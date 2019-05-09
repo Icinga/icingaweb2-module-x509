@@ -86,7 +86,7 @@ class CheckCommand extends Command
 
             $maxDays = $validFrom->diff($validTo)->days;
             $perfData[] = sprintf(
-                "'%s'=%d;%d;%d;1;%d",
+                "'%s'=%d;%d;%d;0;%d",
                 $target['subject'],
                 $remainingTime->invert
                     ? $maxDays

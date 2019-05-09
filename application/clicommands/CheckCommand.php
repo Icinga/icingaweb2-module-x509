@@ -5,6 +5,7 @@ namespace Icinga\Module\X509\Clicommands;
 
 use Icinga\Application\Logger;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\Job;
 use ipl\Sql\Select;
 
 class CheckCommand extends Command
@@ -38,7 +39,7 @@ class CheckCommand extends Command
         if (isset($hostname)) {
             $targets->where(['t.hostname = ?' => $hostname]);
         } else {
-            $targets->where(['t.ip = ?' => $ip])
+            $targets->where(['t.ip = ?' => Job::binary($ip)])
                 ->groupBy(['t.ip', 't.port']); // We may have multiple rows due to SNI
         }
 

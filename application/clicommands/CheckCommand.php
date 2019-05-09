@@ -74,19 +74,26 @@ class CheckCommand extends Command
                 $state = 0;
             }
 
-            $output[$target['subject']] = sprintf(
-                '%s expires in %d days',
-                $target['subject'],
-                $now->diff($validTo)->days
-            );
+            $remainingTime = $now->diff($validTo);
+            if (! $remainingTime->invert) {
+                // The certificate has not expired yet
+                $output[$target['subject']] = sprintf(
+                    '%s expires in %d days',
+                    $target['subject'],
+                    $remainingTime->days
+                );
+            }
 
+            $maxDays = $validFrom->diff($validTo)->days;
             $perfData[] = sprintf(
                 "'%s'=%d;%d;%d;1;%d",
                 $target['subject'],
-                $validFrom->diff($now)->days,
+                $remainingTime->invert
+                    ? $maxDays
+                    : $validFrom->diff($now)->days,
                 $validFrom->diff($warningAfter)->days,
                 $validFrom->diff($criticalAfter)->days,
-                $validFrom->diff($validTo)->days
+                $maxDays
             );
         }
 

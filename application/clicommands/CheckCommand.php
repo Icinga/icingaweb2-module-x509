@@ -41,6 +41,10 @@ class CheckCommand extends Command
                 ->groupBy(['t.ip', 't.port']); // We may have multiple rows due to SNI
         }
 
+        if ($this->params->has('port')) {
+            $targets->where(['t.port = ?' => $this->params->get('port')]);
+        }
+
         $allowSelfSigned = (bool) $this->params->get('allow-self-signed', false);
         list($warningThreshold, $warningUnit) = $this->splitThreshold($this->params->get('warning', '25%'));
         list($criticalThreshold, $criticalUnit) = $this->splitThreshold($this->params->get('critical', '10%'));

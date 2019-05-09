@@ -26,13 +26,14 @@ class CheckCommand extends Command
                 'cc.valid',
                 'cc.invalid_reason',
                 'c.subject',
-                'c.self_signed',
+                'ci.self_signed',
                 'c.valid_from',
                 'c.valid_to'
             ])
             ->join('x509_certificate_chain cc', 'cc.id = t.latest_certificate_chain_id')
             ->join('x509_certificate_chain_link ccl', 'ccl.certificate_chain_id = cc.id')
             ->join('x509_certificate c', 'c.id = ccl.certificate_id')
+            ->join('x509_certificate ci', 'ci.subject_hash = c.issuer_hash')
             ->where(['ccl.order = ?' => 0]);
         if (isset($hostname)) {
             $targets->where(['t.hostname = ?' => $hostname]);
@@ -54,7 +55,6 @@ class CheckCommand extends Command
 
         $state = 3;
         foreach ($this->getDb()->select($targets) as $target) {
-            // TODO: self_signed is 'no' in case an intermediate certificate is self_signed (reason match?)
             if ($target['valid'] === 'no' && ($target['self_signed'] === 'no' || ! $allowSelfSigned)) {
                 $output[] = $target['subject'] . ': ' . $target['invalid_reason'];
                 $state = 2;

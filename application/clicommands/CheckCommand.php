@@ -27,8 +27,10 @@ class CheckCommand extends Command
      *   --ip                   A hosts IP address
      *   --host                 A hosts name
      *   --port                 The port to check in particular
-     *   --warning              The warning threshold [25%]
-     *   --critical             The critical threshold [10%]
+     *   --warning              Less remaining time results in state WARNING
+     *                          Default: 25%
+     *   --critical             Less remaining time results in state CRITICAL
+     *                          Default: 10%
      *   --allow-self-signed    Ignore if a certificate or its issuer has been
      *                          self-signed
      *

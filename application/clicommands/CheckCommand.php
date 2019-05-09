@@ -151,7 +151,7 @@ class CheckCommand extends Command
             return $to->sub($thresholdValue);
         }
 
-        $coveredDays = abs(round($from->diff($to)->days * ($thresholdValue / 100)));
+        $coveredDays = (int) round($from->diff($to)->days * ($thresholdValue / 100));
         return $to->sub(new \DateInterval('P' . $coveredDays . 'D'));
     }
 }

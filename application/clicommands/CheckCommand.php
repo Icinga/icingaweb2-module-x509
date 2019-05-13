@@ -57,7 +57,11 @@ class CheckCommand extends Command
     {
         $ip = $this->params->get('ip');
         if ($ip === null) {
-            $hostname = $this->params->getRequired('host');
+            $hostname = $this->params->get('host');
+            if ($hostname === null) {
+                $this->showUsage('host');
+                exit(3);
+            }
         }
 
         $targets = (new Select())

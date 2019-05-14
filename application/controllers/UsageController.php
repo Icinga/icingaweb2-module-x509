@@ -119,7 +119,7 @@ class UsageController extends Controller
                     ->format('l F jS, Y H:i:s e');
 
                 $ip = $usage['ip'];
-                $ipv4 = ltrim($ip);
+                $ipv4 = ltrim($ip, "\0");
                 if (strlen($ipv4) === 4) {
                     $ip = $ipv4;
                 }

@@ -19,3 +19,4 @@ At a glance you see which CAs have issued your certificates and key counters of 
 
 * [Installation](02-Installation.md)
 * [Configuration](03-Configuration.md)
+* [Monitoring](10-Monitoring.md)

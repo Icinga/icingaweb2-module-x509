@@ -127,6 +127,12 @@ class CheckCommand extends Command
                     $target['subject'],
                     $remainingTime->days
                 );
+            } else {
+                $output[$target['subject']] = sprintf(
+                    '%s has expired since %d days',
+                    $target['subject'],
+                    $remainingTime->days
+                );
             }
 
             $maxDays = $validFrom->diff($validTo)->days;
@@ -147,7 +153,7 @@ class CheckCommand extends Command
 
         if (! empty($output)) {
             echo join('; ', $output);
-        } else {
+        } elseif ($state === 3) {
             echo 'Host not found';
         }
 

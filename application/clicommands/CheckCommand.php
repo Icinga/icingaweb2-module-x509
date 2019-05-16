@@ -24,6 +24,8 @@ class CheckCommand extends Command
      *
      * OPTIONS
      *
+     * You can either pass --ip or --host or both at the same time but at least one is mandatory.
+     *
      *   --ip                   A hosts IP address
      *   --host                 A hosts name
      *   --port                 The port to check in particular
@@ -38,7 +40,7 @@ class CheckCommand extends Command
      *
      *   icingacli x509 check host --ip 10.0.10.78
      *   icingacli x509 check host --host mail.example.org
-     *   icingacli x509 check host --host mail.example.org --port 993
+     *   icingacli x509 check host --ip 10.0.10.78 --host mail.example.org --port 993
      *
      * THRESHOLD DEFINITION
      *
@@ -56,12 +58,10 @@ class CheckCommand extends Command
     public function hostAction()
     {
         $ip = $this->params->get('ip');
-        if ($ip === null) {
-            $hostname = $this->params->get('host');
-            if ($hostname === null) {
-                $this->showUsage('host');
-                exit(3);
-            }
+        $hostname = $this->params->get('host');
+        if ($ip === null && $hostname === null) {
+            $this->showUsage('host');
+            exit(3);
         }
 
         $targets = (new Select())
@@ -80,13 +80,13 @@ class CheckCommand extends Command
             ->join('x509_certificate c', 'c.id = ccl.certificate_id')
             ->join('x509_certificate ci', 'ci.subject_hash = c.issuer_hash')
             ->where(['ccl.order = ?' => 0]);
-        if (isset($hostname)) {
-            $targets->where(['t.hostname = ?' => $hostname]);
-        } else {
-            $targets->where(['t.ip = ?' => Job::binary($ip)])
-                ->groupBy(['t.ip', 't.port']); // We may have multiple rows due to SNI
-        }
 
+        if ($ip !== null) {
+            $targets->where(['t.ip = ?' => Job::binary($ip)]);
+        }
+        if ($hostname !== null) {
+            $targets->where(['t.hostname = ?' => $hostname]);
+        }
         if ($this->params->has('port')) {
             $targets->where(['t.port = ?' => $this->params->get('port')]);
         }

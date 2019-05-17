@@ -39,7 +39,7 @@ class ChainController extends Controller
         $this->setTitle($this->translate('X.509 Certificate Chain'));
 
         $ip = $chain['ip'];
-        $ipv4 = ltrim($ip);
+        $ipv4 = ltrim($ip, "\0");
         if (strlen($ipv4) === 4) {
             $ip = $ipv4;
         }

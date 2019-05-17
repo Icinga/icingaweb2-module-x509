@@ -34,7 +34,7 @@ class UsageTable extends DataTable
             'ip' => [
                 'label' => $this->translate('IP'),
                 'renderer' => function ($ip) {
-                    $ipv4 = ltrim($ip);
+                    $ipv4 = ltrim($ip, "\0");
                     if (strlen($ipv4) === 4) {
                         $ip = $ipv4;
                     }

@@ -71,14 +71,14 @@ class CheckCommand extends Command
                 'cc.valid',
                 'cc.invalid_reason',
                 'c.subject',
-                'ci.self_signed',
+                'self_signed'   => 'COALESCE(ci.self_signed, c.self_signed)',
                 'c.valid_from',
                 'c.valid_to'
             ])
             ->join('x509_certificate_chain cc', 'cc.id = t.latest_certificate_chain_id')
             ->join('x509_certificate_chain_link ccl', 'ccl.certificate_chain_id = cc.id')
             ->join('x509_certificate c', 'c.id = ccl.certificate_id')
-            ->join('x509_certificate ci', 'ci.subject_hash = c.issuer_hash')
+            ->joinLeft('x509_certificate ci', 'ci.subject_hash = c.issuer_hash')
             ->where(['ccl.order = ?' => 0]);
 
         if ($ip !== null) {

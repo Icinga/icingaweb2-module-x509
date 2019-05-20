@@ -97,6 +97,12 @@ class CertificatesController extends Controller
                     return $filter->setColumn(
                         'CASE WHEN UNIX_TIMESTAMP() > valid_to THEN 0 ELSE (valid_to - UNIX_TIMESTAMP()) / 86400 END'
                     );
+                case 'valid_from':
+                case 'valid_to':
+                    $expr = $filter->getExpression();
+                    if (! is_numeric($expr)) {
+                        return $filter->setExpression(strtotime($expr));
+                    }
                 default:
                     return false;
             }

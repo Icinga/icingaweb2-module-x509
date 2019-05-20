@@ -54,14 +54,23 @@ class UsageController extends Controller
             'signature_hash_algo' => $this->translate('Signature Hash Algorithm'),
             'valid_from' => $this->translate('Valid From'),
             'valid_to' => $this->translate('Valid To'),
-            'valid' => $this->translate('Chain Is Valid')
+            'valid' => $this->translate('Chain Is Valid'),
+            'duration' => $this->translate('Duration'),
+            'expires' => $this->translate('Expires')
         ];
 
         $this->view->paginator = new Paginator(new SqlAdapter($conn, $select), Url::fromRequest());
 
         $this->setupSortControl(
             $sortAndFilterColumns,
-            new SortAdapter($select)
+            new SortAdapter($select, function ($field) {
+                if ($field === 'duration') {
+                    return '(valid_to - valid_from)';
+                } elseif ($field === 'expires') {
+                    return 'CASE WHEN UNIX_TIMESTAMP() > valid_to'
+                        . ' THEN 0 ELSE (valid_to - UNIX_TIMESTAMP()) / 86400 END';
+                }
+            })
         );
 
         $this->setupLimitControl();
@@ -98,6 +107,22 @@ class UsageController extends Controller
                 }
 
                 $filter->setExpression($value);
+            }
+
+            if ($column === 'duration') {
+                $expr = clone $filter;
+                $expr->setColumn('(valid_to - valid_from)');
+
+                return $expr;
+            }
+
+            if ($column === 'expires') {
+                $expr = clone $filter;
+                $expr->setColumn(
+                    'CASE WHEN UNIX_TIMESTAMP() > valid_to THEN 0 ELSE (valid_to - UNIX_TIMESTAMP()) / 86400 END'
+                );
+
+                return $expr;
             }
 
             return false;

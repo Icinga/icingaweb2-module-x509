@@ -52,12 +52,12 @@
         "source": {
             "type": "git",
             "url": "https://github.com/lippserd/ipl-pagination",
-            "reference": "9239b21264e4906d2e28d78822ea9357bd38f993"
+            "reference": "e6dd9588bb1e1b5bc32f736e986c4a33e6f4188c"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/lippserd/ipl-pagination/zipball/9239b21264e4906d2e28d78822ea9357bd38f993",
-            "reference": "9239b21264e4906d2e28d78822ea9357bd38f993",
+            "url": "https://api.github.com/repos/lippserd/ipl-pagination/zipball/e6dd9588bb1e1b5bc32f736e986c4a33e6f4188c",
+            "reference": "e6dd9588bb1e1b5bc32f736e986c4a33e6f4188c",
             "shasum": ""
         },
         "require": {
@@ -68,44 +68,13 @@
         "suggest": {
             "ipl/sql": "OOP SQL Abstraction"
         },
-        "time": "2018-10-17T10:29:30+00:00",
+        "time": "2019-05-20T08:40:17+00:00",
         "type": "library",
         "installation-source": "source",
         "autoload": {
             "psr-4": {
-                "ipl\\Pagination\\": "src/"
+                "lipl\\Pagination\\": "src/"
             }
-        }
-    },
-    {
-        "name": "ipl/translation",
-        "version": "dev-master",
-        "version_normalized": "9999999-dev",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/lippserd/ipl-translation",
-            "reference": "6b540bf4fdbaed7511096ef3e59fb0c3641b2a44"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/lippserd/ipl-translation/zipball/6b540bf4fdbaed7511096ef3e59fb0c3641b2a44",
-            "reference": "6b540bf4fdbaed7511096ef3e59fb0c3641b2a44",
-            "shasum": ""
-        },
-        "require": {
-            "php": ">=5.6"
-        },
-        "time": "2018-05-16T12:01:53+00:00",
-        "type": "library",
-        "installation-source": "source",
-        "autoload": {
-            "psr-4": {
-                "ipl\\Translation\\": "src/"
-            }
-        },
-        "support": {
-            "source": "https://github.com/lippserd/ipl-translation/tree/master",
-            "issues": "https://github.com/lippserd/ipl-translation/issues"
         }
     }
 ]

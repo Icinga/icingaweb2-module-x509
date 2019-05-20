@@ -1,6 +1,6 @@
 <?php
 
-namespace ipl\Pagination\Adapter;
+namespace lipl\Pagination\Adapter;
 
 use ipl\Sql\Connection;
 use ipl\Sql\Select;

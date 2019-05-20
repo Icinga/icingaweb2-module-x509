@@ -4,16 +4,10 @@
             "type": "vcs",
             "url": "https://github.com/lippserd/ipl-pagination",
             "no-api": true
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/lippserd/ipl-translation",
-            "no-api": true
         }
     ],
     "require": {
         "ipl/pagination": "dev-master",
-        "ipl/translation": "dev-master",
         "dragonmantank/cron-expression": "^1.2.1"
     },
     "replace": {

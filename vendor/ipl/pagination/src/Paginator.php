@@ -1,12 +1,12 @@
 <?php
 
-namespace ipl\Pagination;
+namespace lipl\Pagination;
 
 use Icinga\Web\Url;
 use ipl\Html\Attributes;
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
-use ipl\Pagination\Adapter\AdapterInterface;
+use lipl\Pagination\Adapter\AdapterInterface;
 
 /**
  * The paginator displays a list of links that point to different pages of the current view

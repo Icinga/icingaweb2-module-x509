@@ -7,10 +7,9 @@ namespace Composer\Autoload;
 class ComposerStaticInit8c98ed3da38ac69cfc10030dfb826423
 {
     public static $prefixLengthsPsr4 = array (
-        'i' => 
+        'l' => 
         array (
-            'ipl\\Translation\\' => 16,
-            'ipl\\Pagination\\' => 15,
+            'lipl\\Pagination\\' => 16,
         ),
         'C' => 
         array (
@@ -19,11 +18,7 @@ class ComposerStaticInit8c98ed3da38ac69cfc10030dfb826423
     );
 
     public static $prefixDirsPsr4 = array (
-        'ipl\\Translation\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/ipl/translation/src',
-        ),
-        'ipl\\Pagination\\' => 
+        'lipl\\Pagination\\' => 
         array (
             0 => __DIR__ . '/..' . '/ipl/pagination/src',
         ),

@@ -1,6 +1,6 @@
 <?php
 
-namespace ipl\Pagination\Adapter;
+namespace lipl\Pagination\Adapter;
 
 /**
  * Representation of pagination adapters

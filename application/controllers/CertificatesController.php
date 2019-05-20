@@ -11,8 +11,8 @@ use Icinga\Module\X509\FilterAdapter;
 use Icinga\Module\X509\SortAdapter;
 use Icinga\Module\X509\SqlFilter;
 use Icinga\Web\Url;
-use ipl\Pagination\Adapter\SqlAdapter;
-use ipl\Pagination\Paginator;
+use lipl\Pagination\Adapter\SqlAdapter;
+use lipl\Pagination\Paginator;
 use ipl\Sql;
 
 class CertificatesController extends Controller

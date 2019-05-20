@@ -47,11 +47,11 @@ class NoImplicitConnectDbConnection extends DbConnection
         $hit = false;
 
         if (isset($this->renderFilterCallback)) {
-            $hit = call_user_func($this->renderFilterCallback, $filter);
+            $hit = call_user_func($this->renderFilterCallback, clone $filter);
         }
 
         if ($hit !== false) {
-            return $hit;
+            $filter = $hit;
         }
 
         return parent::renderFilterExpression($filter);

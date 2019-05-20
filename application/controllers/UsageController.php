@@ -83,49 +83,37 @@ class UsageController extends Controller
             ['format']
         );
         SqlFilter::apply($select, $filterAdapter->getFilter(), function (FilterExpression $filter) {
-            $column = $filter->getColumn();
+            switch ($filter->getColumn())
+            {
+                case 'ip':
+                    $value = $filter->getExpression();
 
-            if ($column === 'ip') {
-                $value = $filter->getExpression();
+                    if (is_array($value)) {
+                        $value = array_map('Job::binary', $value);
+                    } else {
+                        $value = Job::binary($value);
+                    }
 
-                if (is_array($value)) {
-                    $value = array_map('Job::binary', $value);
-                } else {
-                    $value = Job::binary($value);
-                }
+                    return $filter->setExpression($value);
+                case 'issuer_hash':
+                    $value = $filter->getExpression();
 
-                $filter->setExpression($value);
+                    if (is_array($value)) {
+                        $value = array_map('hex2bin', $value);
+                    } else {
+                        $value = hex2bin($value);
+                    }
+
+                    return $filter->setExpression($value);
+                case 'duration':
+                    return $filter->setColumn('(valid_to - valid_from)');
+                case 'expires':
+                    return $filter->setColumn(
+                        'CASE WHEN UNIX_TIMESTAMP() > valid_to THEN 0 ELSE (valid_to - UNIX_TIMESTAMP()) / 86400 END'
+                    );
+                default:
+                    return false;
             }
-
-            if ($column === 'issuer_hash') {
-                $value = $filter->getExpression();
-
-                if (is_array($value)) {
-                    $value = array_map('hex2bin', $value);
-                } else {
-                    $value = hex2bin($value);
-                }
-
-                $filter->setExpression($value);
-            }
-
-            if ($column === 'duration') {
-                $expr = clone $filter;
-                $expr->setColumn('(valid_to - valid_from)');
-
-                return $expr;
-            }
-
-            if ($column === 'expires') {
-                $expr = clone $filter;
-                $expr->setColumn(
-                    'CASE WHEN UNIX_TIMESTAMP() > valid_to THEN 0 ELSE (valid_to - UNIX_TIMESTAMP()) / 86400 END'
-                );
-
-                return $expr;
-            }
-
-            return false;
         });
 
         $formatQuery = clone $select;

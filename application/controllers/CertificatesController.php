@@ -79,37 +79,27 @@ class CertificatesController extends Controller
             ['format']
         );
         SqlFilter::apply($select, $filterAdapter->getFilter(), function (FilterExpression $filter) {
-            $column = $filter->getColumn();
+            switch ($filter->getColumn())
+            {
+                case 'issuer_hash':
+                    $value = $filter->getExpression();
 
-            if ($column === 'issuer_hash') {
-                $value = $filter->getExpression();
+                    if (is_array($value)) {
+                        $value = array_map('hex2bin', $value);
+                    } else {
+                        $value = hex2bin($value);
+                    }
 
-                if (is_array($value)) {
-                    $value = array_map('hex2bin', $value);
-                } else {
-                    $value = hex2bin($value);
-                }
-
-                $filter->setExpression($value);
+                    return $filter->setExpression($value);
+                case 'duration':
+                    return $filter->setColumn('(valid_to - valid_from)');
+                case 'expires':
+                    return $filter->setColumn(
+                        'CASE WHEN UNIX_TIMESTAMP() > valid_to THEN 0 ELSE (valid_to - UNIX_TIMESTAMP()) / 86400 END'
+                    );
+                default:
+                    return false;
             }
-
-            if ($column === 'duration') {
-                $expr = clone $filter;
-                $expr->setColumn('(valid_to - valid_from)');
-
-                return $expr;
-            }
-
-            if ($column === 'expires') {
-                $expr = clone $filter;
-                $expr->setColumn(
-                    'CASE WHEN UNIX_TIMESTAMP() > valid_to THEN 0 ELSE (valid_to - UNIX_TIMESTAMP()) / 86400 END'
-                );
-
-                return $expr;
-            }
-
-            return false;
         });
 
         $this->handleFormatRequest($conn, $select, function (\PDOStatement $stmt) {

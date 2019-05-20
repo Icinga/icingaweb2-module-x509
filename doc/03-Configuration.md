@@ -94,7 +94,7 @@ vi /etc/crontab
 30 2 * * *   wwwdata   icingacli x509 scan --job lan
 ```
 
-## Server Name Identification
+## Server Name Indication
 
 In case you are serving multiple virtual hosts under a single IP you can configure those in
 `Configuration -> Modules -> x509 -> SNI`.

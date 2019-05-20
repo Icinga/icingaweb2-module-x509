@@ -6,12 +6,9 @@ namespace Icinga\Module\X509;
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
 use ipl\Html\HtmlString;
-use ipl\Translation\Translation;
 
 class ExpirationWidget extends BaseHtmlElement
 {
-    use Translation;
-
     protected $tag = 'div';
 
     protected $from;
@@ -31,7 +28,7 @@ class ExpirationWidget extends BaseHtmlElement
         $from = $this->from;
 
         if ($from > $now) {
-            return $this->translate('Not started');
+            return mt('x509', 'Not started');
         }
 
         $to = $this->to;
@@ -57,7 +54,7 @@ class ExpirationWidget extends BaseHtmlElement
             Html::tag(
                 'span',
                 ['class' => '', 'style' => 'font-size: 0.9em;'],
-                sprintf($this->translate('in %d days'), $daysRemaining)
+                sprintf(mt('x509', 'in %d days'), $daysRemaining)
             ),
             Html::tag(
                 'div',

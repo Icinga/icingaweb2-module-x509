@@ -6,15 +6,12 @@ namespace Icinga\Module\X509;
 use DateTime;
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
-use ipl\Translation\Translation;
 
 /**
  * Widget to display X.509 certificate details
  */
 class CertificateDetails extends BaseHtmlElement
 {
-    use Translation;
-
     protected $tag = 'div';
 
     protected $defaultAttributes = ['class' => 'cert-details'];
@@ -55,23 +52,23 @@ class CertificateDetails extends BaseHtmlElement
 
         $certInfo = Html::tag('dl');
         $certInfo->add([
-            Html::tag('dt', $this->translate('Serial Number')),
+            Html::tag('dt', mt('x509', 'Serial Number')),
             Html::tag('dd', bin2hex($this->cert['serial'])),
-            Html::tag('dt', $this->translate('Version')),
+            Html::tag('dt', mt('x509', 'Version')),
             Html::tag('dd', $this->cert['version']),
-            Html::tag('dt', $this->translate('Signature Algorithm')),
+            Html::tag('dt', mt('x509', 'Signature Algorithm')),
             Html::tag('dd', $this->cert['signature_algo'] . ' with ' . $this->cert['signature_hash_algo']),
-            Html::tag('dt', $this->translate('Not Valid Before')),
+            Html::tag('dt', mt('x509', 'Not Valid Before')),
             Html::tag('dd', (new DateTime())->setTimestamp($this->cert['valid_from'])->format('l F jS, Y H:i:s e')),
-            Html::tag('dt', $this->translate('Not Valid After')),
+            Html::tag('dt', mt('x509', 'Not Valid After')),
             Html::tag('dd', (new DateTime())->setTimestamp($this->cert['valid_to'])->format('l F jS, Y H:i:s e')),
         ]);
 
         $pubkeyInfo = Html::tag('dl');
         $pubkeyInfo->add([
-            Html::tag('dt', $this->translate('Algorithm')),
+            Html::tag('dt', mt('x509', 'Algorithm')),
             Html::tag('dd', $this->cert['pubkey_algo']),
-            Html::tag('dt', $this->translate('Key Size')),
+            Html::tag('dt', mt('x509', 'Key Size')),
             Html::tag('dd', $this->cert['pubkey_bits'])
         ]);
 
@@ -91,17 +88,17 @@ class CertificateDetails extends BaseHtmlElement
 
         $this->add([
             Html::tag('h2', [Html::tag('i', ['class' => 'icon x509-icon-cert']), $this->cert['subject']]),
-            Html::tag('h3', $this->translate('Subject Name')),
+            Html::tag('h3', mt('x509', 'Subject Name')),
             $subject,
-            Html::tag('h3', $this->translate('Issuer Name')),
+            Html::tag('h3', mt('x509', 'Issuer Name')),
             $issuer,
-            Html::tag('h3', $this->translate('Certificate Info')),
+            Html::tag('h3', mt('x509', 'Certificate Info')),
             $certInfo,
-            Html::tag('h3', $this->translate('Public Key Info')),
+            Html::tag('h3', mt('x509', 'Public Key Info')),
             $pubkeyInfo,
-            Html::tag('h3', $this->translate('Extensions')),
+            Html::tag('h3', mt('x509', 'Extensions')),
             $extensions,
-            Html::tag('h3', $this->translate('Fingerprints')),
+            Html::tag('h3', mt('x509', 'Fingerprints')),
             $fingerprints
         ]);
     }

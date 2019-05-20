@@ -8,7 +8,6 @@ use ipl\Html\Attributes;
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
 use ipl\Pagination\AdapterInterface;
-use ipl\Translation\Translation;
 
 /**
  * The paginator displays a list of links that point to different pages of the current view
@@ -21,8 +20,6 @@ use ipl\Translation\Translation;
  */
 class Paginator extends BaseHtmlElement
 {
-    use Translation;
-
     protected $tag = 'div';
 
     protected $defaultAttributes = ['class' => 'pagination-control', 'role' => 'navigation'];
@@ -338,7 +335,7 @@ class Paginator extends BaseHtmlElement
                 'class'     => 'sr-only',
                 'tabindex'  => '-1'
             ],
-            $this->translate('Pagination')
+            mt('x509', 'Pagination')
         ));
 
         $paginator = Html::tag('ul', ['class' => 'tab-nav nav']);
@@ -351,7 +348,7 @@ class Paginator extends BaseHtmlElement
             $prevItem = Html::tag('li', ['class' => 'previous-page nav-item']);
 
             $label = sprintf(
-                $this->translate('Show rows %u to %u of %u'),
+                mt('x509', 'Show rows %u to %u of %u'),
                 ($currentPageNumber - 2) * $pageSize + 1,
                 ($currentPageNumber - 1) * $pageSize,
                 $totalCount
@@ -373,7 +370,7 @@ class Paginator extends BaseHtmlElement
             );
 
             $prevItem->add([
-                Html::tag('span', ['class' => 'sr-only'], $this->translate('Previous page')),
+                Html::tag('span', ['class' => 'sr-only'], mt('x509', 'Previous page')),
                 $prevIcon
             ]);
         }
@@ -406,7 +403,7 @@ class Paginator extends BaseHtmlElement
             $nextItem = Html::tag('li', ['class' => 'next-page nav-item']);
 
             $label = sprintf(
-                $this->translate('Show rows %u to %u of %u'),
+                mt('x509', 'Show rows %u to %u of %u'),
                 $currentPageNumber * $pageSize + 1,
                 ($currentPageNumber + 1) * $pageSize,
                 $totalCount
@@ -425,7 +422,7 @@ class Paginator extends BaseHtmlElement
             $nextItem = Html::tag('li', ['class' => 'next-page nav-item disabled', 'aria-hidden' => true]);
 
             $nextItem->add([
-                Html::tag('span', ['class' => 'sr-only'], $this->translate('Next page')),
+                Html::tag('span', ['class' => 'sr-only'], mt('x509', 'Next page')),
                 $nextIcon
             ]);
         }

@@ -5,7 +5,6 @@ namespace Icinga\Module\X509;
 
 use Icinga\Web\Url;
 use ipl\Html\Html;
-use ipl\Translation\Translation;
 
 /**
  * Table widget to display X.509 certificate usage
@@ -29,10 +28,10 @@ class UsageTable extends DataTable
                 }
             ],
 
-            'hostname' => $this->translate('Hostname'),
+            'hostname' => mt('x509', 'Hostname'),
 
             'ip' => [
-                'label' => $this->translate('IP'),
+                'label' => mt('x509', 'IP'),
                 'renderer' => function ($ip) {
                     $ipv4 = ltrim($ip, "\0");
                     if (strlen($ipv4) === 4) {
@@ -43,19 +42,19 @@ class UsageTable extends DataTable
                 }
             ],
 
-            'port' => $this->translate('Port'),
+            'port' => mt('x509', 'Port'),
 
-            'subject' => $this->translate('Certificate'),
+            'subject' => mt('x509', 'Certificate'),
 
             'signature_algo' => [
-                'label' => $this->translate('Signature Algorithm'),
+                'label' => mt('x509', 'Signature Algorithm'),
                 'renderer' => function ($algo, $data) {
                     return "{$data['signature_hash_algo']} with $algo";
                 }
             ],
 
             'pubkey_algo' => [
-                'label' => $this->translate('Public Key'),
+                'label' => mt('x509', 'Public Key'),
                 'renderer' => function ($algo, $data) {
                     return "$algo {$data['pubkey_bits']} bits";
                 }
@@ -63,7 +62,7 @@ class UsageTable extends DataTable
 
             'valid_to' => [
                 'attributes' => ['class' => 'expiration-col'],
-                'label' => $this->translate('Expires'),
+                'label' => mt('x509', 'Expires'),
                 'renderer' => function ($to, $data) {
                     return new ExpirationWidget($data['valid_from'], $to);
                 }

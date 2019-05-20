@@ -26,7 +26,7 @@ class CertificatesTable extends DataTable
                 }
             ],
 
-            'subject' => $this->translate('Certificate'),
+            'subject' => mt('x509', 'Certificate'),
 
             'ca' => [
                 'attributes' => ['class' => 'icon-col'],
@@ -37,7 +37,7 @@ class CertificatesTable extends DataTable
 
                     return Html::tag(
                         'i',
-                        ['class' => 'icon x509-icon-ca', 'title' => $this->translate('Is Certificate Authority')]
+                        ['class' => 'icon x509-icon-ca', 'title' => mt('x509', 'Is Certificate Authority')]
                     );
                 }
             ],
@@ -51,7 +51,7 @@ class CertificatesTable extends DataTable
 
                     return Html::tag(
                         'i',
-                        ['class' => 'icon x509-icon-self-signed', 'title' => $this->translate('Is Self-Signed')]
+                        ['class' => 'icon x509-icon-self-signed', 'title' => mt('x509', 'Is Self-Signed')]
                     );
                 }
             ],
@@ -65,22 +65,22 @@ class CertificatesTable extends DataTable
 
                     return Html::tag(
                         'i',
-                        ['class' => 'icon icon-thumbs-up', 'title' => $this->translate('Is Trusted')]
+                        ['class' => 'icon icon-thumbs-up', 'title' => mt('x509', 'Is Trusted')]
                     );
                 }
             ],
 
-            'issuer' => $this->translate('Issuer'),
+            'issuer' => mt('x509', 'Issuer'),
 
             'signature_algo' => [
-                'label' => $this->translate('Signature Algorithm'),
+                'label' => mt('x509', 'Signature Algorithm'),
                 'renderer' => function ($algo, $data) {
                     return "{$data['signature_hash_algo']} with $algo";
                 }
             ],
 
             'pubkey_algo' => [
-                'label' => $this->translate('Public Key'),
+                'label' => mt('x509', 'Public Key'),
                 'renderer' => function ($algo, $data) {
                     return "$algo {$data['pubkey_bits']} bits";
                 }
@@ -88,7 +88,7 @@ class CertificatesTable extends DataTable
 
             'valid_to' => [
                 'attributes' => ['class' => 'expiration-col'],
-                'label' => $this->translate('Expires'),
+                'label' => mt('x509', 'Expires'),
                 'renderer' => function ($to, $data) {
                     return new ExpirationWidget($data['valid_from'], $to);
                 }

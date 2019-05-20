@@ -6,12 +6,9 @@ namespace Icinga\Module\X509;
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
 use ipl\Html\HtmlString;
-use ipl\Translation\Translation;
 
 class DataTable extends BaseHtmlElement
 {
-    use Translation;
-
     protected $tag = 'table';
 
     /**
@@ -128,7 +125,7 @@ class DataTable extends BaseHtmlElement
                 Html::tag(
                     'td',
                     ['colspan' => $colspan],
-                    $this->translate('No results found.')
+                    mt('x509', 'No results found.')
                 )
             );
         }

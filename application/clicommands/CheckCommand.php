@@ -136,16 +136,15 @@ class CheckCommand extends Command
                 );
             }
 
-            $maxDays = $validFrom->diff($validTo)->days;
             $perfData[$target['subject']] = sprintf(
-                "'%s'=%d;%d;%d;0;%d",
+                "'%s'=%ds;%d;%d;0;%d",
                 $target['subject'],
                 $remainingTime->invert
-                    ? $maxDays
-                    : $validFrom->diff($now)->days,
-                $validFrom->diff($warningAfter)->days,
-                $validFrom->diff($criticalAfter)->days,
-                $maxDays
+                    ? 0
+                    : $target['valid_to'] - time(),
+                $target['valid_to'] - $warningAfter->getTimestamp(),
+                $target['valid_to'] - $criticalAfter->getTimestamp(),
+                $target['valid_to'] - $target['valid_from']
             );
         }
 

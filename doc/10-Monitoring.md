@@ -39,20 +39,20 @@ s, S        | Second
 
 ```
 $ icingacli x509 check host --host example.org --warning 1y
-WARNING - *.example.org expires in 349 days|'*.example.org'=333;317;615;0;683
+WARNING - *.example.org expires in 219 days|'*.example.org'=18985010s;25574400;10281600;0;102470399
 ```
 
 ### Performance Data
 
 The command outputs a performance data value for each certificate that is
-served by the host. The value measured is the amount of days passed since
-the certificate's first day of validity.
+served by the host. The value measured is the amount of seconds remaining
+until the certificate expires.
 
 ![check host perf data](res/check-host-perf-data.png)
 
-The value of `max` is the total amount of days the certificate is valid.
-`warning` and `critical` are the days after which the respective state is
-reported.
+The value of `max` is the total amount of seconds the certificate is valid.
+`warning` and `critical` are the seconds remaining after which the respective
+state is reported.
 
 ## Icinga 2 Integration
 

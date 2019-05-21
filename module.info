@@ -1,5 +1,5 @@
 Module: X.509
 Version: 1.0.0
-Depends: ipl
-Depends: reactbundle
+Depends: ipl (>= 0.1)
+Depends: reactbundle (>= 0.4)
 Description: Scan and view X.509 certificate usage

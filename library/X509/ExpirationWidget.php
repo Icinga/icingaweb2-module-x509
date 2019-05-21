@@ -3,6 +3,7 @@
 
 namespace Icinga\Module\X509;
 
+use Icinga\Date\DateFormatter;
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
 use ipl\Html\HtmlString;
@@ -28,17 +29,31 @@ class ExpirationWidget extends BaseHtmlElement
         $from = $this->from;
 
         if ($from > $now) {
-            return mt('x509', 'Not started');
+            $ratio = 0;
+            $dateTip = DateFormatter::formatDateTime($from);
+            $message = sprintf(mt('x509', 'not until after %s'), DateFormatter::timeUntil($from, true));
+        } else {
+            $to = $this->to;
+
+            $secondsRemaining = $to - $now;
+            $daysRemaining = ($secondsRemaining - $secondsRemaining % 86400) / 86400;
+            if ($daysRemaining > 0) {
+                $secondsTotal = $to - $from;
+                $daysTotal = ($secondsTotal - $secondsTotal % 86400) / 86400;
+
+                $ratio = min(100, 100 - round(($daysRemaining * 100) / $daysTotal, 2));
+                $message = sprintf(mt('x509', 'in %d days'), $daysRemaining);
+            } else {
+                $ratio = 100;
+                if ($daysRemaining < 0) {
+                    $message = sprintf(mt('x509', 'since %d days'), $daysRemaining * -1);
+                } else {
+                    $message = mt('x509', 'today');
+                }
+            }
+
+            $dateTip = DateFormatter::formatDateTime($to);
         }
-
-        $to = $this->to;
-
-        $secondsRemaining = $to - $now;
-        $daysRemaining = ($secondsRemaining - $secondsRemaining % 86400) / 86400;
-        $secondsTotal = $to - $from;
-        $daysTotal = ($secondsTotal - $secondsTotal % 86400) / 86400;
-
-        $ratio = min(100, 100 - round(($daysRemaining * 100) / $daysTotal, 2));
 
         if ($ratio >= 75) {
             if ($ratio >= 90) {
@@ -53,8 +68,8 @@ class ExpirationWidget extends BaseHtmlElement
         $this->add([
             Html::tag(
                 'span',
-                ['class' => '', 'style' => 'font-size: 0.9em;'],
-                sprintf(mt('x509', 'in %d days'), $daysRemaining)
+                ['class' => '', 'style' => 'font-size: 0.9em;', 'title' => $dateTip],
+                $message
             ),
             Html::tag(
                 'div',

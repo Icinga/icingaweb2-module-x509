@@ -1,0 +1,520 @@
+# Icinga Web 2 - Head for multiple monitoring backends.
+# Copyright (C) 2019 Icinga Development Team
+# This file is distributed under the same license as X509 Module.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: X509 Module (1.0.0)\n"
+"Report-Msgid-Bugs-To: dev@icinga.com\n"
+"POT-Creation-Date: 2019-05-27 08:44+0000\n"
+"PO-Revision-Date: 2019-05-27 10:44+0200\n"
+"Last-Translator: Johannes Meyer <johannes.meyer@icinga.com>\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Basepath: .\n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.0.6\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: ../../../../library/X509/CertificateDetails.php:69
+msgid "Algorithm"
+msgstr "Algorithmus"
+
+#: ../../../../configuration.php:24
+msgid "Backend"
+msgstr "Backend"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:31
+msgid "CIDRs"
+msgstr "CIDRs"
+
+#: ../../../../application/controllers/UsageController.php:45
+#: ../../../../application/controllers/CertificatesController.php:44
+#: ../../../../library/X509/UsageTable.php:47
+#: ../../../../library/X509/CertificatesTable.php:29
+msgid "Certificate"
+msgstr "Zertifikat"
+
+#: ../../../../library/X509/CertificateDetails.php:95
+msgid "Certificate Info"
+msgstr "Zertifikats-Info"
+
+#: ../../../../configuration.php:12
+msgid "Certificate Overview"
+msgstr "Zertifikat Übersicht"
+
+#: ../../../../configuration.php:17
+msgid "Certificate Usage"
+msgstr "Zertifikat Nutzung"
+
+#: ../../../../application/controllers/ChainController.php:64
+#, php-format
+msgid "Certificate chain is invalid: %s."
+msgstr "Zertifikatskette ungültig: %s."
+
+#: ../../../../application/controllers/ChainController.php:61
+msgid "Certificate chain is valid."
+msgstr "Zertifikatskette gültig."
+
+#: ../../../../application/controllers/CertificateController.php:32
+#: ../../../../application/controllers/ChainController.php:36
+msgid "Certificate not found."
+msgstr "Zertifikat nicht gefunden."
+
+#: ../../../../application/controllers/DashboardController.php:37
+msgid "Certificates by CA"
+msgstr "Zertifikate nach CA"
+
+#: ../../../../application/controllers/DashboardController.php:62
+msgid "Certificates by Duration"
+msgstr "Zertifikate nach Dauer"
+
+#: ../../../../application/controllers/UsageController.php:57
+msgid "Chain Is Valid"
+msgstr "Kette gültig"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:30
+msgid "Comma-separated list of CIDR addresses to scan"
+msgstr "Kommagetrennte Liste von abzusuchenden CIDR Adressen"
+
+#: ../../../../application/forms/Config/SniConfigForm.php:30
+msgid "Comma-separated list of hostnames"
+msgstr "Kommagetrennte Liste von Hostnamen"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:39
+msgid "Comma-separated list of ports to scan"
+msgstr "Kommagetrennte Liste von abzusuchenden Ports"
+
+#: ../../../../configuration.php:35
+msgid "Configure SNI"
+msgstr "Konfiguriere SNI"
+
+#: ../../../../configuration.php:23
+msgid "Configure the database backend"
+msgstr "Konfiguriere das Datenbank-Backend"
+
+#: ../../../../configuration.php:29
+msgid "Configure the scan jobs"
+msgstr "Konfiguriere die Scan-Jobs"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:55
+#: ../../../../application/forms/Config/SniConfigForm.php:38
+msgid "Create"
+msgstr "Erstellen"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:54
+#: ../../../../application/views/scripts/jobs/index.phtml:7
+#: ../../../../application/views/scripts/jobs/index.phtml:14
+msgid "Create a New Job"
+msgstr "Erstelle einen neuen Job"
+
+#: ../../../../application/forms/Config/SniConfigForm.php:37
+#: ../../../../application/views/scripts/sni/index.phtml:7
+#: ../../../../application/views/scripts/sni/index.phtml:14
+msgid "Create a New SNI Map"
+msgstr "Erstelle eine neue SNI-Map"
+
+#: ../../../../application/forms/Config/BackendConfigForm.php:22
+msgid "Database"
+msgstr "Datenbank"
+
+#: ../../../../application/views/scripts/missing-resource.phtml:5
+msgid "Database not configured"
+msgstr "Datenbank nicht konfiguriert"
+
+#: ../../../../application/forms/Config/BackendConfigForm.php:23
+msgid "Database resource"
+msgstr "Datenbank-Ressource"
+
+#: ../../../../application/controllers/UsageController.php:58
+#: ../../../../application/controllers/CertificatesController.php:56
+msgid "Duration"
+msgstr "Dauer"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:61
+#, php-format
+msgid "Edit job %s"
+msgstr "Ändere Job %s"
+
+#: ../../../../application/forms/Config/SniConfigForm.php:44
+#, php-format
+msgid "Edit map for %s"
+msgstr "Ändere Map für %s"
+
+#: ../../../../application/controllers/UsageController.php:59
+#: ../../../../application/controllers/CertificatesController.php:57
+#: ../../../../library/X509/UsageTable.php:65
+#: ../../../../library/X509/CertificatesTable.php:91
+#: ../../../../library/X509/ChainDetails.php:98
+msgid "Expires"
+msgstr "Läuft ab"
+
+#: ../../../../library/X509/CertificateDetails.php:99
+msgid "Extensions"
+msgstr "Erweiterungen"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:80
+msgid "Failed to create job"
+msgstr "Konnte Job nicht erstellen"
+
+#: ../../../../application/forms/Config/SniConfigForm.php:63
+msgid "Failed to create map"
+msgstr "Konnte Map nicht erstellen"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:94
+msgid "Failed to remove job"
+msgstr "Konnte Job nicht entfernen"
+
+#: ../../../../application/forms/Config/SniConfigForm.php:77
+msgid "Failed to remove map"
+msgstr "Konnte Map nicht entfernen"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:87
+msgid "Failed to update job"
+msgstr "Konnte Job nicht ändern"
+
+#: ../../../../application/forms/Config/SniConfigForm.php:70
+msgid "Failed to update map"
+msgstr "Konnte Map nicht ändern"
+
+#: ../../../../library/X509/CertificateDetails.php:101
+msgid "Fingerprints"
+msgstr "Fingerabdrücke"
+
+#: ../../../../application/controllers/ChainController.php:49
+msgid "Host"
+msgstr "Host"
+
+#: ../../../../application/controllers/UsageController.php:43
+#: ../../../../library/X509/UsageTable.php:31
+msgid "Hostname"
+msgstr "Hostname"
+
+#: ../../../../application/forms/Config/SniConfigForm.php:31
+msgid "Hostnames"
+msgstr "Hostnamen"
+
+#: ../../../../application/forms/Config/SniConfigForm.php:21
+#: ../../../../application/forms/Config/SniConfigForm.php:22
+#: ../../../../application/controllers/UsageController.php:44
+#: ../../../../application/controllers/ChainController.php:51
+#: ../../../../application/views/scripts/sni/index.phtml:24
+#: ../../../../library/X509/UsageTable.php:34
+msgid "IP"
+msgstr "IP"
+
+#: ../../../../application/controllers/SniController.php:48
+#: ../../../../application/controllers/SniController.php:64
+msgid "IP not found"
+msgstr "IP nicht gefunden"
+
+#: ../../../../application/controllers/UsageController.php:49
+#: ../../../../application/controllers/CertificatesController.php:48
+#: ../../../../library/X509/CertificatesTable.php:40
+#: ../../../../library/X509/ChainDetails.php:49
+msgid "Is Certificate Authority"
+msgstr "Ist Zertifikats-Autorität"
+
+#: ../../../../application/controllers/UsageController.php:48
+#: ../../../../application/controllers/CertificatesController.php:47
+#: ../../../../library/X509/CertificatesTable.php:54
+#: ../../../../library/X509/ChainDetails.php:63
+msgid "Is Self-Signed"
+msgstr "Ist Selbst-Signiert"
+
+#: ../../../../application/controllers/UsageController.php:50
+#: ../../../../application/controllers/CertificatesController.php:49
+#: ../../../../library/X509/CertificatesTable.php:68
+#: ../../../../library/X509/ChainDetails.php:77
+msgid "Is Trusted"
+msgstr "Wird vertraut"
+
+#: ../../../../application/controllers/UsageController.php:46
+#: ../../../../application/controllers/CertificatesController.php:45
+#: ../../../../library/X509/CertificatesTable.php:73
+msgid "Issuer"
+msgstr "Aussteller"
+
+#: ../../../../library/X509/CertificateDetails.php:93
+msgid "Issuer Name"
+msgstr "Aussteller Name"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:79
+msgid "Job created"
+msgstr "Job erstellt"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:48
+msgid "Job cron Schedule"
+msgstr "Job cron Zeitplan"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:21
+msgid "Job name"
+msgstr "Job Name"
+
+#: ../../../../application/controllers/JobsController.php:48
+#: ../../../../application/controllers/JobsController.php:64
+msgid "Job not found"
+msgstr "Job nicht gefunden"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:93
+msgid "Job removed"
+msgstr "Job entfernt"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:86
+msgid "Job updated"
+msgstr "Job geändert"
+
+#: ../../../../configuration.php:30
+msgid "Jobs"
+msgstr "Jobs"
+
+#: ../../../../library/X509/CertificateDetails.php:71
+msgid "Key Size"
+msgstr "Schlüssel-Größe"
+
+#: ../../../../application/controllers/DashboardController.php:85
+msgid "Key Strength"
+msgstr "Schlüssel-Stärke"
+
+#: ../../../../application/forms/Config/SniConfigForm.php:62
+msgid "Map created"
+msgstr "Map erstellt"
+
+#: ../../../../application/forms/Config/SniConfigForm.php:76
+msgid "Map removed"
+msgstr "Map entfernt"
+
+#: ../../../../application/forms/Config/SniConfigForm.php:69
+msgid "Map updated"
+msgstr "Map geändert"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:22
+#: ../../../../application/views/scripts/jobs/index.phtml:24
+msgid "Name"
+msgstr "Name"
+
+#: ../../../../application/controllers/JobsController.php:35
+msgid "New Job"
+msgstr "Neuer Job"
+
+#: ../../../../application/controllers/SniController.php:35
+msgid "New SNI Map"
+msgstr "Neue SNI Map"
+
+#: ../../../../library/X509/Paginator.php:425
+msgid "Next page"
+msgstr "Nächste Seite"
+
+#: ../../../../application/views/scripts/sni/index.phtml:19
+msgid "No SNI maps configured yet."
+msgstr "Noch keine SNI Maps konfiguriert."
+
+#: ../../../../application/views/scripts/jobs/index.phtml:19
+msgid "No jobs configured yet."
+msgstr "Noch keine Jobs konfiguriert."
+
+#: ../../../../library/X509/DataTable.php:128
+msgid "No results found."
+msgstr "Keine Ergebnisse gefunden."
+
+#: ../../../../library/X509/CertificateDetails.php:63
+msgid "Not Valid After"
+msgstr "Nicht gültig vor"
+
+#: ../../../../library/X509/CertificateDetails.php:61
+msgid "Not Valid Before"
+msgstr "Nicht gültig nach"
+
+#: ../../../../library/X509/Paginator.php:338
+msgid "Pagination"
+msgstr "Paginierung"
+
+#: ../../../../application/controllers/ChainController.php:53
+#: ../../../../library/X509/UsageTable.php:45
+msgid "Port"
+msgstr "Port"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:40
+msgid "Ports"
+msgstr "Ports"
+
+#: ../../../../library/X509/Paginator.php:373
+msgid "Previous page"
+msgstr "Vorherige Seite"
+
+#: ../../../../library/X509/UsageTable.php:57
+#: ../../../../library/X509/CertificatesTable.php:83
+#: ../../../../library/X509/ChainDetails.php:90
+msgid "Public Key"
+msgstr "Öffentlicher Schlüssel"
+
+#: ../../../../application/controllers/UsageController.php:51
+#: ../../../../application/controllers/CertificatesController.php:50
+msgid "Public Key Algorithm"
+msgstr "Algorithmus des öffentlichen Schlüssels"
+
+#: ../../../../library/X509/CertificateDetails.php:97
+msgid "Public Key Info"
+msgstr "Informationen des öffentlichen Schlüssels"
+
+#: ../../../../application/controllers/UsageController.php:52
+#: ../../../../application/controllers/CertificatesController.php:51
+msgid "Public Key Strength"
+msgstr "Stärke des öffentlichen Schlüssels"
+
+#: ../../../../application/controllers/JobsController.php:67
+msgid "Remove Job"
+msgstr "Entferne Job"
+
+#: ../../../../application/controllers/SniController.php:67
+msgid "Remove SNI Map"
+msgstr "Entferne SNI Map"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:67
+#, php-format
+msgid "Remove job %s?"
+msgstr "Job %s entfernen?"
+
+#: ../../../../application/forms/Config/SniConfigForm.php:50
+#, php-format
+msgid "Remove map for %s?"
+msgstr "Map für %s entfernen?"
+
+#: ../../../../application/views/scripts/sni/index.phtml:38
+msgid "Remove this SNI map"
+msgstr "Entferne diese SNI Map"
+
+#: ../../../../application/views/scripts/jobs/index.phtml:38
+msgid "Remove this job"
+msgstr "Entferne diesen Job"
+
+#: ../../../../configuration.php:36
+msgid "SNI"
+msgstr "SNI"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:62
+#: ../../../../application/forms/Config/SniConfigForm.php:45
+msgid "Save"
+msgstr "Speichern"
+
+#: ../../../../application/forms/Config/BackendConfigForm.php:14
+msgid "Save Changes"
+msgstr "Änderungen speichern"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:49
+msgid "Schedule"
+msgstr "Zeitplan"
+
+#: ../../../../library/X509/CertificateDetails.php:55
+msgid "Serial Number"
+msgstr "Seriennummer"
+
+#: ../../../../library/X509/Paginator.php:351
+#: ../../../../library/X509/Paginator.php:406
+#, php-format
+msgid "Show rows %u to %u of %u"
+msgstr "Zeige Zeilen %u bis %u von %u"
+
+#: ../../../../application/controllers/UsageController.php:53
+#: ../../../../application/controllers/CertificatesController.php:52
+#: ../../../../library/X509/UsageTable.php:50
+#: ../../../../library/X509/CertificatesTable.php:76
+#: ../../../../library/X509/CertificateDetails.php:59
+#: ../../../../library/X509/ChainDetails.php:83
+msgid "Signature Algorithm"
+msgstr "Signatur Algorithmus"
+
+#: ../../../../application/controllers/DashboardController.php:112
+msgid "Signature Algorithms"
+msgstr "Signatur Algorithmen"
+
+#: ../../../../application/controllers/UsageController.php:54
+#: ../../../../application/controllers/CertificatesController.php:53
+msgid "Signature Hash Algorithm"
+msgstr "Signatur Prüfsummen Algorithmus"
+
+#: ../../../../library/X509/ChainDetails.php:37
+msgid "Subject"
+msgstr "Betreff"
+
+#: ../../../../library/X509/CertificateDetails.php:91
+msgid "Subject Name"
+msgstr "Zertifikatinhaber"
+
+#: ../../../../application/controllers/JobsController.php:51
+msgid "Update Job"
+msgstr "Ändere Job"
+
+#: ../../../../application/controllers/SniController.php:51
+msgid "Update SNI Map"
+msgstr "Ändere SNI Map"
+
+#: ../../../../application/controllers/UsageController.php:55
+#: ../../../../application/controllers/CertificatesController.php:54
+msgid "Valid From"
+msgstr "Gültig ab"
+
+#: ../../../../application/controllers/UsageController.php:56
+#: ../../../../application/controllers/CertificatesController.php:55
+msgid "Valid To"
+msgstr "Gültig bis"
+
+#: ../../../../application/controllers/UsageController.php:47
+#: ../../../../application/controllers/CertificatesController.php:46
+#: ../../../../library/X509/CertificateDetails.php:57
+msgid "Version"
+msgstr "Version"
+
+#: ../../../../application/controllers/CertificateController.php:35
+msgid "X.509 Certificate"
+msgstr "X.509 Zertifikat"
+
+#: ../../../../application/controllers/ChainController.php:39
+msgid "X.509 Certificate Chain"
+msgstr "X.509 Zertifikatskette"
+
+#: ../../../../application/controllers/UsageController.php:25
+msgid "X.509 Certificate Usage"
+msgstr "X.509 Zertifikat Nutzung"
+
+#: ../../../../application/controllers/CertificatesController.php:24
+msgid "X.509 Certificates"
+msgstr "X.509 Zertifikate"
+
+#: ../../../../application/forms/Config/JobConfigForm.php:68
+#: ../../../../application/forms/Config/SniConfigForm.php:51
+msgid "Yes"
+msgstr "Ja"
+
+#: ../../../../application/views/scripts/missing-resource.phtml:7
+#, php-format
+msgid ""
+"You seem to not have configured a database resource yet. Please create one "
+"%1$shere%3$s and then set it in this %2$smodule's configuration%3$s."
+msgstr ""
+"Es scheint noch keine Datenbank Ressource konfiguriert zu sein. Bitte "
+"erstelle %1$shier%3$s eine und setze sie dann in der %2$sModul-Konfiguration"
+"%3$s."
+
+#: ../../../../library/X509/ExpirationWidget.php:45
+#, php-format
+msgid "in %d days"
+msgstr "in %d Tagen"
+
+#: ../../../../library/X509/ExpirationWidget.php:34
+#, php-format
+msgid "not until after %s"
+msgstr "nicht vor %s"
+
+#: ../../../../library/X509/ExpirationWidget.php:49
+#, php-format
+msgid "since %d days"
+msgstr "seit %d Tagen"
+
+#: ../../../../library/X509/ExpirationWidget.php:51
+msgid "today"
+msgstr "Heute"

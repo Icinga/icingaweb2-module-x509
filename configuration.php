@@ -3,7 +3,7 @@
 
 /** @var \Icinga\Application\Modules\Module $this */
 
-$section = $this->menuSection(N_('X.509'), array(
+$section = $this->menuSection('X.509', array(
     'icon'      => 'check',
     'url'       => 'x509/dashboard',
     'priority'  => 40

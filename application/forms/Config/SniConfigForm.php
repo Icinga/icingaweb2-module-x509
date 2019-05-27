@@ -34,7 +34,7 @@ class SniConfigForm extends RepositoryForm
             ]
         ]);
 
-        $this->setTitle($this->translate('Create a new map'));
+        $this->setTitle($this->translate('Create a New SNI Map'));
         $this->setSubmitLabel($this->translate('Create'));
     }
 

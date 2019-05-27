@@ -15,7 +15,7 @@ class DashboardController extends Controller
 {
     public function indexAction()
     {
-        $this->setTitle($this->translate('X.509 Dashboard'));
+        $this->setTitle('X.509 Dashboard');
 
         try {
             $db = $this->getDb();

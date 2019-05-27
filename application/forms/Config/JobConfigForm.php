@@ -51,7 +51,7 @@ class JobConfigForm extends RepositoryForm
             ],
         ]);
 
-        $this->setTitle($this->translate('Create a new job'));
+        $this->setTitle($this->translate('Create a New Job'));
         $this->setSubmitLabel($this->translate('Create'));
     }
 

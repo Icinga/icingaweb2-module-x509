@@ -22,7 +22,7 @@ class UsageController extends Controller
     {
         $this
             ->initTabs()
-            ->setTitle($this->translate('X.509 Certificate Usage'));
+            ->setTitle($this->translate('Certificate Usage'));
 
         try {
             $conn = $this->getDb();

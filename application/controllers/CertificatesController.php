@@ -21,7 +21,7 @@ class CertificatesController extends Controller
     {
         $this
             ->initTabs()
-            ->setTitle($this->translate('X.509 Certificates'));
+            ->setTitle($this->translate('Certificates'));
 
         try {
             $conn = $this->getDb();

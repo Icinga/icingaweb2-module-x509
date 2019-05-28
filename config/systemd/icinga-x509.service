@@ -1,5 +1,5 @@
 [Unit]
-Description=Icinga Web 2 X.509 Module Jobs Runner
+Description=Icinga Certificate Monitoring Module Jobs Runner
 
 [Service]
 Type=simple

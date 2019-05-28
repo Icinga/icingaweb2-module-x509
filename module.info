@@ -1,4 +1,4 @@
-Module: X.509
+Module: Certificate Monitoring
 Version: 1.0.0
 Depends: ipl (>= 0.1)
 Depends: reactbundle (>= 0.4)

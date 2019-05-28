@@ -1,6 +1,6 @@
-# Icinga X.509 Module
+# Icinga Certificate Monitoring
 
-The X.509 module for Icinga keeps track of certificates as they are deployed in a network environment.
+The certificate monitoring module for Icinga keeps track of certificates as they are deployed in a network environment.
 It does this by scanning networks for TLS services and collects whatever certificates it finds along the way.
 The certificates are verified using its own trust store.
 

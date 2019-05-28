@@ -2,7 +2,7 @@
 
 ## Importing CA certificates
 
-The X.509 module tries to verify certificates using its own trust store. By default this trust store is empty and it
+The module tries to verify certificates using its own trust store. By default this trust store is empty and it
 is up to the Icinga Web 2 admin to import CA certificates into it.
 
 Using the `icingacli x509 import` command CA certificates can be imported. The certificate chain file that is specified
@@ -15,13 +15,13 @@ icingacli x509 import --file /etc/ssl/certs/ca-certificates.crt
 
 ## Scan Jobs
 
-The X.509 module needs to know which IP address ranges and ports to scan. These can be configured in
+The module needs to know which IP address ranges and ports to scan. These can be configured in
 `Configuration -> Modules -> x509 -> Jobs`.
 
 Scan jobs have a name which uniquely identifies them, e.g. `lan`. These names are used by the CLI command to start
 scanning for specific jobs.
 
-Each scan job can have one or more IP address ranges and one or more port ranges. The X.509 module scans each port in
+Each scan job can have one or more IP address ranges and one or more port ranges. The module scans each port in
 a job's port ranges for all the individual IP addresses in the IP ranges.
 
 IP address ranges have to be specified using the CIDR format. Multiple IP address ranges can be separated with commas,

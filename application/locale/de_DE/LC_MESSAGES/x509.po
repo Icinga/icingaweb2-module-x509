@@ -1,14 +1,14 @@
 # Icinga Web 2 - Head for multiple monitoring backends.
-# Copyright (C) 2019 Icinga Development Team
-# This file is distributed under the same license as X509 Module.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Copyright (C) 2019 Icinga GmbH
+# This file is distributed under the same license as the X509 Module.
+# Johannes Meyer <johannes.meyer@icinga.com>, 2019.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: X509 Module (1.0.0)\n"
 "Report-Msgid-Bugs-To: dev@icinga.com\n"
-"POT-Creation-Date: 2019-05-27 08:44+0000\n"
-"PO-Revision-Date: 2019-05-27 10:44+0200\n"
+"POT-Creation-Date: 2019-05-28 11:50+0000\n"
+"PO-Revision-Date: 2019-05-28 13:54+0200\n"
 "Last-Translator: Johannes Meyer <johannes.meyer@icinga.com>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"
@@ -39,15 +39,24 @@ msgstr "CIDRs"
 msgid "Certificate"
 msgstr "Zertifikat"
 
+#: ../../../../application/controllers/DashboardController.php:18
+msgid "Certificate Dashboard"
+msgstr "Zertifikat Dashboard"
+
 #: ../../../../library/X509/CertificateDetails.php:95
 msgid "Certificate Info"
 msgstr "Zertifikats-Info"
+
+#: ../../../../configuration.php:6
+msgid "Certificate Monitoring"
+msgstr "Zertifikat Monitoring"
 
 #: ../../../../configuration.php:12
 msgid "Certificate Overview"
 msgstr "Zertifikat Übersicht"
 
 #: ../../../../configuration.php:17
+#: ../../../../application/controllers/UsageController.php:25
 msgid "Certificate Usage"
 msgstr "Zertifikat Nutzung"
 
@@ -64,6 +73,10 @@ msgstr "Zertifikatskette gültig."
 #: ../../../../application/controllers/ChainController.php:36
 msgid "Certificate not found."
 msgstr "Zertifikat nicht gefunden."
+
+#: ../../../../application/controllers/CertificatesController.php:24
+msgid "Certificates"
+msgstr "Zertifikate"
 
 #: ../../../../application/controllers/DashboardController.php:37
 msgid "Certificates by CA"
@@ -476,14 +489,6 @@ msgstr "X.509 Zertifikat"
 #: ../../../../application/controllers/ChainController.php:39
 msgid "X.509 Certificate Chain"
 msgstr "X.509 Zertifikatskette"
-
-#: ../../../../application/controllers/UsageController.php:25
-msgid "X.509 Certificate Usage"
-msgstr "X.509 Zertifikat Nutzung"
-
-#: ../../../../application/controllers/CertificatesController.php:24
-msgid "X.509 Certificates"
-msgstr "X.509 Zertifikate"
 
 #: ../../../../application/forms/Config/JobConfigForm.php:68
 #: ../../../../application/forms/Config/SniConfigForm.php:51

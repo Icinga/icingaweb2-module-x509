@@ -46,7 +46,7 @@ Or use the `icingacli` and run `icingacli module enable x509`.
 3. Once you've set up the database, create a new Icinga Web 2 resource for it using the
 `Configuration -> Application -> Resources` menu.
 
-4. The next step involves telling the X.509 module which database resource to use. This can be done in
+4. The next step involves telling the module which database resource to use. This can be done in
 `Configuration -> Modules -> x509 -> Backend`.
 
 This concludes the installation. You should now be able to import CA certificates and set up scan jobs.

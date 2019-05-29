@@ -49,12 +49,13 @@ CREATE TABLE x509_certificate_chain_link (
 
 CREATE TABLE x509_certificate_subject_alt_name (
   certificate_id int(10) unsigned NOT NULL,
+  hash binary(32) NOT NULL COMMENT 'sha256 hash of type=value',
   `type` varchar(255) NOT NULL,
   `value` varchar(255) NOT NULL,
   ctime timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (certificate_id,`type`,`value`),
+  PRIMARY KEY (certificate_id,hash),
   CONSTRAINT x509_fk_certificate_subject_alt_name_certificate_id FOREIGN KEY (certificate_id) REFERENCES x509_certificate (id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE x509_dn (
   `hash` binary(32) NOT NULL,
@@ -87,5 +88,5 @@ CREATE TABLE x509_target (
   ctime timestamp NULL DEFAULT NULL,
   mtime timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY x509_idx_target_ip_port_hostname (ip,`port`,hostname)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
+  INDEX x509_idx_target_ip_port_hostname (ip,port,hostname)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

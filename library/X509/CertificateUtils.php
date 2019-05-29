@@ -260,14 +260,15 @@ class CertificateUtils
             foreach (CertificateUtils::splitSANs($certInfo['extensions']['subjectAltName']) as $san) {
                 list($type, $value) = $san;
 
+                $hash = hash('sha256', sprintf('%s=%s', $type, $value), true);
+
                 $row = $db->select(
                     (new Select())
                         ->from('x509_certificate_subject_alt_name')
                         ->columns('certificate_id')
                         ->where([
                             'certificate_id = ?' => $certId,
-                            'type = ?' => $type,
-                            'value = ?' => $value
+                            'hash = ?' => $hash
                         ])
                 )->fetch();
 
@@ -280,6 +281,7 @@ class CertificateUtils
                     'x509_certificate_subject_alt_name',
                     [
                         'certificate_id' => $certId,
+                        'hash' => $hash,
                         'type' => $type,
                         'value' => $value
                     ]

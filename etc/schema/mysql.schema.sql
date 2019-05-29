@@ -88,5 +88,5 @@ CREATE TABLE x509_target (
   ctime timestamp NULL DEFAULT NULL,
   mtime timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY x509_idx_target_ip_port_hostname (ip,`port`,hostname)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
+  INDEX x509_idx_target_ip_port_hostname (ip,port,hostname)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

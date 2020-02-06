@@ -412,12 +412,17 @@ class CertificateUtils
                 $files->create($certFile, array_pop($collection));
 
                 $untrusted = '';
-                foreach ($collection as $intermediate) {
+                if (count($collection) > 0) {
+                    $intermediateCerts = '';
+                    foreach ($collection as $intermediate) {
+                        $intermediateCerts .= $intermediate . "\n";
+                    }
                     $intermediateFile = uniqid('intermediate');
-                    $files->create($intermediateFile, $intermediate);
-                    $untrusted .= ' -untrusted ' . escapeshellarg($files->resolvePath($intermediateFile));
-                }
+                    $files->create($intermediateFile, $intermediateCerts);
 
+                    $untrusted = sprintf(' -untrusted %s',
+                        escapeshellarg($files->resolvePath($intermediateFile)));
+                }
                 $command = sprintf(
                     'openssl verify -CAfile %s%s %s 2>&1',
                     escapeshellarg($files->resolvePath($caFile)),

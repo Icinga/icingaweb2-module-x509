@@ -336,11 +336,11 @@ msgstr "Keine Ergebnisse gefunden."
 
 #: ../../../../library/X509/CertificateDetails.php:63
 msgid "Not Valid After"
-msgstr "Nicht gültig vor"
+msgstr "Nicht gültig nach"
 
 #: ../../../../library/X509/CertificateDetails.php:61
 msgid "Not Valid Before"
-msgstr "Nicht gültig nach"
+msgstr "Nicht gültig vor"
 
 #: ../../../../library/X509/Paginator.php:338
 msgid "Pagination"

@@ -6,6 +6,7 @@ namespace Icinga\Module\X509;
 use Icinga\Application\Config;
 use Icinga\Application\Logger;
 use Icinga\Data\ConfigObject;
+use Icinga\Module\X509\React\StreamOptsCaptureConnector;
 use Icinga\Util\StringHelper;
 use ipl\Sql\Connection;
 use ipl\Sql\Expression;
@@ -15,6 +16,7 @@ use ipl\Sql\Update;
 use React\EventLoop\Factory;
 use React\Socket\ConnectionInterface;
 use React\Socket\Connector;
+use React\Socket\ConnectorInterface;
 use React\Socket\SecureConnector;
 use React\Socket\TimeoutConnector;
 
@@ -47,14 +49,15 @@ class Job
     private function getConnector($peerName)
     {
         $simpleConnector = new Connector($this->loop);
-        $secureConnector = new SecureConnector($simpleConnector, $this->loop, array(
+        $streamCaptureConnector = new StreamOptsCaptureConnector($simpleConnector);
+        $secureConnector = new SecureConnector($streamCaptureConnector, $this->loop, array(
             'verify_peer' => false,
             'verify_peer_name' => false,
             'capture_peer_cert_chain' => true,
             'SNI_enabled' => true,
             'peer_name' => $peerName
         ));
-        return new TimeoutConnector($secureConnector, 5.0, $this->loop);
+        return [new TimeoutConnector($secureConnector, 5.0, $this->loop), $streamCaptureConnector];
     }
 
     public static function binary($addr)
@@ -179,137 +182,44 @@ class Job
         $url = "tls://[{$target->ip}]:{$target->port}";
         Logger::debug("Connecting to %s", static::formatTarget($target));
         $this->pendingTargets++;
-        $this->getConnector($target->hostname)->connect($url)->then(
-            function (ConnectionInterface $conn) use ($target) {
+        /** @var ConnectorInterface $connector */
+        /** @var StreamOptsCaptureConnector $streamCapture */
+        list($connector, $streamCapture) = $this->getConnector($target->hostname);
+        $connector->connect($url)->then(
+            function (ConnectionInterface $conn) use ($target, $streamCapture) {
                 $this->finishTarget();
 
                 Logger::info("Connected to %s", static::formatTarget($target));
 
-                $stream = $conn->stream;
-                $options = stream_context_get_options($stream);
-
+                // Close connection in order to capture stream context options
                 $conn->close();
 
-                $chain = $options['ssl']['peer_certificate_chain'];
+                $capturedStreamOptions = $streamCapture->getCapturedStreamOptions();
 
-                if ($target->hostname === null) {
-                    $hostname = gethostbyaddr($target->ip);
-
-                    if ($hostname !== false) {
-                        $target->hostname = $hostname;
-                    }
-                }
-
-                $this->db->transaction(function () use ($target, $chain) {
-                    $row = $this->db->select(
-                        (new Select())
-                            ->columns(['id'])
-                            ->from('x509_target')
-                            ->where([
-                                'ip = ?' => static::binary($target->ip),
-                                'port = ?' => $target->port,
-                                'hostname = ?' => $target->hostname
-                            ])
-                    )->fetch();
-
-                    if ($row === false) {
-                        $this->db->insert(
-                            'x509_target',
-                            [
-                                'ip'       => static::binary($target->ip),
-                                'port'     => $target->port,
-                                'hostname' => $target->hostname
-                            ]
-                        );
-                        $targetId = $this->db->lastInsertId();
-                    } else {
-                        $targetId = $row['id'];
-                    }
-
-                    $chainUptodate = false;
-
-                    $lastChain = $this->db->select(
-                        (new Select())
-                            ->columns(['id'])
-                            ->from('x509_certificate_chain')
-                            ->where(['target_id = ?' => $targetId])
-                            ->orderBy('id', SORT_DESC)
-                            ->limit(1)
-                    )->fetch();
-
-                    if ($lastChain !== false) {
-                        $lastFingerprints = $this->db->select(
-                            (new Select())
-                                ->columns(['c.fingerprint'])
-                                ->from('x509_certificate_chain_link l')
-                                ->join('x509_certificate c', 'l.certificate_id = c.id')
-                                ->where(['l.certificate_chain_id = ?' => $lastChain[0]])
-                                ->orderBy('l.`order`')
-                        )->fetchAll();
-
-                        foreach ($lastFingerprints as &$lastFingerprint) {
-                            $lastFingerprint = $lastFingerprint[0];
-                        }
-
-                        $currentFingerprints = [];
-
-                        foreach ($chain as $cert) {
-                            $currentFingerprints[] = openssl_x509_fingerprint($cert, 'sha256', true);
-                        }
-
-                        $chainUptodate = $currentFingerprints === $lastFingerprints;
-                    }
-
-                    if ($chainUptodate) {
-                        $chainId = $lastChain[0];
-                    } else {
-                        $this->db->insert(
-                            'x509_certificate_chain',
-                            [
-                                'target_id' => $targetId,
-                                'length'    => count($chain)
-                            ]
-                        );
-
-                        $chainId = $this->db->lastInsertId();
-
-                        foreach ($chain as $index => $cert) {
-                            $certInfo = openssl_x509_parse($cert);
-
-                            $certId = CertificateUtils::findOrInsertCert($this->db, $cert, $certInfo);
-
-                            $this->db->insert(
-                                'x509_certificate_chain_link',
-                                [
-                                    'certificate_chain_id' => $chainId,
-                                    '`order`'              => $index,
-                                    'certificate_id'       => $certId
-                                ]
-                            );
-                        }
-                    }
-
-                    $this->db->update(
-                        'x509_target',
-                        ['latest_certificate_chain_id' => $chainId],
-                        ['id = ?' => $targetId]
-                    );
-                });
+                $this->processChain($target, $capturedStreamOptions['ssl']['peer_certificate_chain']);
             },
-            function (\Exception $exception) use ($target) {
+            function (\Exception $exception) use ($target, $streamCapture) {
                 Logger::debug("Cannot connect to server: %s", $exception->getMessage());
 
-                $this->db->update(
-                    'x509_target',
-                    ['latest_certificate_chain_id' => null],
-                    [
-                        'hostname = ?' => $target->hostname,
-                        'ip = ?'       => static::binary($target->ip),
-                        'port = ?'     => $target->port
-                    ]
-                );
-
                 $this->finishTarget();
+
+                $capturedStreamOptions = $streamCapture->getCapturedStreamOptions();
+
+                if (isset($capturedStreamOptions['ssl']['peer_certificate_chain'])) {
+                    // The scanned target presented its certificate chain despite throwing an error
+                    // This is the case for targets which require client certificates for example
+                    $this->processChain($target, $capturedStreamOptions['ssl']['peer_certificate_chain']);
+                } else {
+                    $this->db->update(
+                        'x509_target',
+                        ['latest_certificate_chain_id' => null],
+                        [
+                            'hostname = ?' => $target->hostname,
+                            'ip = ?'       => static::binary($target->ip),
+                            'port = ?'     => $target->port
+                        ]
+                    );
+                }
 
                 $step = max($this->totalTargets / 100, 1);
 
@@ -360,5 +270,112 @@ class Job
         $this->loop->run();
 
         return $this->totalTargets;
+    }
+
+    protected function processChain($target, $chain)
+    {
+        if ($target->hostname === null) {
+            $hostname = gethostbyaddr($target->ip);
+
+            if ($hostname !== false) {
+                $target->hostname = $hostname;
+            }
+        }
+
+        $this->db->transaction(function () use ($target, $chain) {
+            $row = $this->db->select(
+                (new Select())
+                    ->columns(['id'])
+                    ->from('x509_target')
+                    ->where([
+                        'ip = ?'        => static::binary($target->ip),
+                        'port = ?'      => $target->port,
+                        'hostname = ?'  => $target->hostname
+                    ])
+            )->fetch();
+
+            if ($row === false) {
+                $this->db->insert(
+                    'x509_target',
+                    [
+                        'ip'       => static::binary($target->ip),
+                        'port'     => $target->port,
+                        'hostname' => $target->hostname
+                    ]
+                );
+                $targetId = $this->db->lastInsertId();
+            } else {
+                $targetId = $row['id'];
+            }
+
+            $chainUptodate = false;
+
+            $lastChain = $this->db->select(
+                (new Select())
+                    ->columns(['id'])
+                    ->from('x509_certificate_chain')
+                    ->where(['target_id = ?' => $targetId])
+                    ->orderBy('id', SORT_DESC)
+                    ->limit(1)
+            )->fetch();
+
+            if ($lastChain !== false) {
+                $lastFingerprints = $this->db->select(
+                    (new Select())
+                        ->columns(['c.fingerprint'])
+                        ->from('x509_certificate_chain_link l')
+                        ->join('x509_certificate c', 'l.certificate_id = c.id')
+                        ->where(['l.certificate_chain_id = ?' => $lastChain[0]])
+                        ->orderBy('l.`order`')
+                )->fetchAll();
+
+                foreach ($lastFingerprints as &$lastFingerprint) {
+                    $lastFingerprint = $lastFingerprint[0];
+                }
+
+                $currentFingerprints = [];
+
+                foreach ($chain as $cert) {
+                    $currentFingerprints[] = openssl_x509_fingerprint($cert, 'sha256', true);
+                }
+
+                $chainUptodate = $currentFingerprints === $lastFingerprints;
+            }
+
+            if ($chainUptodate) {
+                $chainId = $lastChain[0];
+            } else {
+                $this->db->insert(
+                    'x509_certificate_chain',
+                    [
+                        'target_id' => $targetId,
+                        'length'    => count($chain)
+                    ]
+                );
+
+                $chainId = $this->db->lastInsertId();
+
+                foreach ($chain as $index => $cert) {
+                    $certInfo = openssl_x509_parse($cert);
+
+                    $certId = CertificateUtils::findOrInsertCert($this->db, $cert, $certInfo);
+
+                    $this->db->insert(
+                        'x509_certificate_chain_link',
+                        [
+                            'certificate_chain_id' => $chainId,
+                            '`order`'              => $index,
+                            'certificate_id'       => $certId
+                        ]
+                    );
+                }
+            }
+
+            $this->db->update(
+                'x509_target',
+                ['latest_certificate_chain_id' => $chainId],
+                ['id = ?' => $targetId]
+            );
+        });
     }
 }

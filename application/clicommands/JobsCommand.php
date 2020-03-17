@@ -33,8 +33,17 @@ class JobsCommand extends Command
 
         $db = $this->getDb();
 
+        $hasJobs = false;
+        $jobNames = [];
+
         foreach ($this->Config('jobs') as $name => $jobDescription) {
             $schedule = $jobDescription->get('schedule', $defaultSchedule);
+
+            if (in_array($name, $jobNames, true)) {
+                continue;
+            }
+
+            $jobNames[] = $name;
 
             if (! $schedule) {
                 Logger::debug("The job '%s' is not scheduled.", $name);
@@ -60,6 +69,15 @@ class JobsCommand extends Command
 
                     Logger::info("Checked %d certificate chain%s.", $verified, $verified !== 1 ? 's' : '');
                 }
+            });
+            $hasJobs = true;
+        }
+
+        if ($hasJobs === false) {
+            Logger::info("Adding an empty schedule");
+            $name = 'default';
+            $scheduler->add($name, '@hourly', function () {
+
             });
         }
 

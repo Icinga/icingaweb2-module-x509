@@ -9,13 +9,15 @@
   * [Icinga PHP Thirdparty](https://github.com/Icinga/icinga-php-thirdparty) (>= 0.10)
 * php-gmp
 * OpenSSL
-* MySQL or MariaDB
+* MySQL / MariaDB or PostgreSQL
 
 ## Database Setup
 
+### MySQL / MariaDB
+
 The module needs a MySQL/MariaDB database with the schema that's provided in the `etc/schema/mysql.schema.sql` file.
 
-You may use the following example command for creating the MySQL/MariaDB database. Please change the password:
+You can use the following sample command for creating the MySQL/MariaDB database. Please change the password:
 
 ```
 CREATE DATABASE x509;
@@ -26,6 +28,27 @@ After, you can import the schema using the following command:
 
 ```
 mysql -p -u root x509 < etc/schema/mysql.schema.sql
+```
+
+## PostgreSQL
+
+The module needs a PostgreSQL database with the schema that's provided in the `etc/schema/postgresql.schema.sql` file.
+
+You can use the following sample command for creating the PostgreSQL database. Please change the password:
+
+```sql
+CREATE USER x509 WITH PASSWORD 'secret';
+CREATE DATABASE x509
+  WITH OWNER x509
+  ENCODING 'UTF8'
+  LC_COLLATE = 'en_US.UTF-8'
+  LC_CTYPE = 'en_US.UTF-8';
+```
+
+After, you can import the schema using the following command:
+
+```
+psql -U x509 x509 -a -f etc/schema/postgresql.schema.sql
 ```
 
 ## Installation

@@ -72,7 +72,7 @@ class Controller extends \Icinga\Web\Controller
         switch ($desiredFormat) {
             case 'sql':
                 echo '<pre>'
-                    . var_export((new Sql\QueryBuilder())->assembleSelect($select), true)
+                    . var_export((new Sql\QueryBuilder($db->getAdapter()))->assembleSelect($select), true)
                     . '</pre>';
                 exit;
             case 'json':

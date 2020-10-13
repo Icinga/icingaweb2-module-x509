@@ -330,10 +330,10 @@ class CertificateUtils
                 $db->insert(
                     'x509_dn',
                     [
-                        'hash'    => $hash,
-                        '`key`'   => $key,
-                        '`value`' => $value,
-                        '`order`' => $index,
+                        'hash'    => $dbTool->marshalBinary($hash),
+                        $db->quoteIdentifier('key')   => $key,
+                        $db->quoteIdentifier('value') => $value,
+                        $db->quoteIdentifier('order') => $index,
                         'type'    => $type
                     ]
                 );

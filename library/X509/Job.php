@@ -326,7 +326,7 @@ class Job
                         ->from('x509_certificate_chain_link l')
                         ->join('x509_certificate c', 'l.certificate_id = c.id')
                         ->where(['l.certificate_chain_id = ?' => $lastChain[0]])
-                        ->orderBy('l.`order`')
+                        ->orderBy('l.order')
                 )->fetchAll();
 
                 foreach ($lastFingerprints as &$lastFingerprint) {
@@ -364,7 +364,7 @@ class Job
                         'x509_certificate_chain_link',
                         [
                             'certificate_chain_id' => $chainId,
-                            '`order`'              => $index,
+                            $this->db->quoteIdentifier('order') => $index,
                             'certificate_id'       => $certId
                         ]
                     );

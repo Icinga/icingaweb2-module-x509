@@ -188,6 +188,8 @@ class CertificateUtils
      */
     public static function findOrInsertCert(Connection $db, $cert)
     {
+        $dbTool = new DbTool($db);
+
         $certInfo = openssl_x509_parse($cert);
 
         $fingerprint = openssl_x509_fingerprint($cert, 'sha256', true);
@@ -196,7 +198,7 @@ class CertificateUtils
             (new Select())
                 ->columns(['id'])
                 ->from('x509_certificate')
-                ->where(['fingerprint = ?' => $fingerprint])
+                ->where(['fingerprint = ?' => $dbTool->marshalBinary($fingerprint)])
         )->fetch();
 
         if ($row !== false) {
@@ -227,9 +229,9 @@ class CertificateUtils
             'x509_certificate',
             [
                 'subject'             => CertificateUtils::shortNameFromDN($certInfo['subject']),
-                'subject_hash'        => $subjectHash,
+                'subject_hash'        => $dbTool->marshalBinary($subjectHash),
                 'issuer'              => CertificateUtils::shortNameFromDN($certInfo['issuer']),
-                'issuer_hash'         => $issuerHash,
+                'issuer_hash'         => $dbTool->marshalBinary($issuerHash),
                 'version'             => $certInfo['version'] + 1,
                 'self_signed'         => $subjectHash === $issuerHash ? 'yes' : 'no',
                 'ca'                  => $ca ? 'yes' : 'no',
@@ -239,9 +241,9 @@ class CertificateUtils
                 'signature_hash_algo' => array_pop($signature),   // ecdsa-with-SHA384
                 'valid_from'          => $certInfo['validFrom_time_t'],
                 'valid_to'            => $certInfo['validTo_time_t'],
-                'fingerprint'         => $fingerprint,
-                'serial'              => gmp_export($certInfo['serialNumber']),
-                'certificate'         => $der
+                'fingerprint'         => $dbTool->marshalBinary($fingerprint),
+                'serial'              => $dbTool->marshalBinary(gmp_export($certInfo['serialNumber'])),
+                'certificate'         => $dbTool->marshalBinary($der)
             ]
         );
 
@@ -252,8 +254,10 @@ class CertificateUtils
         return $certId;
     }
 
-    private static function insertSANs($db, $certId, array $certInfo)
-    {
+
+    private static function insertSANs($db, $certId, array $certInfo) {
+        $dbTool = new DbTool($db);
+
         if (isset($certInfo['extensions']['subjectAltName'])) {
             foreach (CertificateUtils::splitSANs($certInfo['extensions']['subjectAltName']) as $san) {
                 list($type, $value) = $san;
@@ -266,7 +270,7 @@ class CertificateUtils
                         ->columns('certificate_id')
                         ->where([
                             'certificate_id = ?' => $certId,
-                            'hash = ?' => $hash
+                            'hash = ?' => $dbTool->marshalBinary($hash)
                         ])
                 )->fetch();
 
@@ -279,7 +283,7 @@ class CertificateUtils
                     'x509_certificate_subject_alt_name',
                     [
                         'certificate_id' => $certId,
-                        'hash' => $hash,
+                        'hash' => $dbTool->marshalBinary($hash),
                         'type' => $type,
                         'value' => $value
                     ]
@@ -288,8 +292,10 @@ class CertificateUtils
         }
     }
 
-    private static function findOrInsertDn($db, $certInfo, $type)
-    {
+
+    private static function findOrInsertDn($db, $certInfo, $type) {
+        $dbTool = new DbTool($db);
+
         $dn = $certInfo[$type];
 
         $data = '';
@@ -310,7 +316,7 @@ class CertificateUtils
             (new Select())
                 ->from('x509_dn')
                 ->columns('hash')
-                ->where([ 'hash = ?' => $hash, 'type = ?' => $type ])
+                ->where([ 'hash = ?' => $dbTool->marshalBinary($hash), 'type = ?' => $type ])
                 ->limit(1)
         )->fetch();
 
@@ -353,6 +359,8 @@ class CertificateUtils
      */
     public static function verifyCertificates(Connection $db)
     {
+        $dbTool = new DbTool($db);
+
         $files = new TemporaryLocalFileStorage();
 
         $caFile = uniqid('ca');
@@ -367,7 +375,7 @@ class CertificateUtils
         $contents = [];
 
         foreach ($cas as $ca) {
-            $contents[] = static::der2pem($ca['certificate']);
+            $contents[] = static::der2pem(DbTool::unmarshalBinary($ca['certificate']));
         }
 
         if (empty($contents)) {
@@ -403,7 +411,7 @@ class CertificateUtils
                 $collection = [];
 
                 foreach ($certs as $cert) {
-                    $collection[] = CertificateUtils::der2pem($cert['certificate']);
+                    $collection[] = CertificateUtils::der2pem(DbTool::unmarshalBinary($cert['certificate']));
                 }
 
                 $certFile = uniqid('cert');

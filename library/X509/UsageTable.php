@@ -33,6 +33,7 @@ class UsageTable extends DataTable
             'ip' => [
                 'label' => mt('x509', 'IP'),
                 'renderer' => function ($ip) {
+                    $ip = DbTool::unmarshalBinary($ip);
                     $ipv4 = ltrim($ip, "\0");
                     if (strlen($ipv4) === 4) {
                         $ip = $ipv4;

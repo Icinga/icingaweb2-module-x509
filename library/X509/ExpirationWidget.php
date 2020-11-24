@@ -76,7 +76,7 @@ class ExpirationWidget extends BaseHtmlElement
                 ['class' => 'progress-bar dont-print'],
                 Html::tag(
                     'div',
-                    ['style' => "width: {$ratio}%;", 'class' => "bg-stateful {$state}"],
+                    ['style' => sprintf('width: %.2F%%;', $ratio), 'class' => "bg-stateful {$state}"],
                     new HtmlString('&nbsp;')
                 )
             )

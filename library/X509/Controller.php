@@ -25,11 +25,14 @@ class Controller extends \Icinga\Web\Controller
             $this->Config()->get('backend', 'resource')
         ));
 
-        $config->options = [
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION SQL_MODE='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE"
-                . ",ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'"
+        $options = [
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ];
+        if ($config->db === 'mysql') {
+            $options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET SESSION SQL_MODE='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE"
+                . ",NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'";
+        }
+        $config->options = $options;
 
         $conn = new Sql\Connection($config);
 
@@ -72,7 +75,7 @@ class Controller extends \Icinga\Web\Controller
         switch ($desiredFormat) {
             case 'sql':
                 echo '<pre>'
-                    . var_export((new Sql\QueryBuilder())->assembleSelect($select), true)
+                    . var_export((new Sql\QueryBuilder($db->getAdapter()))->assembleSelect($select), true)
                     . '</pre>';
                 exit;
             case 'json':

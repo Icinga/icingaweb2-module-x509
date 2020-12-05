@@ -3,37 +3,18 @@
 
 namespace Icinga\Module\X509;
 
-use ReflectionClass;
 use Icinga\Data\ConfigObject;
 use Icinga\Data\Db\DbConnection;
 use Icinga\Data\Filter\Filter;
+use ipl\Sql\Connection;
 use ipl\Sql\Select;
 
 /**
  * @internal
  */
-class Quoter
-{
-    public function quote($identifier, $quoteCharacter = '"')
-    {
-        if (strlen($quoteCharacter) === 1) {
-            return $quoteCharacter . $identifier . $quoteCharacter;
-        } else {
-            return $quoteCharacter[0] . $identifier . $quoteCharacter[1];
-        }
-    }
-}
-
-/**
- * @internal
- */
-class NoImplicitConnectDbConnection extends DbConnection
+class RenderFilterCallbackDbConnection extends DbConnection
 {
     protected $renderFilterCallback;
-
-    public function __construct(ConfigObject $config = null)
-    {
-    }
 
     public function setRenderFilterCallback(callable $callback = null)
     {
@@ -63,20 +44,22 @@ class NoImplicitConnectDbConnection extends DbConnection
  */
 class SqlFilter
 {
-    public static function apply(Select $select, Filter $filter = null, callable $renderFilterCallback = null)
+    protected $conn;
+
+    public function __construct(Connection $conn)
+    {
+        $this->conn = new RenderFilterCallbackDbConnection(new ConfigObject((array) $conn->getConfig()));
+    }
+
+    public function apply(Select $select, Filter $filter = null, callable $renderFilterCallback = null)
     {
         if ($filter === null || $filter->isEmpty()) {
             return;
         }
 
         if (! $filter->isEmpty()) {
-            $conn = (new NoImplicitConnectDbConnection())->setRenderFilterCallback($renderFilterCallback);
-
-            $reflection = new ReflectionClass('\Icinga\Data\Db\DbConnection');
-
-            $dbAdapter = $reflection->getProperty('dbAdapter');
-            $dbAdapter->setAccessible(true);
-            $dbAdapter->setValue($conn, new Quoter());
+            $conn = clone $this->conn;
+            $conn->setRenderFilterCallback($renderFilterCallback);
 
             $select->where($conn->renderFilter($filter));
         }

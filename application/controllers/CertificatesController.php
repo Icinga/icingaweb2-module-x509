@@ -78,7 +78,7 @@ class CertificatesController extends Controller
             ['subject', 'issuer'],
             ['format']
         );
-        SqlFilter::apply($select, $filterAdapter->getFilter(), function (FilterExpression $filter) {
+        (new SqlFilter($conn))->apply($select, $filterAdapter->getFilter(), function (FilterExpression $filter) {
             switch ($filter->getColumn())
             {
                 case 'issuer_hash':

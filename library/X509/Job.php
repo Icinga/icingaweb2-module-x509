@@ -294,7 +294,11 @@ class Job
                 $this->db->update(
                     'x509_target',
                     ['latest_certificate_chain_id' => null],
-                    ['ip = ?' => static::binary($target->ip), 'port = ?' => $target->port]
+                    [
+                        'hostname = ?' => $target->hostname,
+                        'ip = ?'       => static::binary($target->ip),
+                        'port = ?'     => $target->port
+                    ]
                 );
 
                 $this->finishTarget();

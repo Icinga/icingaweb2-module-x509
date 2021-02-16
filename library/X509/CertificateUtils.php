@@ -439,7 +439,7 @@ class CertificateUtils
                 if (!empty($match)) {
                     $set = ['invalid_reason' => trim($match[1])];
                 } else {
-                    $set = ['valid' => 'yes'];
+                    $set = ['valid' => 'yes', 'invalid_reason' => null];
                 }
 
                 $db->update(

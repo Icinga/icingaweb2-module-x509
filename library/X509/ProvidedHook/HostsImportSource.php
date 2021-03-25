@@ -9,22 +9,41 @@ class HostsImportSource extends x509ImportSource
 {
     public function fetchData()
     {
-        $targets = (new Sql\Select())
-            ->from('x509_target t')
-            ->columns([
-                'host_ip'       => 't.ip',
-                'host_name'     => 't.hostname',
-                'host_ports'    => 'GROUP_CONCAT(DISTINCT t.port SEPARATOR ",")'
-            ])
-            ->join('x509_certificate_chain cc', 'cc.id = t.latest_certificate_chain_id')
-            ->join('x509_certificate_chain_link ccl', 'ccl.certificate_chain_id = cc.id')
-            ->join('x509_certificate c', 'c.id = ccl.certificate_id')
-            ->where(['ccl.order = ?' => 0])
-            ->groupBy(['t.ip', 't.hostname']);
+        if ($this->getDb()->getConfig()->db === 'pgsql') {
+            $targets = (new Sql\Select())
+                ->from('x509_target t')
+                ->columns([
+                    'host_ip'       => 'encode(t.ip, \'hex\')',
+                    'host_name'     => 't.hostname',
+                    'host_ports'    => 'array_to_string(array_agg(DISTINCT t.port),  \',\')'
+                ])
+                ->join('x509_certificate_chain cc', 'cc.id = t.latest_certificate_chain_id')
+                ->join('x509_certificate_chain_link ccl', 'ccl.certificate_chain_id = cc.id')
+                ->join('x509_certificate c', 'c.id = ccl.certificate_id')
+                ->where(['ccl.order = ?' => 0])
+                ->groupBy(['t.ip', 't.hostname']);
+        } else {
+            $targets = (new Sql\Select())
+                ->from('x509_target t')
+                ->columns([
+                    'host_ip'       => 't.ip',
+                    'host_name'     => 't.hostname',
+                    'host_ports'    => 'GROUP_CONCAT(DISTINCT t.port SEPARATOR ",")'
+                ])
+                ->join('x509_certificate_chain cc', 'cc.id = t.latest_certificate_chain_id')
+                ->join('x509_certificate_chain_link ccl', 'ccl.certificate_chain_id = cc.id')
+                ->join('x509_certificate c', 'c.id = ccl.certificate_id')
+                ->where(['ccl.order = ?' => 0])
+                ->groupBy(['t.ip', 't.hostname']);
+        }
 
         $results = [];
         $foundDupes = [];
         foreach ($this->getDb()->select($targets) as $target) {
+            if ($this->getDb()->getConfig()->db === 'pgsql') {
+                $target->host_ip = hex2bin($target->host_ip);
+            }
+
             list($ipv4, $ipv6) = $this->transformIpAddress($target->host_ip);
             $target->host_ip = $ipv4 ?: $ipv6;
             $target->host_address = $ipv4;

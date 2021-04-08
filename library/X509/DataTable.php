@@ -55,7 +55,6 @@ class DataTable extends BaseHtmlElement
 
     protected function createColumns()
     {
-
     }
 
     public function renderHeader()
@@ -121,7 +120,8 @@ class DataTable extends BaseHtmlElement
         if (empty($rows)) {
             $colspan = count($this->columns);
 
-            $rows = Html::tag('tr',
+            $rows = Html::tag(
+                'tr',
                 Html::tag(
                     'td',
                     ['colspan' => $colspan],

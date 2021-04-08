@@ -44,7 +44,8 @@ class Job
         $this->name = $name;
     }
 
-    private function getConnector($peerName) {
+    private function getConnector($peerName)
+    {
         $simpleConnector = new Connector($this->loop);
         $secureConnector = new SecureConnector($simpleConnector, $this->loop, array(
             'verify_peer' => false,
@@ -61,11 +62,13 @@ class Job
         return str_pad(inet_pton($addr), 16, "\0", STR_PAD_LEFT);
     }
 
-    private static function addrToNumber($addr) {
+    private static function addrToNumber($addr)
+    {
         return gmp_import(static::binary($addr));
     }
 
-    private static function numberToAddr($num, $ipv6 = true) {
+    private static function numberToAddr($num, $ipv6 = true)
+    {
         if ((bool) $ipv6) {
             return inet_ntop(str_pad(gmp_export($num), 16, "\0", STR_PAD_LEFT));
         } else {
@@ -126,7 +129,8 @@ class Job
         }
     }
 
-    private function updateJobStats($finished = false) {
+    private function updateJobStats($finished = false)
+    {
         $fields = ['finished_targets' => $this->finishedTargets];
 
         if ($finished) {
@@ -140,7 +144,8 @@ class Job
         );
     }
 
-    private static function formatTarget($target) {
+    private static function formatTarget($target)
+    {
         $result = "tls://[{$target->ip}]:{$target->port}";
 
         if ($target->hostname !== null) {
@@ -150,8 +155,7 @@ class Job
         return $result;
     }
 
-
-    function finishTarget()
+    private function finishTarget()
     {
         $this->pendingTargets--;
         $this->finishedTargets++;
@@ -196,12 +200,16 @@ class Job
                     }
                 }
 
-                $this->db->transaction(function () use($target, $chain) {
+                $this->db->transaction(function () use ($target, $chain) {
                     $row = $this->db->select(
                         (new Select())
                             ->columns(['id'])
                             ->from('x509_target')
-                            ->where(['ip = ?' => static::binary($target->ip), 'port = ?' => $target->port, 'hostname = ?' => $target->hostname ])
+                            ->where([
+                                'ip = ?' => static::binary($target->ip),
+                                'port = ?' => $target->port,
+                                'hostname = ?' => $target->hostname
+                            ])
                     )->fetch();
 
                     if ($row === false) {
@@ -288,7 +296,7 @@ class Job
                     );
                 });
             },
-            function (\Exception $exception) use($target) {
+            function (\Exception $exception) use ($target) {
                 Logger::debug("Cannot connect to server: %s", $exception->getMessage());
 
                 $this->db->update(
@@ -325,7 +333,6 @@ class Job
 
         if ($this->totalTargets == 0) {
             return null;
-
         }
 
         $this->targets = static::generateTargets($this->jobDescription, $this->snimap);

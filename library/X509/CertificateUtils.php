@@ -7,10 +7,7 @@ use Exception;
 use Icinga\Application\Logger;
 use Icinga\File\Storage\TemporaryLocalFileStorage;
 use ipl\Sql\Connection;
-use ipl\Sql\Insert;
 use ipl\Sql\Select;
-use ipl\Sql\Update;
-
 
 class CertificateUtils
 {
@@ -255,7 +252,8 @@ class CertificateUtils
         return $certId;
     }
 
-    private static function insertSANs($db, $certId, array $certInfo) {
+    private static function insertSANs($db, $certId, array $certInfo)
+    {
         if (isset($certInfo['extensions']['subjectAltName'])) {
             foreach (CertificateUtils::splitSANs($certInfo['extensions']['subjectAltName']) as $san) {
                 list($type, $value) = $san;
@@ -290,7 +288,8 @@ class CertificateUtils
         }
     }
 
-    private static function findOrInsertDn($db, $certInfo, $type) {
+    private static function findOrInsertDn($db, $certInfo, $type)
+    {
         $dn = $certInfo[$type];
 
         $data = '';

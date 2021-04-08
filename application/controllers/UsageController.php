@@ -83,8 +83,7 @@ class UsageController extends Controller
             ['format']
         );
         SqlFilter::apply($select, $filterAdapter->getFilter(), function (FilterExpression $filter) {
-            switch ($filter->getColumn())
-            {
+            switch ($filter->getColumn()) {
                 case 'ip':
                     $value = $filter->getExpression();
 
@@ -117,6 +116,8 @@ class UsageController extends Controller
                     if (! is_numeric($expr)) {
                         return $filter->setExpression(strtotime($expr));
                     }
+
+                    // expression doesn't need changing
                 default:
                     return false;
             }
@@ -124,7 +125,8 @@ class UsageController extends Controller
 
         $formatQuery = clone $select;
         $formatQuery->resetColumns()->columns([
-            'valid', 'hostname', 'ip', 'port', 'subject', 'issuer', 'version', 'self_signed', 'ca', 'trusted', 'pubkey_algo',  'pubkey_bits',
+            'valid', 'hostname', 'ip', 'port', 'subject', 'issuer', 'version',
+            'self_signed', 'ca', 'trusted', 'pubkey_algo',  'pubkey_bits',
             'signature_algo', 'signature_hash_algo', 'valid_from', 'valid_to'
         ]);
 

@@ -22,4 +22,12 @@
             <property name="absoluteLineLimit" value="0"/>
         </properties>
     </rule>
+
+    <rule ref="PSR1.Classes.ClassDeclaration.MultipleClasses">
+        <exclude-pattern>library/X509/SqlFilter\.php</exclude-pattern>
+    </rule>
+
+    <rule ref="Squiz.Classes.ValidClassName.NotCamelCaps">
+        <exclude-pattern>library/X509/ProvidedHook/x509ImportSource\.php</exclude-pattern>
+    </rule>
 </ruleset>

@@ -61,7 +61,10 @@ class ChainController extends Controller
             $valid->add(Html::tag('p', $this->translate('Certificate chain is valid.')));
         } else {
             $valid->getAttributes()->add('class', '-invalid');
-            $valid->add(Html::tag('p', sprintf($this->translate('Certificate chain is invalid: %s.'), $chain['invalid_reason'])));
+            $valid->add(Html::tag('p', sprintf(
+                $this->translate('Certificate chain is invalid: %s.'),
+                $chain['invalid_reason']
+            )));
         }
 
         $certsSelect = (new Sql\Select())

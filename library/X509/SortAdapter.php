@@ -43,5 +43,4 @@ class SortAdapter implements Sortable
     {
         return $this->select->getOrderBy();
     }
-
 }

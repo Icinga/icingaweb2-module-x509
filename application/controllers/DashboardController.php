@@ -24,13 +24,14 @@ class DashboardController extends Controller
             return;
         }
 
-        $byCa = $db->select((new Select())
-            ->from('x509_certificate i')
-            ->columns(['i.subject', 'cnt' => 'COUNT(*)'])
-            ->join('x509_certificate c', ['c.issuer_hash = i.subject_hash', 'i.ca = ?' => 'yes'])
-            ->groupBy(['i.id'])
-            ->orderBy('cnt', SORT_DESC)
-            ->limit(5)
+        $byCa = $db->select(
+            (new Select())
+                ->from('x509_certificate i')
+                ->columns(['i.subject', 'cnt' => 'COUNT(*)'])
+                ->join('x509_certificate c', ['c.issuer_hash = i.subject_hash', 'i.ca = ?' => 'yes'])
+                ->groupBy(['i.id'])
+                ->orderBy('cnt', SORT_DESC)
+                ->limit(5)
         );
 
         $this->view->byCa = (new Donut())
@@ -46,16 +47,17 @@ class DashboardController extends Controller
                 );
             });
 
-        $duration = $db->select((new Select())
-            ->from('x509_certificate')
-            ->columns([
-                'duration' => 'valid_to - valid_from',
-                'cnt' => 'COUNT(*)'
-            ])
-            ->where(['ca = ?' => 'no'])
-            ->groupBy(['duration'])
-            ->orderBy('cnt', SORT_DESC)
-            ->limit(5)
+        $duration = $db->select(
+            (new Select())
+                ->from('x509_certificate')
+                ->columns([
+                    'duration' => 'valid_to - valid_from',
+                    'cnt' => 'COUNT(*)'
+                ])
+                ->where(['ca = ?' => 'no'])
+                ->groupBy(['duration'])
+                ->orderBy('cnt', SORT_DESC)
+                ->limit(5)
         );
 
         $this->view->duration = (new Donut())
@@ -73,12 +75,13 @@ class DashboardController extends Controller
                 );
             });
 
-        $keyStrength = $db->select((new Select())
-            ->from('x509_certificate')
-            ->columns(['pubkey_algo', 'pubkey_bits', 'cnt' => 'COUNT(*)'])
-            ->groupBy(['pubkey_algo', 'pubkey_bits'])
-            ->orderBy('cnt', SORT_DESC)
-            ->limit(5)
+        $keyStrength = $db->select(
+            (new Select())
+                ->from('x509_certificate')
+                ->columns(['pubkey_algo', 'pubkey_bits', 'cnt' => 'COUNT(*)'])
+                ->groupBy(['pubkey_algo', 'pubkey_bits'])
+                ->orderBy('cnt', SORT_DESC)
+                ->limit(5)
         );
 
         $this->view->keyStrength = (new Donut())
@@ -100,12 +103,13 @@ class DashboardController extends Controller
                 );
             });
 
-        $sigAlgos = $db->select((new Select())
-            ->from('x509_certificate')
-            ->columns(['signature_algo', 'signature_hash_algo', 'cnt' => 'COUNT(*)'])
-            ->groupBy(['signature_algo', 'signature_hash_algo'])
-            ->orderBy('cnt', SORT_DESC)
-            ->limit(5)
+        $sigAlgos = $db->select(
+            (new Select())
+                ->from('x509_certificate')
+                ->columns(['signature_algo', 'signature_hash_algo', 'cnt' => 'COUNT(*)'])
+                ->groupBy(['signature_algo', 'signature_hash_algo'])
+                ->orderBy('cnt', SORT_DESC)
+                ->limit(5)
         );
 
         $this->view->sigAlgos = (new Donut())

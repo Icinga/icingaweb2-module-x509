@@ -85,7 +85,11 @@ class Controller extends \Icinga\Web\Controller
                         'inline; filename=' . $this->getRequest()->getActionName() . '.json'
                     )
                     ->appendBody(
-                        Json::encode($callback !== null ? iterator_to_array($callback($db->select($select))) : $db->select($select)->fetchAll())
+                        Json::encode(
+                            $callback !== null
+                                ? iterator_to_array($callback($db->select($select)))
+                                : $db->select($select)->fetchAll()
+                        )
                     )
                     ->sendResponse();
                 exit;
@@ -99,7 +103,9 @@ class Controller extends \Icinga\Web\Controller
                         'attachment; filename=' . $this->getRequest()->getActionName() . '.csv'
                     )
                     ->appendBody(
-                        (string) Csv::fromQuery($callback !== null ? $callback($db->select($select)) : $db->select($select))
+                        (string) Csv::fromQuery(
+                            $callback !== null ? $callback($db->select($select)) : $db->select($select)
+                        )
                     )
                     ->sendResponse();
                 exit;

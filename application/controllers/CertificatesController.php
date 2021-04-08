@@ -79,8 +79,7 @@ class CertificatesController extends Controller
             ['format']
         );
         SqlFilter::apply($select, $filterAdapter->getFilter(), function (FilterExpression $filter) {
-            switch ($filter->getColumn())
-            {
+            switch ($filter->getColumn()) {
                 case 'issuer_hash':
                     $value = $filter->getExpression();
 
@@ -103,6 +102,8 @@ class CertificatesController extends Controller
                     if (! is_numeric($expr)) {
                         return $filter->setExpression(strtotime($expr));
                     }
+
+                    // expression doesn't need changing
                 default:
                     return false;
             }

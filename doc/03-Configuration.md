@@ -91,7 +91,7 @@ vi /etc/crontab
 [...]
 
 # Runs job 'lan' daily at 2:30 AM
-30 2 * * *   wwwdata   icingacli x509 scan --job lan
+30 2 * * *   www-data   icingacli x509 scan --job lan
 ```
 
 ## Server Name Indication

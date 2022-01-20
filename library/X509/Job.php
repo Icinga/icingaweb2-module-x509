@@ -309,7 +309,7 @@ class Job
 
                 $step = max($this->totalTargets / 100, 1);
 
-                if ($this->finishedTargets % $step == 0) {
+                if ($this->finishedTargets % (int) $step == 0) {
                     $this->updateJobStats();
                 }
                 //$loop->stop();

@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'lipl\\Pagination\\' => array($vendorDir . '/ipl/pagination/src'),
+    'Webmozart\\Assert\\' => array($vendorDir . '/webmozart/assert/src'),
+    'Symfony\\Polyfill\\Ctype\\' => array($vendorDir . '/symfony/polyfill-ctype'),
     'Cron\\' => array($vendorDir . '/dragonmantank/cron-expression/src/Cron'),
 );

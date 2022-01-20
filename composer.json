@@ -1,18 +1,6 @@
 {
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/lippserd/ipl-pagination",
-            "no-api": true
-        }
-    ],
     "require": {
-        "ipl/pagination": "dev-master",
         "dragonmantank/cron-expression": "^1.2.1"
-    },
-    "replace": {
-        "ipl/html": "*",
-        "ipl/stdlib": "*"
     },
     "scripts": {
         "git-archive": "git archive --format=tar --prefix=x509/ HEAD >icingaweb2-module-x509.tar && tar --transform 's,^,x509/,' --exclude-vcs --exclude '.*' -rf icingaweb2-module-x509.tar vendor composer.lock && gzip -f icingaweb2-module-x509.tar"

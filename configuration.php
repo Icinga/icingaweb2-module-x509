@@ -37,4 +37,4 @@ $this->provideConfigTab('sni', array(
     'url' => 'sni'
 ));
 
-$this->provideCssFile('icons.css');
+$this->provideCssFile('icons.less');

@@ -87,7 +87,7 @@ class CertificateDetails extends BaseHtmlElement
         ]);
 
         $this->add([
-            Html::tag('h2', [Html::tag('i', ['class' => 'icon x509-icon-cert']), $this->cert['subject']]),
+            Html::tag('h2', [Html::tag('i', ['class' => 'x509-icon-cert']), $this->cert['subject']]),
             Html::tag('h3', mt('x509', 'Subject Name')),
             $subject,
             Html::tag('h3', mt('x509', 'Issuer Name')),

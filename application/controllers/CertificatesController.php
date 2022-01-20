@@ -10,10 +10,9 @@ use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\FilterAdapter;
 use Icinga\Module\X509\SortAdapter;
 use Icinga\Module\X509\SqlFilter;
-use Icinga\Web\Url;
-use lipl\Pagination\Adapter\SqlAdapter;
-use lipl\Pagination\Paginator;
+use ipl\Web\Control\PaginationControl;
 use ipl\Sql;
+use ipl\Web\Url;
 
 class CertificatesController extends Controller
 {
@@ -38,7 +37,8 @@ class CertificatesController extends Controller
                 'c.valid_from', 'c.valid_to',
             ]);
 
-        $this->view->paginator = new Paginator(new SqlAdapter($conn, $select), Url::fromRequest());
+        $this->view->paginator = new PaginationControl(new Sql\Cursor($conn, $select), Url::fromRequest());
+        $this->view->paginator->apply();
 
         $sortAndFilterColumns = [
             'subject' => $this->translate('Certificate'),

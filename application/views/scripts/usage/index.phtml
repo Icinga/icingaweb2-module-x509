@@ -1,7 +1,7 @@
 <?php if (! $this->compact): ?>
 <div class="controls">
     <?= $this->tabs ?>
-    <?= /** @var \Icinga\Module\X509\Paginator $paginator */ $paginator->render() ?>
+    <?= $this->paginator ?>
     <div class="sort-controls-container">
         <?= $this->limiter ?>
         <?= $this->sortBox ?>

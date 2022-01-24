@@ -1,5 +1,4 @@
 Module: Certificate Monitoring
 Version: 1.0.0
-Depends: ipl (>= 0.1)
-Depends: reactbundle (>= 0.4)
+Depends: reactbundle (>=0.9), ipl (>=0.5)
 Description: Scan and view X.509 certificate usage

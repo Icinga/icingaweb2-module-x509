@@ -11,10 +11,9 @@ use Icinga\Module\X509\Job;
 use Icinga\Module\X509\SortAdapter;
 use Icinga\Module\X509\SqlFilter;
 use Icinga\Module\X509\UsageTable;
-use Icinga\Web\Url;
-use lipl\Pagination\Adapter\SqlAdapter;
-use lipl\Pagination\Paginator;
+use ipl\Web\Control\PaginationControl;
 use ipl\Sql;
+use ipl\Web\Url;
 
 class UsageController extends Controller
 {
@@ -59,7 +58,8 @@ class UsageController extends Controller
             'expires' => $this->translate('Expires')
         ];
 
-        $this->view->paginator = new Paginator(new SqlAdapter($conn, $select), Url::fromRequest());
+        $this->view->paginator = new PaginationControl(new Sql\Cursor($conn, $select), Url::fromRequest());
+        $this->view->paginator->apply();
 
         $this->setupSortControl(
             $sortAndFilterColumns,

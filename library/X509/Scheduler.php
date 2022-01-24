@@ -24,7 +24,7 @@ class Scheduler
 
         $now = new \DateTime();
 
-        $expression = CronExpression::factory($cronSchedule);
+        $expression = new CronExpression($cronSchedule);
 
         if ($expression->isDue($now)) {
             $this->loop->futureTick($callback);

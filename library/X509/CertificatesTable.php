@@ -37,7 +37,7 @@ class CertificatesTable extends DataTable
 
                     return Html::tag(
                         'i',
-                        ['class' => 'icon x509-icon-ca', 'title' => mt('x509', 'Is Certificate Authority')]
+                        ['class' => 'x509-icon-ca', 'title' => mt('x509', 'Is Certificate Authority')]
                     );
                 }
             ],
@@ -51,7 +51,7 @@ class CertificatesTable extends DataTable
 
                     return Html::tag(
                         'i',
-                        ['class' => 'icon x509-icon-self-signed', 'title' => mt('x509', 'Is Self-Signed')]
+                        ['class' => 'x509-icon-self-signed', 'title' => mt('x509', 'Is Self-Signed')]
                     );
                 }
             ],

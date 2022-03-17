@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Cron;
 
 use DateTime;
 use DateTimeInterface;
 
 /**
- * Day of month field.  Allows: * , / - ? L W.
+ * Day of month field.  Allows: * , / - ? L W
  *
  * 'L' stands for "last" and specifies the last day of the month.
  *
@@ -28,33 +26,28 @@ use DateTimeInterface;
 class DayOfMonthField extends AbstractField
 {
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     protected $rangeStart = 1;
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     protected $rangeEnd = 31;
 
     /**
-     * Get the nearest day of the week for a given day in a month.
+     * Get the nearest day of the week for a given day in a month
      *
-     * @param int $currentYear Current year
+     * @param int $currentYear  Current year
      * @param int $currentMonth Current month
-     * @param int $targetDay Target day of the month
+     * @param int $targetDay    Target day of the month
      *
-     * @return \DateTime|null Returns the nearest date
+     * @return \DateTime Returns the nearest date
      */
-    private static function getNearestWeekday(int $currentYear, int $currentMonth, int $targetDay): ?DateTime
+    private static function getNearestWeekday($currentYear, $currentMonth, $targetDay)
     {
-        $tday = str_pad((string) $targetDay, 2, '0', STR_PAD_LEFT);
-        $target = DateTime::createFromFormat('Y-m-d', "${currentYear}-${currentMonth}-${tday}");
-
-        if ($target === false) {
-            return null;
-        }
-
+        $tday = str_pad($targetDay, 2, '0', STR_PAD_LEFT);
+        $target = DateTime::createFromFormat('Y-m-d', "$currentYear-$currentMonth-$tday");
         $currentWeekday = (int) $target->format('N');
 
         if ($currentWeekday < 6) {
@@ -62,93 +55,81 @@ class DayOfMonthField extends AbstractField
         }
 
         $lastDayOfMonth = $target->format('t');
-        foreach ([-1, 1, -2, 2] as $i) {
+
+        foreach (array(-1, 1, -2, 2) as $i) {
             $adjusted = $targetDay + $i;
             if ($adjusted > 0 && $adjusted <= $lastDayOfMonth) {
                 $target->setDate($currentYear, $currentMonth, $adjusted);
-
-                if ((int) $target->format('N') < 6 && (int) $target->format('m') === $currentMonth) {
+                if ($target->format('N') < 6 && $target->format('m') == $currentMonth) {
                     return $target;
                 }
             }
         }
-
-        return null;
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    public function isSatisfiedBy(DateTimeInterface $date, $value, bool $invert): bool
+    public function isSatisfiedBy(DateTimeInterface $date, $value)
     {
         // ? states that the field value is to be skipped
-        if ('?' === $value) {
+        if ($value == '?') {
             return true;
         }
 
         $fieldValue = $date->format('d');
 
         // Check to see if this is the last day of the month
-        if ('L' === $value) {
-            return $fieldValue === $date->format('t');
+        if ($value == 'L') {
+            return $fieldValue == $date->format('t');
         }
 
         // Check to see if this is the nearest weekday to a particular value
         if (strpos($value, 'W')) {
             // Parse the target day
-            $targetDay = (int) substr($value, 0, strpos($value, 'W'));
+            $targetDay = substr($value, 0, strpos($value, 'W'));
             // Find out if the current day is the nearest day of the week
-            $nearest = self::getNearestWeekday(
-                (int) $date->format('Y'),
-                (int) $date->format('m'),
+            return $date->format('j') == self::getNearestWeekday(
+                $date->format('Y'),
+                $date->format('m'),
                 $targetDay
-            );
-            if ($nearest) {
-                return $date->format('j') === $nearest->format('j');
-            }
-
-            throw new \RuntimeException('Unable to return nearest weekday');
+            )->format('j');
         }
 
-        return $this->isSatisfied((int) $date->format('d'), $value);
+        return $this->isSatisfied($date->format('d'), $value);
     }
 
     /**
      * @inheritDoc
      *
-     * @param \DateTime|\DateTimeImmutable $date
+     * @param \DateTime|\DateTimeImmutable &$date
      */
-    public function increment(DateTimeInterface &$date, $invert = false, $parts = null): FieldInterface
+    public function increment(DateTimeInterface &$date, $invert = false)
     {
-        if (! $invert) {
-            $date = $date->add(new \DateInterval('P1D'));
-            $date = $date->setTime(0, 0);
+        if ($invert) {
+            $date = $date->modify('previous day')->setTime(23, 59);
         } else {
-            $date = $date->sub(new \DateInterval('P1D'));
-            $date = $date->setTime(23, 59);
+            $date = $date->modify('next day')->setTime(0, 0);
         }
 
         return $this;
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    public function validate(string $value): bool
+    public function validate($value)
     {
         $basicChecks = parent::validate($value);
 
         // Validate that a list don't have W or L
-        if (false !== strpos($value, ',') && (false !== strpos($value, 'W') || false !== strpos($value, 'L'))) {
+        if (strpos($value, ',') !== false && (strpos($value, 'W') !== false || strpos($value, 'L') !== false)) {
             return false;
         }
 
         if (!$basicChecks) {
-            if ('?' === $value) {
-                return true;
-            }
 
-            if ('L' === $value) {
+            if ($value === 'L') {
                 return true;
             }
 

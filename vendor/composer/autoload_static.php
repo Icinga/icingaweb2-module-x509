@@ -6,19 +6,7 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit52105223ed18fb0487ba02f5d0fcfd9e
 {
-    public static $files = array (
-        '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
-    );
-
     public static $prefixLengthsPsr4 = array (
-        'W' => 
-        array (
-            'Webmozart\\Assert\\' => 17,
-        ),
-        'S' => 
-        array (
-            'Symfony\\Polyfill\\Ctype\\' => 23,
-        ),
         'C' => 
         array (
             'Cron\\' => 5,
@@ -26,14 +14,6 @@ class ComposerStaticInit52105223ed18fb0487ba02f5d0fcfd9e
     );
 
     public static $prefixDirsPsr4 = array (
-        'Webmozart\\Assert\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/webmozart/assert/src',
-        ),
-        'Symfony\\Polyfill\\Ctype\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
-        ),
         'Cron\\' => 
         array (
             0 => __DIR__ . '/..' . '/dragonmantank/cron-expression/src/Cron',

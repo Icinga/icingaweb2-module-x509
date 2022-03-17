@@ -3,7 +3,7 @@
 ## Requirements
 
 * Icinga Web 2 (&gt;= 2.7)
-* PHP (&gt;= 7.2)
+* PHP (&gt;= 7.0)
 * php-gmp
 * OpenSSL
 * MySQL or MariaDB

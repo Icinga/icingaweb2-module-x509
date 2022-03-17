@@ -88,7 +88,7 @@ class CertificatesTable extends DataTable
 
             'valid_to' => [
                 'attributes' => ['class' => 'expiration-col'],
-                'label' => mt('x509', 'Expires'),
+                'label' => mt('x509', 'Expiration'),
                 'renderer' => function ($to, $data) {
                     return new ExpirationWidget($data['valid_from'], $to);
                 }

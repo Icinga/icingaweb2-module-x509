@@ -46,7 +46,7 @@ class ExpirationWidget extends BaseHtmlElement
             } else {
                 $ratio = 100;
                 if ($daysRemaining < 0) {
-                    $message = sprintf(mt('x509', 'since %d days'), $daysRemaining * -1);
+                    $message = sprintf(mt('x509', '%d days ago'), $daysRemaining * -1);
                 } else {
                     $message = mt('x509', 'today');
                 }

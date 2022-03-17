@@ -55,7 +55,7 @@ class UsageController extends Controller
             'valid_to' => $this->translate('Valid To'),
             'valid' => $this->translate('Chain Is Valid'),
             'duration' => $this->translate('Duration'),
-            'expires' => $this->translate('Expires')
+            'expires' => $this->translate('Expiration')
         ];
 
         $this->view->paginator = new PaginationControl(new Sql\Cursor($conn, $select), Url::fromRequest());

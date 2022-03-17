@@ -54,7 +54,7 @@ class CertificatesController extends Controller
             'valid_from' => $this->translate('Valid From'),
             'valid_to' => $this->translate('Valid To'),
             'duration' => $this->translate('Duration'),
-            'expires' => $this->translate('Expires')
+            'expires' => $this->translate('Expiration')
         ];
 
         $this->setupSortControl(

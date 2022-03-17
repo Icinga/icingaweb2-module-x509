@@ -437,9 +437,9 @@ class CertificateUtils
                 preg_match('/^error \d+ at \d+ depth lookup:(.+)$/m', $output, $match);
 
                 if (!empty($match)) {
-                    $set = ['invalid_reason' => $match[1]];
+                    $set = ['invalid_reason' => trim($match[1])];
                 } else {
-                    $set = ['valid' => 'yes'];
+                    $set = ['valid' => 'yes', 'invalid_reason' => null];
                 }
 
                 $db->update(

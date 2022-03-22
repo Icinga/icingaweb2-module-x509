@@ -32,15 +32,13 @@ mysql -p -u root x509 < etc/schema/mysql.schema.sql
 
 ## Installation
 
-1. Just drop this module to a `x509` subfolder in your Icinga Web 2 module path.
+1. Install it [like any other module](https://icinga.com/docs/icinga-web-2/latest/doc/08-Modules/#installation).
+Use `x509` as name.
 
-2. Log in with a privileged user in Icinga Web 2 and enable the module in `Configuration -> Modules -> x509`.
-Or use the `icingacli` and run `icingacli module enable x509`.
-
-3. Once you've set up the database, create a new Icinga Web 2 resource for it using the
+2. Once you've set up the database, create a new Icinga Web 2 resource for it using the
 `Configuration -> Application -> Resources` menu.
 
-4. The next step involves telling the module which database resource to use. This can be done in
+3. The next step involves telling the module which database resource to use. This can be done in
 `Configuration -> Modules -> x509 -> Backend`.
 
 This concludes the installation. You should now be able to import CA certificates and set up scan jobs.

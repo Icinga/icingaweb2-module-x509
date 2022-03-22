@@ -2,16 +2,14 @@
 
 ## Requirements
 
-* Icinga Web 2 (&gt;= 2.7)
-* PHP (&gt;= 7.0)
+* PHP (>= 7.0)
+* Icinga Web 2 (>= 2.9)
+* Icinga Web 2 libraries:
+  * [Icinga PHP Library (ipl)](https://github.com/Icinga/icinga-php-library) (>= 0.6)
+  * [Icinga PHP Thirdparty](https://github.com/Icinga/icinga-php-thirdparty) (>= 0.10)
 * php-gmp
 * OpenSSL
 * MySQL or MariaDB
-
-If your Icinga Web 2 is **not** v2.9+, the following modules are also required:
-
-* [reactbundle](https://github.com/Icinga/icingaweb2-module-reactbundle) (0.9.0)
-* [Icinga PHP Library (ipl)](https://github.com/Icinga/icingaweb2-module-ipl) (0.5.0)
 
 ## Database Setup
 

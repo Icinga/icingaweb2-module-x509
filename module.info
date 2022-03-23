@@ -1,5 +1,5 @@
 Module: Certificate Monitoring
-Version: 1.0.0
+Version: 1.1.0
 Requires:
   Libraries: icinga-php-library (>=0.6.0), icinga-php-thirdparty (>=0.10.0)
   Modules: monitoring (>=2.9.0), icingadb (>=1.0.0)

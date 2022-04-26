@@ -44,6 +44,11 @@ class JobsCommand extends Command
             $job = new Job($name, $db, $jobDescription, SniHook::getAll(), $parallel);
 
             $scheduler->add($name, $schedule, function () use ($job, $name, $db) {
+                if (! $db->ping()) {
+                    Logger::error('Lost connection to database and failed to re-connect. Skipping this job run.');
+                    return;
+                }
+
                 $finishedTargets = $job->run();
 
                 if ($finishedTargets === null) {

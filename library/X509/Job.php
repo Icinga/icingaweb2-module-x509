@@ -101,9 +101,9 @@ class Job
 //            }
             $ipv6 = filter_var($start_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false;
             $subnet = $ipv6 ? 128 : 32;
-            $ip_count = 1 << ($subnet - $prefix);
+            $numIps = pow(2, ($subnet - $prefix)) - 2;
             $start = static::addrToNumber($start_ip);
-            for ($i = 0; $i < $ip_count; $i++) {
+            for ($i = 0; $i < $numIps; $i++) {
                 $ip = static::numberToAddr(gmp_add($start, $i), $ipv6);
                 foreach (StringHelper::trimSplit($jobDescription->get('ports')) as $portRange) {
                     $pieces = StringHelper::trimSplit($portRange, '-');

@@ -15,18 +15,18 @@ class ServicesImportSource extends x509ImportSource
                 'host_ip'               => 't.ip',
                 'host_name'             => 't.hostname',
                 'host_port'             => 't.port',
-                'cert_subject'          => 'c.subject',
-                'cert_issuer'           => 'c.issuer',
-                'cert_self_signed'      => 'COALESCE(ci.self_signed, c.self_signed)',
-                'cert_trusted'          => 'c.trusted',
-                'cert_valid_from'       => 'c.valid_from',
-                'cert_valid_to'         => 'c.valid_to',
-                'cert_fingerprint'      => 'HEX(c.fingerprint)',
+                'cert_subject'          => 'MIN(c.subject)',
+                'cert_issuer'           => 'MIN(c.issuer)',
+                'cert_self_signed'      => 'MIN(COALESCE(ci.self_signed, c.self_signed))',
+                'cert_trusted'          => 'MIN(c.trusted)',
+                'cert_valid_from'       => 'MIN(c.valid_from)',
+                'cert_valid_to'         => 'MIN(c.valid_to)',
+                'cert_fingerprint'      => 'HEX(MIN(c.fingerprint))',
                 'cert_dn'               => 'GROUP_CONCAT(CONCAT(dn.key, \'=\', dn.value) SEPARATOR \',\')',
                 'cert_subject_alt_name' => (new Sql\Select())
                     ->from('x509_certificate_subject_alt_name can')
                     ->columns('GROUP_CONCAT(CONCAT(can.type, \':\', can.value) SEPARATOR \',\')')
-                    ->where(['can.certificate_id = c.id'])
+                    ->where(['can.certificate_id = MIN(c.id)'])
                     ->groupBy(['can.certificate_id'])
             ])
             ->join('x509_certificate_chain cc', 'cc.id = t.latest_certificate_chain_id')

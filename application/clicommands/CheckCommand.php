@@ -72,8 +72,18 @@ class CheckCommand extends Command
                 'cc.invalid_reason',
                 'c.subject',
                 'self_signed'   => 'COALESCE(ci.self_signed, c.self_signed)',
-                'c.valid_from',
-                'c.valid_to'
+                'valid_from'    => (new Select())
+                    ->from('x509_certificate_chain_link xccl')
+                    ->columns('MAX(GREATEST(xc.valid_from, xci.valid_from))')
+                    ->join('x509_certificate xc', 'xc.id = xccl.certificate_id')
+                    ->join('x509_certificate xci', 'xci.subject_hash = xc.issuer_hash')
+                    ->where('xccl.certificate_chain_id = cc.id'),
+                'valid_to'      => (new Select())
+                    ->from('x509_certificate_chain_link xccl')
+                    ->columns('MIN(LEAST(xc.valid_to, xci.valid_to))')
+                    ->join('x509_certificate xc', 'xc.id = xccl.certificate_id')
+                    ->join('x509_certificate xci', 'xci.subject_hash = xc.issuer_hash')
+                    ->where('xccl.certificate_chain_id = cc.id')
             ])
             ->join('x509_certificate_chain cc', 'cc.id = t.latest_certificate_chain_id')
             ->join('x509_certificate_chain_link ccl', 'ccl.certificate_chain_id = cc.id')

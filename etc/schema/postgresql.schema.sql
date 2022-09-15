@@ -5,6 +5,17 @@ CREATE TYPE certificate_version AS ENUM('1','2','3');
 CREATE TYPE dn_type AS ENUM('issuer','subject');
 CREATE TYPE pubkey_algo AS ENUM('unknown','RSA','DSA','DH','EC');
 
+-- Used when sorting certificates by expiration date.
+CREATE OR REPLACE FUNCTION UNIX_TIMESTAMP()
+    RETURNS bigint
+    LANGUAGE plpgsql
+    PARALLEL SAFE
+    AS $$
+BEGIN
+RETURN EXTRACT(EPOCH FROM now());
+END;
+$$;
+
 CREATE TABLE x509_certificate (
   id serial PRIMARY KEY,
   subject varchar(255) NOT NULL,

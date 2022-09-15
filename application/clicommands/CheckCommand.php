@@ -137,7 +137,7 @@ class CheckCommand extends Command
             }
 
             $perfData[$target['subject']] = sprintf(
-                "'%s'=%ds;%d;%d;0;%d",
+                "'%s'=%ds;%d:;%d:;0;%d",
                 $target['subject'],
                 $remainingTime->invert
                     ? 0

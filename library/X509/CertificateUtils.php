@@ -411,10 +411,15 @@ class CertificateUtils
                 $files->create($certFile, array_pop($collection));
 
                 $untrusted = '';
-                foreach ($collection as $intermediate) {
+
+                if (! empty($collection)) {
                     $intermediateFile = uniqid('intermediate');
-                    $files->create($intermediateFile, $intermediate);
-                    $untrusted .= ' -untrusted ' . escapeshellarg($files->resolvePath($intermediateFile));
+                    $files->create($intermediateFile, implode("\n", $collection));
+
+                    $untrusted = sprintf(
+                        ' -untrusted %s',
+                        escapeshellarg($files->resolvePath($intermediateFile))
+                    );
                 }
 
                 $command = sprintf(

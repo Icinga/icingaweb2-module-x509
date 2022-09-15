@@ -6,6 +6,7 @@ namespace Icinga\Module\X509\Controllers;
 use Icinga\Data\Filter\FilterExpression;
 use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\Controller;
+use Icinga\Module\X509\DbTool;
 use Icinga\Module\X509\FilterAdapter;
 use Icinga\Module\X509\Job;
 use Icinga\Module\X509\SortAdapter;
@@ -131,7 +132,7 @@ class UsageController extends Controller
             'signature_algo', 'signature_hash_algo', 'valid_from', 'valid_to'
         ]);
 
-        $this->handleFormatRequest($conn, $formatQuery, function (\PDOStatement $stmt) {
+        $this->handleFormatRequest($conn, $formatQuery, function (\PDOStatement $stmt) use ($conn) {
             foreach ($stmt as $usage) {
                 $usage['valid_from'] = (new \DateTime())
                     ->setTimestamp($usage['valid_from'])
@@ -141,6 +142,10 @@ class UsageController extends Controller
                     ->format('l F jS, Y H:i:s e');
 
                 $ip = $usage['ip'];
+                if ($conn->getAdapter() instanceof Sql\Adapter\Pgsql) {
+                    $ip = DbTool::unmarshalBinary($ip);
+                }
+
                 $ipv4 = ltrim($ip, "\0");
                 if (strlen($ipv4) === 4) {
                     $ip = $ipv4;

@@ -6,6 +6,7 @@ namespace Icinga\Module\X509\Controllers;
 use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\ChainDetails;
 use Icinga\Module\X509\Controller;
+use Icinga\Module\X509\DbTool;
 use ipl\Html\Attribute;
 use ipl\Html\Html;
 use ipl\Html\HtmlDocument;
@@ -38,7 +39,7 @@ class ChainController extends Controller
 
         $this->setTitle($this->translate('X.509 Certificate Chain'));
 
-        $ip = $chain['ip'];
+        $ip = DbTool::unmarshalBinary($chain['ip']);
         $ipv4 = ltrim($ip, "\0");
         if (strlen($ipv4) === 4) {
             $ip = $ipv4;

@@ -5,6 +5,7 @@ namespace Icinga\Module\X509\Clicommands;
 
 use Icinga\Application\Logger;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\DbTool;
 use Icinga\Module\X509\Job;
 use ipl\Sql\Select;
 
@@ -64,6 +65,7 @@ class CheckCommand extends Command
             exit(3);
         }
 
+        $dbTool = new DbTool($this->getDb());
         $targets = (new Select())
             ->from('x509_target t')
             ->columns([
@@ -82,7 +84,7 @@ class CheckCommand extends Command
             ->where(['ccl.order = ?' => 0]);
 
         if ($ip !== null) {
-            $targets->where(['t.ip = ?' => Job::binary($ip)]);
+            $targets->where(['t.ip = ?' => $dbTool->marshalBinary(Job::binary($ip))]);
         }
         if ($hostname !== null) {
             $targets->where(['t.hostname = ?' => $hostname]);

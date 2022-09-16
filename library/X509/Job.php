@@ -26,6 +26,7 @@ class Job
      * @var Connection
      */
     private $db;
+    private $dbTool;
     private $loop;
     private $pendingTargets = 0;
     private $totalTargets = 0;
@@ -40,6 +41,7 @@ class Job
     public function __construct($name, Connection $db, ConfigObject $jobDescription, array $snimap, $parallel)
     {
         $this->db = $db;
+        $this->dbTool = new DbTool($db);
         $this->jobDescription = $jobDescription;
         $this->snimap = $snimap;
         $this->parallel = $parallel;
@@ -215,7 +217,7 @@ class Job
                         ['latest_certificate_chain_id' => null],
                         [
                             'hostname = ?' => $target->hostname,
-                            'ip = ?'       => static::binary($target->ip),
+                            'ip = ?'       => $this->dbTool->marshalBinary(static::binary($target->ip)),
                             'port = ?'     => $target->port
                         ]
                     );
@@ -288,7 +290,7 @@ class Job
                     ->columns(['id'])
                     ->from('x509_target')
                     ->where([
-                        'ip = ?'        => static::binary($target->ip),
+                        'ip = ?'        => $this->dbTool->marshalBinary(static::binary($target->ip)),
                         'port = ?'      => $target->port,
                         'hostname = ?'  => $target->hostname
                     ])
@@ -298,7 +300,7 @@ class Job
                 $this->db->insert(
                     'x509_target',
                     [
-                        'ip'       => static::binary($target->ip),
+                        'ip'       => $this->dbTool->marshalBinary(static::binary($target->ip)),
                         'port'     => $target->port,
                         'hostname' => $target->hostname
                     ]
@@ -326,7 +328,7 @@ class Job
                         ->from('x509_certificate_chain_link l')
                         ->join('x509_certificate c', 'l.certificate_id = c.id')
                         ->where(['l.certificate_chain_id = ?' => $lastChain[0]])
-                        ->orderBy('l.`order`')
+                        ->orderBy('l.order')
                 )->fetchAll();
 
                 foreach ($lastFingerprints as &$lastFingerprint) {
@@ -364,7 +366,7 @@ class Job
                         'x509_certificate_chain_link',
                         [
                             'certificate_chain_id' => $chainId,
-                            '`order`'              => $index,
+                            $this->db->quoteIdentifier('order') => $index,
                             'certificate_id'       => $certId
                         ]
                     );

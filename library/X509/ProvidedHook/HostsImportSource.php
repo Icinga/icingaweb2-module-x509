@@ -3,6 +3,7 @@
 
 namespace Icinga\Module\X509\ProvidedHook;
 
+use Icinga\Module\X509\DbTool;
 use ipl\Sql;
 
 class HostsImportSource extends x509ImportSource
@@ -12,9 +13,8 @@ class HostsImportSource extends x509ImportSource
         $targets = (new Sql\Select())
             ->from('x509_target t')
             ->columns([
-                'host_ip'       => 't.ip',
-                'host_name'     => 't.hostname',
-                'host_ports'    => 'GROUP_CONCAT(DISTINCT t.port SEPARATOR ",")'
+                'host_ip'   => 't.ip',
+                'host_name' => 't.hostname'
             ])
             ->join('x509_certificate_chain cc', 'cc.id = t.latest_certificate_chain_id')
             ->join('x509_certificate_chain_link ccl', 'ccl.certificate_chain_id = cc.id')
@@ -22,9 +22,19 @@ class HostsImportSource extends x509ImportSource
             ->where(['ccl.order = ?' => 0])
             ->groupBy(['t.ip', 't.hostname']);
 
+        if ($this->getDb()->getConfig()->db === 'pgsql') {
+            $targets->columns(['host_ports' => 'ARRAY_TO_STRING(ARRAY_AGG(DISTINCT t.port),  \',\')']);
+        } else {
+            $targets->columns(['host_ports' => 'GROUP_CONCAT(DISTINCT t.port SEPARATOR ",")']);
+        }
+
         $results = [];
         $foundDupes = [];
         foreach ($this->getDb()->select($targets) as $target) {
+            if ($this->getDb()->getConfig()->db === 'pgsql') {
+                $target->host_ip = DbTool::unmarshalBinary($target->host_ip);
+            }
+
             list($ipv4, $ipv6) = $this->transformIpAddress($target->host_ip);
             $target->host_ip = $ipv4 ?: $ipv6;
             $target->host_address = $ipv4;

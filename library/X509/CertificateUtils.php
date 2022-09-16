@@ -446,7 +446,7 @@ class CertificateUtils
                 $output = implode("\n", $output);
 
                 if ($exitcode !== 0) {
-                    Logger::warning('openssl verify failed for command %s: %s', $command, $output);
+                    Logger::debug('openssl verify failed for command %s: %s', $command, $output);
                 }
 
                 preg_match('/^error \d+ at \d+ depth lookup:(.+)$/m', $output, $match);

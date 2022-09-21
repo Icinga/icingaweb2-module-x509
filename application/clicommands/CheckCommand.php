@@ -12,8 +12,8 @@ use ipl\Sql\Select;
 
 class CheckCommand extends Command
 {
-    const UNIT_PERCENT = 'percent';
-    const UNIT_INTERVAL = 'interval';
+    public const UNIT_PERCENT = 'percent';
+    public const UNIT_INTERVAL = 'interval';
 
     /**
      * Check a host's certificate

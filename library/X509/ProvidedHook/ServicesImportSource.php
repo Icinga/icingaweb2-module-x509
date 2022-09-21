@@ -1,4 +1,5 @@
 <?php
+
 // Icinga Web 2 X.509 Module | (c) 2019 Icinga GmbH | GPLv2
 
 namespace Icinga\Module\X509\ProvidedHook;
@@ -60,7 +61,7 @@ class ServicesImportSource extends x509ImportSource
             if ($this->getDb()->getConfig()->db === 'pgsql') {
                 $target->host_ip = DbTool::unmarshalBinary($target->host_ip);
             }
-            
+
             list($ipv4, $ipv6) = $this->transformIpAddress($target->host_ip);
             $target->host_ip = $ipv4 ?: $ipv6;
             $target->host_address = $ipv4;

@@ -10,7 +10,7 @@ use Icinga\Module\Director\Hook\ImportSourceHook;
 use ipl\Sql;
 use PDO;
 
-abstract class x509ImportSource extends ImportSourceHook
+abstract class X509ImportSource extends ImportSourceHook
 {
     /**
      * Get the connection to the X.509 database

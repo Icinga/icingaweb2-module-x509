@@ -7,7 +7,7 @@ namespace Icinga\Module\X509\ProvidedHook;
 use Icinga\Module\X509\DbTool;
 use ipl\Sql;
 
-class HostsImportSource extends x509ImportSource
+class HostsImportSource extends X509ImportSource
 {
     public function fetchData()
     {

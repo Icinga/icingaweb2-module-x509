@@ -40,23 +40,24 @@ class UsageController extends Controller
             ->where(['ccl.order = ?' => 0]);
 
         $sortAndFilterColumns = [
-            'hostname' => $this->translate('Hostname'),
-            'ip' => $this->translate('IP'),
-            'subject' => $this->translate('Certificate'),
-            'issuer' => $this->translate('Issuer'),
-            'version' => $this->translate('Version'),
-            'self_signed' => $this->translate('Is Self-Signed'),
-            'ca' => $this->translate('Is Certificate Authority'),
-            'trusted' => $this->translate('Is Trusted'),
-            'pubkey_algo' => $this->translate('Public Key Algorithm'),
-            'pubkey_bits' => $this->translate('Public Key Strength'),
-            'signature_algo' => $this->translate('Signature Algorithm'),
+            'hostname'            => $this->translate('Hostname'),
+            'ip'                  => $this->translate('IP'),
+            'port'                => $this->translate('Port'),
+            'subject'             => $this->translate('Certificate'),
+            'issuer'              => $this->translate('Issuer'),
+            'version'             => $this->translate('Version'),
+            'self_signed'         => $this->translate('Is Self-Signed'),
+            'ca'                  => $this->translate('Is Certificate Authority'),
+            'trusted'             => $this->translate('Is Trusted'),
+            'pubkey_algo'         => $this->translate('Public Key Algorithm'),
+            'pubkey_bits'         => $this->translate('Public Key Strength'),
+            'signature_algo'      => $this->translate('Signature Algorithm'),
             'signature_hash_algo' => $this->translate('Signature Hash Algorithm'),
-            'valid_from' => $this->translate('Valid From'),
-            'valid_to' => $this->translate('Valid To'),
-            'valid' => $this->translate('Chain Is Valid'),
-            'duration' => $this->translate('Duration'),
-            'expires' => $this->translate('Expiration')
+            'valid_from'          => $this->translate('Valid From'),
+            'valid_to'            => $this->translate('Valid To'),
+            'valid'               => $this->translate('Chain Is Valid'),
+            'duration'            => $this->translate('Duration'),
+            'expires'             => $this->translate('Expiration')
         ];
 
         $this->view->paginator = new PaginationControl(new Sql\Cursor($conn, $select), Url::fromRequest());

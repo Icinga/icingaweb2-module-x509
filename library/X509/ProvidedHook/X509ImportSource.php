@@ -7,35 +7,13 @@ namespace Icinga\Module\X509\ProvidedHook;
 use Icinga\Application\Config;
 use Icinga\Data\ResourceFactory;
 use Icinga\Module\Director\Hook\ImportSourceHook;
+use Icinga\Module\X509\Common\Database;
 use ipl\Sql;
 use PDO;
 
 abstract class X509ImportSource extends ImportSourceHook
 {
-    /**
-     * Get the connection to the X.509 database
-     *
-     * @return  Sql\Connection
-     */
-    protected function getDb()
-    {
-        $config = new Sql\Config(ResourceFactory::getResourceConfig(
-            Config::module('x509')->get('backend', 'resource')
-        ));
-
-        $options = [
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ
-        ];
-        if ($config->db === 'mysql') {
-            $options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET SESSION SQL_MODE='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE"
-                . ",NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'";
-        }
-        $config->options = $options;
-
-        $conn = new Sql\Connection($config);
-
-        return $conn;
-    }
+    use Database;
 
     /**
      * Transform the given binary IP address in a human readable format

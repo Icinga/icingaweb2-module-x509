@@ -7,6 +7,7 @@ namespace Icinga\Module\X509;
 use Icinga\Application\Config;
 use Icinga\Application\Logger;
 use Icinga\Data\ConfigObject;
+use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\React\StreamOptsCaptureConnector;
 use Icinga\Util\StringHelper;
 use ipl\Sql\Connection;
@@ -23,6 +24,8 @@ use React\Socket\TimeoutConnector;
 
 class Job
 {
+    use Database;
+
     /**
      * @var Connection
      */
@@ -39,10 +42,10 @@ class Job
     private $parallel;
     private $name;
 
-    public function __construct($name, Connection $db, ConfigObject $jobDescription, array $snimap, $parallel)
+    public function __construct($name, ConfigObject $jobDescription, array $snimap, $parallel)
     {
-        $this->db = $db;
-        $this->dbTool = new DbTool($db);
+        $this->db = $this->getDb();
+        $this->dbTool = new DbTool($this->db);
         $this->jobDescription = $jobDescription;
         $this->snimap = $snimap;
         $this->parallel = $parallel;

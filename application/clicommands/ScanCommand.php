@@ -44,9 +44,7 @@ class ScanCommand extends Command
             $this->fail('The job does not specify any CIDRs.');
         }
 
-        $db = $this->getDb();
-
-        $job = new Job($name, $db, $jobDescription, SniHook::getAll(), $parallel);
+        $job = new Job($name, $jobDescription, SniHook::getAll(), $parallel);
 
         $finishedTargets = $job->run();
 
@@ -60,7 +58,7 @@ class ScanCommand extends Command
                 $name
             );
 
-            $verified = CertificateUtils::verifyCertificates($db);
+            $verified = CertificateUtils::verifyCertificates($this->getDb());
 
             Logger::info("Checked %d certificate chain%s.", $verified, $verified !== 1 ? 's' : '');
         }

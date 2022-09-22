@@ -6,31 +6,18 @@ namespace Icinga\Module\X509;
 
 use Icinga\Application\Icinga;
 use Icinga\Data\ResourceFactory;
+use Icinga\Module\X509\Common\Database;
 use ipl\Sql;
 
 class Command extends \Icinga\Cli\Command
 {
+    use Database;
+
     // Fix Web 2 issue where $configs is not properly initialized
     protected $configs = [];
 
     public function init()
     {
         Icinga::app()->getModuleManager()->loadEnabledModules();
-    }
-
-    /**
-     * Get the connection to the X.509 database
-     *
-     * @return  Sql\Connection
-     */
-    public function getDb()
-    {
-        $config = new Sql\Config(ResourceFactory::getResourceConfig(
-            $this->Config()->get('backend', 'resource')
-        ));
-
-        $conn = new Sql\Connection($config);
-
-        return $conn;
     }
 }

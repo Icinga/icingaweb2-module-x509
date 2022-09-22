@@ -32,8 +32,6 @@ class JobsCommand extends Command
 
         $defaultSchedule = $this->Config()->get('jobs', 'default_schedule');
 
-        $db = $this->getDb();
-
         foreach ($this->Config('jobs') as $name => $jobDescription) {
             $schedule = $jobDescription->get('schedule', $defaultSchedule);
 
@@ -42,9 +40,10 @@ class JobsCommand extends Command
                 continue;
             }
 
-            $job = new Job($name, $db, $jobDescription, SniHook::getAll(), $parallel);
+            $job = new Job($name, $jobDescription, SniHook::getAll(), $parallel);
 
-            $scheduler->add($name, $schedule, function () use ($job, $name, $db) {
+            $scheduler->add($name, $schedule, function () use ($job, $name) {
+                $db = $this->getDb();
                 if (! $db->ping()) {
                     Logger::error('Lost connection to database and failed to re-connect. Skipping this job run.');
                     return;

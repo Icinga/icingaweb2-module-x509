@@ -6,6 +6,7 @@ namespace Icinga\Module\X509;
 
 use Icinga\Data\ResourceFactory;
 use Icinga\File\Csv;
+use Icinga\Module\X509\Common\Database;
 use Icinga\Util\Json;
 use Icinga\Web\Widget\Tabextension\DashboardAction;
 use Icinga\Web\Widget\Tabextension\MenuAction;
@@ -15,6 +16,10 @@ use PDO;
 
 class Controller extends \Icinga\Web\Controller
 {
+    use Database {
+        getDb as private getDbWithOptions;
+    }
+
     /**
      * Get the connection to the X.509 database
      *
@@ -22,22 +27,11 @@ class Controller extends \Icinga\Web\Controller
      */
     protected function getDb()
     {
-        $config = new Sql\Config(ResourceFactory::getResourceConfig(
-            $this->Config()->get('backend', 'resource')
-        ));
-
         $options = [
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ];
-        if ($config->db === 'mysql') {
-            $options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET SESSION SQL_MODE='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE"
-                . ",NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'";
-        }
-        $config->options = $options;
 
-        $conn = new Sql\Connection($config);
-
-        return $conn;
+        return $this->getDbWithOptions($options);
     }
 
     /**

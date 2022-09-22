@@ -1,4 +1,5 @@
 <?php
+
 // Icinga Web 2 X.509 Module | (c) 2019 Icinga GmbH | GPLv2
 
 namespace Icinga\Module\X509\Clicommands;
@@ -11,8 +12,8 @@ use ipl\Sql\Select;
 
 class CheckCommand extends Command
 {
-    const UNIT_PERCENT = 'percent';
-    const UNIT_INTERVAL = 'interval';
+    public const UNIT_PERCENT = 'percent';
+    public const UNIT_INTERVAL = 'interval';
 
     /**
      * Check a host's certificate

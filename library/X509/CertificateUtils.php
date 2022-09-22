@@ -1,4 +1,5 @@
 <?php
+
 // Icinga Web 2 X.509 Module | (c) 2018 Icinga GmbH | GPLv2
 
 namespace Icinga\Module\X509;
@@ -368,7 +369,7 @@ class CertificateUtils
         $caFile = uniqid('ca');
 
         $cas = $db->select(
-            (new Select)
+            (new Select())
                 ->from('x509_certificate')
                 ->columns(['certificate'])
                 ->where(['ca = ?' => 'yes', 'trusted = ?' => 'yes'])
@@ -392,7 +393,7 @@ class CertificateUtils
 
         try {
             $chains = $db->select(
-                (new Select)
+                (new Select())
                     ->from('x509_certificate_chain c')
                     ->join('x509_target t', ['t.latest_certificate_chain_id = c.id', 'c.valid = ?' => 'no'])
                     ->columns('c.id')
@@ -402,7 +403,7 @@ class CertificateUtils
                 ++$count;
 
                 $certs = $db->select(
-                    (new Select)
+                    (new Select())
                         ->from('x509_certificate c')
                         ->columns('c.certificate')
                         ->join('x509_certificate_chain_link ccl', 'ccl.certificate_id = c.id')

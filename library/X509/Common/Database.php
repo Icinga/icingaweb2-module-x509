@@ -4,6 +4,7 @@
 
 namespace Icinga\Module\X509\Common;
 
+use Icinga\Application\Config;
 use Icinga\Data\ResourceFactory;
 use ipl\Sql;
 use PDO;
@@ -18,7 +19,7 @@ trait Database
     protected function getDb(array $options = [])
     {
         $config = new Sql\Config(ResourceFactory::getResourceConfig(
-            $this->Config()->get('backend', 'resource')
+            Config::module('x509')->get('backend', 'resource')
         ));
 
         if (! isset($options[PDO::ATTR_DEFAULT_FETCH_MODE])) {

@@ -203,7 +203,7 @@ class CertificateUtils
         )->fetch();
 
         if ($row !== false) {
-            return (int) $row['id'];
+            return (int) $row->id;
         }
 
         Logger::debug("Importing certificate: %s", $certInfo['name']);
@@ -324,7 +324,7 @@ class CertificateUtils
         )->fetch();
 
         if ($row !== false) {
-            return $row['hash'];
+            return $row->hash;
         }
 
         $index = 0;
@@ -378,7 +378,7 @@ class CertificateUtils
         $contents = [];
 
         foreach ($cas as $ca) {
-            $contents[] = static::der2pem(DbTool::unmarshalBinary($ca['certificate']));
+            $contents[] = static::der2pem(DbTool::unmarshalBinary($ca->certificate));
         }
 
         if (empty($contents)) {
@@ -407,14 +407,14 @@ class CertificateUtils
                         ->from('x509_certificate c')
                         ->columns('c.certificate')
                         ->join('x509_certificate_chain_link ccl', 'ccl.certificate_id = c.id')
-                        ->where(['ccl.certificate_chain_id = ?' => $chain['id']])
+                        ->where(['ccl.certificate_chain_id = ?' => $chain->id])
                         ->orderBy(['ccl.order' => 'DESC'])
                 );
 
                 $collection = [];
 
                 foreach ($certs as $cert) {
-                    $collection[] = CertificateUtils::der2pem(DbTool::unmarshalBinary($cert['certificate']));
+                    $collection[] = CertificateUtils::der2pem(DbTool::unmarshalBinary($cert->certificate));
                 }
 
                 $certFile = uniqid('cert');
@@ -461,7 +461,7 @@ class CertificateUtils
                 $db->update(
                     'x509_certificate_chain',
                     $set,
-                    ['id = ?' => $chain['id']]
+                    ['id = ?' => $chain->id]
                 );
             }
 

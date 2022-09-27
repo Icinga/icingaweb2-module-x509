@@ -314,7 +314,7 @@ class Job
                 );
                 $targetId = $this->db->lastInsertId();
             } else {
-                $targetId = $row['id'];
+                $targetId = $row->id;
             }
 
             $chainUptodate = false;
@@ -334,7 +334,7 @@ class Job
                         ->columns(['c.fingerprint'])
                         ->from('x509_certificate_chain_link l')
                         ->join('x509_certificate c', 'l.certificate_id = c.id')
-                        ->where(['l.certificate_chain_id = ?' => $lastChain[0]])
+                        ->where(['l.certificate_chain_id = ?' => $lastChain->id])
                         ->orderBy('l.order')
                 )->fetchAll();
 
@@ -352,7 +352,7 @@ class Job
             }
 
             if ($chainUptodate) {
-                $chainId = $lastChain[0];
+                $chainId = $lastChain->id;
             } else {
                 $this->db->insert(
                     'x509_certificate_chain',

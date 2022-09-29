@@ -11,12 +11,15 @@ use Icinga\Application\Logger;
 use Icinga\Data\ConfigObject;
 use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Common\JobUtils;
+use Icinga\Module\X509\Model\X509Certificate;
+use Icinga\Module\X509\Model\X509CertificateChain;
+use Icinga\Module\X509\Model\X509Target;
 use Icinga\Module\X509\React\StreamOptsCaptureConnector;
 use Icinga\Util\Json;
 use ipl\Scheduler\Contract\Task;
 use ipl\Sql\Connection;
 use ipl\Sql\Expression;
-use ipl\Sql\Select;
+use ipl\Stdlib\Filter;
 use ipl\Stdlib\Str;
 use LogicException;
 use Ramsey\Uuid\Uuid;
@@ -191,16 +194,16 @@ class Job implements Task
         if (! $this->isRescan()) {
             yield from $this->generateTargets();
         } else {
-            $targets = (new Select())
-                ->columns(['id', 'ip', 'hostname', 'port'])
-                ->from('x509_target');
-
+            $targets = X509Target::on($this->db)->columns(['id', 'ip', 'hostname', 'port']);
             if ($this->sinceLastScan) {
-                $targets->where(new Expression('last_scan < %d', [$this->sinceLastScan->getTimestamp()]));
+                // The filter processor doesn't allow us to filter using expressions
+                $targets
+                    ->getSelectBase()
+                    ->where(new Expression('last_scan < %d', [$this->sinceLastScan->getTimestamp()]));
             }
 
-            foreach ($this->db->select($targets) as $target) {
-                $addr = gmp_import(DbTool::unmarshalBinary($target->ip));
+            foreach ($targets as $target) {
+                $addr = gmp_import($target->ip);
                 $addrFound = false;
                 foreach ($this->getCidrs() as $cidr) {
                     list($subnet, $mask) = $cidr;
@@ -433,18 +436,17 @@ class Job implements Task
         }
 
         $this->db->transaction(function () use ($target, $chain) {
-            $row = $this->db->select(
-                (new Select())
-                    ->columns(['id'])
-                    ->from('x509_target')
-                    ->where([
-                        'ip = ?'       => $this->dbTool->marshalBinary(static::binary($target->ip)),
-                        'port = ?'     => $target->port,
-                        'hostname = ?' => $target->hostname
-                    ])
-            )->fetch();
+            $row = X509Target::on($this->db)->columns(['id']);
 
-            if ($row === false) {
+            $filter = Filter::all();
+            $filter->add(Filter::equal('ip', static::binary($target->ip)));
+            $filter->add(Filter::equal('port', $target->port));
+            $filter->add(Filter::equal('hostname', $target->hostname));
+
+            $row->filter($filter);
+
+            if (! ($row = $row->first())) {
+                // TODO: https://github.com/Icinga/ipl-orm/pull/78
                 $this->db->insert(
                     'x509_target',
                     [
@@ -456,32 +458,31 @@ class Job implements Task
                 );
                 $targetId = $this->db->lastInsertId();
             } else {
-                $targetId = $row->id;
+                $targetId = (int) $row->id;
             }
 
             $chainUptodate = false;
 
-            $lastChain = $this->db->select(
-                (new Select())
-                    ->columns(['id'])
-                    ->from('x509_certificate_chain')
-                    ->where(['target_id = ?' => $targetId])
-                    ->orderBy('id', SORT_DESC)
-                    ->limit(1)
-            )->fetch();
+            $lastChain = X509CertificateChain::on($this->db)->columns(['id']);
+            $lastChain
+                ->filter(Filter::equal('target_id', $targetId))
+                ->orderBy('id', SORT_DESC)
+                ->limit(1);
 
-            if ($lastChain !== false) {
-                $lastFingerprints = $this->db->select(
-                    (new Select())
-                        ->columns(['c.fingerprint'])
-                        ->from('x509_certificate_chain_link l')
-                        ->join('x509_certificate c', 'l.certificate_id = c.id')
-                        ->where(['l.certificate_chain_id = ?' => $lastChain->id])
-                        ->orderBy('l.order')
-                )->fetchAll();
+            if (($lastChain = $lastChain->first())) {
+                $lastFingerprints = X509Certificate::on($this->db)->utilize('chain');
+                $lastFingerprints
+                    ->columns(['fingerprint'])
+                    ->getSelectBase()
+                    ->where(new Expression(
+                        'certificate_link.certificate_chain_id = %d',
+                        [(int) $lastChain->id]
+                    ))
+                    ->orderBy('certificate_link.order');
 
-                foreach ($lastFingerprints as &$lastFingerprint) {
-                    $lastFingerprint = $lastFingerprint->fingerprint;
+                $lastFingerprintsArr = [];
+                foreach ($lastFingerprints as $lastFingerprint) {
+                    $lastFingerprintsArr[] = $lastFingerprint->fingerprint;
                 }
 
                 $currentFingerprints = [];
@@ -490,12 +491,13 @@ class Job implements Task
                     $currentFingerprints[] = openssl_x509_fingerprint($cert, 'sha256', true);
                 }
 
-                $chainUptodate = $currentFingerprints === $lastFingerprints;
+                $chainUptodate = $currentFingerprints === $lastFingerprintsArr;
             }
 
             if ($chainUptodate) {
-                $chainId = $lastChain->id;
+                $chainId = (int) $lastChain->id;
             } else {
+                // TODO: https://github.com/Icinga/ipl-orm/pull/78
                 $this->db->insert(
                     'x509_certificate_chain',
                     [

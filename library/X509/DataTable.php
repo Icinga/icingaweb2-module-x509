@@ -84,13 +84,16 @@ class DataTable extends BaseHtmlElement
         $cells = [];
 
         foreach ($this->columns as $key => $column) {
-            if (! is_int($key) && array_key_exists($key, $row)) {
+            if (! is_int($key) && isset($row->$key)) {
                 $data = $row[$key];
             } else {
-                if (isset($column['column']) && array_key_exists($column['column'], $row)) {
-                    $data = $row[$column['column']];
-                } else {
-                    $data = null;
+                $data = null;
+                if (isset($column['column'])) {
+                    if (is_callable($column['column'])) {
+                        $data = call_user_func(($column['column']), $row);
+                    } elseif (isset($row->{$column['column']})) {
+                        $data = $row[$column['column']];
+                    }
                 }
             }
 
@@ -100,7 +103,7 @@ class DataTable extends BaseHtmlElement
                 $content = $data;
             }
 
-            $cells[] = Html::tag('td', isset($column['attributes']) ? $column['attributes'] : null, $content);
+            $cells[] = Html::tag('td', $column['attributes'] ?? null, $content);
         }
 
         return Html::tag('tr', $cells);

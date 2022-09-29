@@ -7,11 +7,12 @@ namespace Icinga\Module\X509\Controllers;
 use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\ChainDetails;
 use Icinga\Module\X509\Controller;
-use Icinga\Module\X509\DbTool;
-use ipl\Html\Attribute;
+use Icinga\Module\X509\Model\X509Certificate;
+use Icinga\Module\X509\Model\X509CertificateChain;
 use ipl\Html\Html;
 use ipl\Html\HtmlDocument;
-use ipl\Sql;
+use ipl\Sql\Expression;
+use ipl\Stdlib\Filter;
 
 class ChainController extends Controller
 {
@@ -26,21 +27,18 @@ class ChainController extends Controller
             return;
         }
 
-        $chainSelect = (new Sql\Select())
-            ->from('x509_certificate_chain ch')
-            ->columns('*')
-            ->join('x509_target t', 't.id = ch.target_id')
-            ->where(['ch.id = ?' => $id]);
+        $chains = X509CertificateChain::on($conn)->with(['target']);
+        $chains->filter(Filter::equal('id', $id));
 
-        $chain = $conn->select($chainSelect)->fetch();
-
-        if ($chain === false) {
+        $chain = $chains->first();
+        if (! $chain) {
             $this->httpNotFound($this->translate('Certificate not found.'));
         }
 
-        $this->setTitle($this->translate('X.509 Certificate Chain'));
+        $this->addTitleTab($this->translate('X.509 Certificate Chain'));
+        $this->getTabs()->disableLegacyExtensions();
 
-        $ip = DbTool::unmarshalBinary($chain['ip']);
+        $ip = $chain->target->ip;
         $ipv4 = ltrim($ip, "\0");
         if (strlen($ipv4) === 4) {
             $ip = $ipv4;
@@ -49,16 +47,16 @@ class ChainController extends Controller
         $chainInfo = Html::tag('div');
         $chainInfo->add(Html::tag('dl', [
             Html::tag('dt', $this->translate('Host')),
-            Html::tag('dd', $chain['hostname']),
+            Html::tag('dd', $chain->target->hostname),
             Html::tag('dt', $this->translate('IP')),
             Html::tag('dd', inet_ntop($ip)),
             Html::tag('dt', $this->translate('Port')),
-            Html::tag('dd', $chain['port'])
+            Html::tag('dd', $chain->target->port)
         ]));
 
         $valid = Html::tag('div', ['class' => 'cert-chain']);
 
-        if ($chain['valid'] === 'y') {
+        if ($chain['valid']) {
             $valid->getAttributes()->add('class', '-valid');
             $valid->add(Html::tag('p', $this->translate('Certificate chain is valid.')));
         } else {
@@ -69,17 +67,15 @@ class ChainController extends Controller
             )));
         }
 
-        $certsSelect = (new Sql\Select())
-            ->from('x509_certificate c')
-            ->columns('*')
-            ->join('x509_certificate_chain_link ccl', 'ccl.certificate_id = c.id')
-            ->join('x509_certificate_chain cc', 'cc.id = ccl.certificate_chain_id')
-            ->where(['cc.id = ?' => $id])
-            ->orderBy('ccl.order');
+        $certs = X509Certificate::on($conn)->with(['chain']);
+        $certs
+            ->filter(Filter::equal('chain.id', $id))
+            ->getSelectBase()
+            ->orderBy('certificate_link.order');
 
         $this->view->chain = (new HtmlDocument())
             ->add($chainInfo)
             ->add($valid)
-            ->add((new ChainDetails())->setData($conn->select($certsSelect)));
+            ->add((new ChainDetails())->setData($certs));
     }
 }

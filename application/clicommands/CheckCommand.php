@@ -6,9 +6,11 @@ namespace Icinga\Module\X509\Clicommands;
 
 use Icinga\Application\Logger;
 use Icinga\Module\X509\Command;
-use Icinga\Module\X509\DbTool;
 use Icinga\Module\X509\Job;
-use ipl\Sql\Select;
+use Icinga\Module\X509\Model\X509Certificate;
+use Icinga\Module\X509\Model\X509Target;
+use ipl\Sql\Expression;
+use ipl\Stdlib\Filter;
 
 class CheckCommand extends Command
 {
@@ -66,42 +68,64 @@ class CheckCommand extends Command
             exit(3);
         }
 
-        $dbTool = new DbTool($this->getDb());
-        $targets = (new Select())
-            ->from('x509_target t')
-            ->columns([
-                't.port',
-                'cc.valid',
-                'cc.invalid_reason',
-                'c.subject',
-                'self_signed'   => 'COALESCE(ci.self_signed, c.self_signed)',
-                'valid_from'    => (new Select())
-                    ->from('x509_certificate_chain_link xccl')
-                    ->columns('MAX(GREATEST(xc.valid_from, xci.valid_from))')
-                    ->join('x509_certificate xc', 'xc.id = xccl.certificate_id')
-                    ->join('x509_certificate xci', 'xci.subject_hash = xc.issuer_hash')
-                    ->where('xccl.certificate_chain_id = cc.id'),
-                'valid_to'      => (new Select())
-                    ->from('x509_certificate_chain_link xccl')
-                    ->columns('MIN(LEAST(xc.valid_to, xci.valid_to))')
-                    ->join('x509_certificate xc', 'xc.id = xccl.certificate_id')
-                    ->join('x509_certificate xci', 'xci.subject_hash = xc.issuer_hash')
-                    ->where('xccl.certificate_chain_id = cc.id')
+        $conn = $this->getDb();
+        $targets = X509Target::on($conn)->with([
+            'chain',
+            'chain.certificate',
+            'chain.certificate.issuer_certificate'
+        ]);
+
+        $targets->getWith()['target.chain.certificate.issuer_certificate']->setJoinType('LEFT');
+
+        $targets->columns([
+            'port',
+            'chain.valid',
+            'chain.invalid_reason',
+            'subject'     => 'chain.certificate.subject',
+            'self_signed' => new Expression('COALESCE(%s, %s)', [
+                'chain.certificate.issuer_certificate.self_signed',
+                'chain.certificate.self_signed'
             ])
-            ->join('x509_certificate_chain cc', 'cc.id = t.latest_certificate_chain_id')
-            ->join('x509_certificate_chain_link ccl', 'ccl.certificate_chain_id = cc.id')
-            ->join('x509_certificate c', 'c.id = ccl.certificate_id')
-            ->joinLeft('x509_certificate ci', 'ci.subject_hash = c.issuer_hash')
-            ->where(['ccl.order = ?' => 0]);
+        ]);
+
+        // Sub queries for (valid_from, valid_to) columns
+        $validFrom = X509Certificate::on($conn)->with(['chain', 'issuer_certificate']);
+        $validFrom->getResolver()->setAliasPrefix('sub_');
+        $validFrom->columns([
+            new Expression('MAX(GREATEST(%s, %s))', ['valid_from', 'issuer_certificate.valid_from'])
+        ]);
+
+        $validFrom
+            ->getSelectBase()
+            ->where(new Expression(
+                'sub_certificate_link.certificate_chain_id = target_chain.id'
+            ));
+
+        $validTo = clone $validFrom;
+        $validTo->columns([
+            new Expression('MIN(LEAST(%s, %s))', ['valid_to', 'issuer_certificate.valid_to'])
+        ]);
+
+        list($validFromSelect, $validFromValues) = $validFrom->dump();
+        list($validToSelect, $validToValues) = $validTo->dump();
+
+        $validFromAlias = 'valid_from';
+        $validToAlias = 'valid_to';
+        $targets->withColumns([
+            $validFromAlias => new Expression("$validFromSelect", null, ...$validFromValues),
+            $validToAlias   => new Expression("$validToSelect", null, ...$validToValues)
+        ]);
+
+        $targets->getSelectBase()->where(new Expression('target_chain_link.order = 0'));
 
         if ($ip !== null) {
-            $targets->where(['t.ip = ?' => $dbTool->marshalBinary(Job::binary($ip))]);
+            $targets->filter(Filter::equal('ip', Job::binary($ip)));
         }
         if ($hostname !== null) {
-            $targets->where(['t.hostname = ?' => $hostname]);
+            $targets->filter(Filter::equal('hostname', $hostname));
         }
         if ($this->params->has('port')) {
-            $targets->where(['t.port = ?' => $this->params->get('port')]);
+            $targets->filter(Filter::equal('port', (int) $this->params->get('port')));
         }
 
         $allowSelfSigned = (bool) $this->params->get('allow-self-signed', false);
@@ -112,9 +136,9 @@ class CheckCommand extends Command
         $perfData = [];
 
         $state = 3;
-        foreach ($this->getDb()->select($targets) as $target) {
-            if ($target['valid'] === 'n' && ($target['self_signed'] === 'n' || ! $allowSelfSigned)) {
-                $invalidMessage = $target['subject'] . ': ' . $target['invalid_reason'];
+        foreach ($targets as $target) {
+            if (! $target->chain->valid && (! $target['self_signed'] || ! $allowSelfSigned)) {
+                $invalidMessage = $target['subject'] . ': ' . $target->chain->invalid_reason;
                 $output[$invalidMessage] = $invalidMessage;
                 $state = 2;
             }

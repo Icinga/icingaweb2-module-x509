@@ -4,65 +4,90 @@
 
 namespace Icinga\Module\X509\ProvidedHook;
 
-use Icinga\Module\X509\DbTool;
+use Icinga\Module\X509\Model\X509CertificateSubjectAltName;
+use Icinga\Module\X509\Model\X509Target;
 use ipl\Sql;
 
 class ServicesImportSource extends X509ImportSource
 {
     public function fetchData()
     {
-        $targets = (new Sql\Select())
-            ->from('x509_target t')
+        $targets = X509Target::on($this->getDb())->with([
+            'chain',
+            'chain.certificate',
+            'chain.certificate.dn',
+            'chain.certificate.issuer_certificate',
+        ]);
+
+        $targets->getWith()['target.chain.certificate.issuer_certificate']->setJoinType('LEFT');
+        $targets
             ->columns([
-                'host_ip'          => 't.ip',
-                'host_name'        => 't.hostname',
-                'host_port'        => 't.port',
-                'cert_subject'     => 'c.subject',
-                'cert_issuer'      => 'c.issuer',
-                'cert_self_signed' => 'COALESCE(ci.self_signed, c.self_signed)',
-                'cert_trusted'     => 'c.trusted',
-                'cert_valid_from'  => 'c.valid_from',
-                'cert_valid_to'    => 'c.valid_to'
+                'ip',
+                'host_name'        => 'hostname',
+                'host_port'        => 'port',
+                'cert_subject'     => 'chain.certificate.subject',
+                'cert_issuer'      => 'chain.certificate.issuer',
+                'cert_trusted'     => 'chain.certificate.trusted',
+                'cert_valid_from'  => 'chain.certificate.valid_from',
+                'cert_valid_to'    => 'chain.certificate.valid_to',
+                'cert_self_signed' => new Sql\Expression('COALESCE(%s, %s)', [
+                    'chain.certificate.issuer_certificate.self_signed',
+                    'chain.certificate.self_signed'
+                ])
             ])
-            ->join('x509_certificate_chain cc', 'cc.id = t.latest_certificate_chain_id')
-            ->join('x509_certificate_chain_link ccl', 'ccl.certificate_chain_id = cc.id')
-            ->join('x509_certificate c', 'c.id = ccl.certificate_id')
-            ->joinLeft('x509_certificate ci', 'ci.subject_hash = c.issuer_hash')
-            ->joinLeft('x509_dn dn', 'dn.hash = c.subject_hash')
-            ->where(['ccl.order = ?' => 0])
-            ->groupBy(['t.ip', 't.hostname', 't.port']);
+            ->getSelectBase()
+            ->where(new Sql\Expression('target_chain_link.order = 0'))
+            ->groupBy(['ip, hostname, port']);
 
-        $certAltName = (new Sql\Select())
-            ->from('x509_certificate_subject_alt_name can')
-            ->where(['can.certificate_id = c.id'])
-            ->groupBy(['can.certificate_id']);
+        $certAltName = X509CertificateSubjectAltName::on($this->getDb());
+        $certAltName
+            ->getSelectBase()
+            ->where(new Sql\Expression('certificate_id = target_chain_certificate.id'))
+            ->groupBy(['alt_name.certificate_id']);
 
-        if ($this->getDb()->getConfig()->db === 'pgsql') {
-            $targets->columns([
-                'cert_fingerprint' => 'ENCODE(c.fingerprint, \'hex\')',
-                'cert_dn'          => 'ARRAY_TO_STRING(ARRAY_AGG(CONCAT(dn.key, \'=\', dn.value)), \',\')'
-            ])
-                ->groupBy(['c.id', 'ci.id']);
+        if ($this->getDb()->getAdapter() instanceof Sql\Adapter\Pgsql) {
+            $targets
+                ->withColumns([
+                    'cert_fingerprint' => new Sql\Expression('ENCODE(%s, \'hex\')', [
+                        'chain.certificate.fingerprint'
+                    ]),
+                    'cert_dn'          => new Sql\Expression(
+                        'ARRAY_TO_STRING(ARRAY_AGG(CONCAT(%s, \'=\', %s)), \',\')',
+                        [
+                            'chain.certificate.dn.key',
+                            'chain.certificate.dn.value'
+                        ]
+                    )
+                ])
+                ->getSelectBase()
+                ->groupBy(['target_chain_certificate.id', 'target_chain_certificate_issuer_certificate.id']);
 
-            $certAltName->columns('ARRAY_TO_STRING(ARRAY_AGG(CONCAT(can.type, \':\', can.value)), \',\')');
+            $certAltName->columns([
+                new Sql\Expression('ARRAY_TO_STRING(ARRAY_AGG(CONCAT(%s, \':\', %s)), \',\')', ['type', 'value'])
+            ]);
         } else {
-            $targets->columns([
-                'cert_fingerprint' => 'HEX(c.fingerprint)',
-                'cert_dn'          => 'GROUP_CONCAT(CONCAT(dn.key, \'=\', dn.value) SEPARATOR \',\')'
+            $targets->withColumns([
+                'cert_fingerprint' => new Sql\Expression('HEX(%s)', ['chain.certificate.fingerprint']),
+                'cert_dn'          => new Sql\Expression(
+                    'GROUP_CONCAT(CONCAT(%s, \'=\', %s) SEPARATOR \',\')',
+                    [
+                        'chain.certificate.dn.key',
+                        'chain.certificate.dn.value'
+                    ]
+                )
             ]);
 
-            $certAltName->columns('GROUP_CONCAT(CONCAT(can.type, \':\', can.value) SEPARATOR \',\')');
+            $certAltName->columns([
+                new Sql\Expression('GROUP_CONCAT(CONCAT(%s, \':\', %s) SEPARATOR \',\')', ['type', 'value'])
+            ]);
         }
 
-        $targets->columns(['cert_subject_alt_name' => $certAltName]);
+        list($select, $values) = $certAltName->dump();
+        $targets->withColumns(['cert_subject_alt_name' => new Sql\Expression("$select", null, ...$values)]);
 
         $results = [];
-        foreach ($this->getDb()->select($targets) as $target) {
-            if ($this->getDb()->getConfig()->db === 'pgsql') {
-                $target->host_ip = DbTool::unmarshalBinary($target->host_ip);
-            }
-
-            list($ipv4, $ipv6) = $this->transformIpAddress($target->host_ip);
+        foreach ($targets as $target) {
+            list($ipv4, $ipv6) = $this->transformIpAddress($target->ip);
             $target->host_ip = $ipv4 ?: $ipv6;
             $target->host_address = $ipv4;
             $target->host_address6 = $ipv6;
@@ -74,7 +99,12 @@ class ServicesImportSource extends X509ImportSource
                 $target->host_port
             );
 
-            $results[$target->host_name_ip_and_port] = $target;
+            unset($target->ip); // Isn't needed any more!!
+            unset($target->chain); // We don't need any relation properties anymore
+
+            $properties = iterator_to_array($target->getIterator());
+
+            $results[$target->host_name_ip_and_port] = (object) $properties;
         }
 
         return $results;

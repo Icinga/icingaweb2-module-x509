@@ -7,7 +7,9 @@ namespace Icinga\Module\X509\Controllers;
 use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\CertificateDetails;
 use Icinga\Module\X509\Controller;
+use Icinga\Module\X509\Model\X509Certificate;
 use ipl\Sql;
+use ipl\Stdlib\Filter;
 
 class CertificateController extends Controller
 {
@@ -22,18 +24,17 @@ class CertificateController extends Controller
             return;
         }
 
-        $cert = $conn->select(
-            (new Sql\Select())
-                ->from('x509_certificate')
-                ->columns('*')
-                ->where(['id = ?' => $certId])
-        )->fetch();
+        $certificates = X509Certificate::on($conn);
+        $certificates->filter(Filter::equal('id', $certId));
 
-        if ($cert === false) {
+        $cert = $certificates->first();
+
+        if (! $cert) {
             $this->httpNotFound($this->translate('Certificate not found.'));
         }
 
-        $this->setTitle($this->translate('X.509 Certificate'));
+        $this->addTitleTab($this->translate('X.509 Certificate'));
+        $this->getTabs()->disableLegacyExtensions();
 
         $this->view->certificateDetails = (new CertificateDetails())
             ->setCert($cert);

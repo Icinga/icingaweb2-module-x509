@@ -5,38 +5,41 @@
 namespace Icinga\Module\X509\ProvidedHook;
 
 use Icinga\Module\X509\DbTool;
+use Icinga\Module\X509\Model\X509Target;
 use ipl\Sql;
+use ipl\Stdlib\Filter;
 
 class HostsImportSource extends X509ImportSource
 {
     public function fetchData()
     {
-        $targets = (new Sql\Select())
-            ->from('x509_target t')
-            ->columns([
-                'host_ip'   => 't.ip',
-                'host_name' => 't.hostname'
-            ])
-            ->join('x509_certificate_chain cc', 'cc.id = t.latest_certificate_chain_id')
-            ->join('x509_certificate_chain_link ccl', 'ccl.certificate_chain_id = cc.id')
-            ->join('x509_certificate c', 'c.id = ccl.certificate_id')
-            ->where(['ccl.order = ?' => 0])
-            ->groupBy(['t.ip', 't.hostname']);
+        $targets = X509Target::on($this->getDb())
+            ->utilize('chain')
+            ->utilize('chain.certificate');
 
-        if ($this->getDb()->getConfig()->db === 'pgsql') {
-            $targets->columns(['host_ports' => 'ARRAY_TO_STRING(ARRAY_AGG(DISTINCT t.port),  \',\')']);
+        $targets
+            ->columns([
+                'ip',
+                'host_name' => 'hostname'
+            ])
+            ->getSelectBase()
+            ->where(new Sql\Expression('target_chain_link.order = 0'))
+            ->groupBy(['ip', 'hostname']);
+
+        if ($this->getDb()->getAdapter() instanceof Sql\Adapter\Pgsql) {
+            $targets->withColumns([
+                'host_ports' => new Sql\Expression('ARRAY_TO_STRING(ARRAY_AGG(DISTINCT port),  \',\')')
+            ]);
         } else {
-            $targets->columns(['host_ports' => 'GROUP_CONCAT(DISTINCT t.port SEPARATOR ",")']);
+            $targets->withColumns([
+                'host_ports' => new Sql\Expression('GROUP_CONCAT(DISTINCT port SEPARATOR \',\')')
+            ]);
         }
 
         $results = [];
         $foundDupes = [];
-        foreach ($this->getDb()->select($targets) as $target) {
-            if ($this->getDb()->getConfig()->db === 'pgsql') {
-                $target->host_ip = DbTool::unmarshalBinary($target->host_ip);
-            }
-
-            list($ipv4, $ipv6) = $this->transformIpAddress($target->host_ip);
+        foreach ($targets as $target) {
+            list($ipv4, $ipv6) = $this->transformIpAddress($target->ip);
             $target->host_ip = $ipv4 ?: $ipv6;
             $target->host_address = $ipv4;
             $target->host_address6 = $ipv6;
@@ -56,7 +59,12 @@ class HostsImportSource extends X509ImportSource
                 $target->host_name_or_ip = $target->host_ip;
             }
 
-            $results[$target->host_name_or_ip] = $target;
+            unset($target->ip); // Isn't needed any more!!
+            unset($target->chain); // We don't need any relation properties anymore
+
+            $properties = iterator_to_array($target->getIterator());
+
+            $results[$target->host_name_or_ip] = (object) $properties;
         }
 
         return $results;

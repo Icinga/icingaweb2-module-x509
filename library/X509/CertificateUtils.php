@@ -7,8 +7,13 @@ namespace Icinga\Module\X509;
 use Exception;
 use Icinga\Application\Logger;
 use Icinga\File\Storage\TemporaryLocalFileStorage;
+use Icinga\Module\X509\Model\X509Certificate;
+use Icinga\Module\X509\Model\X509CertificateChain;
+use Icinga\Module\X509\Model\X509CertificateSubjectAltName;
+use Icinga\Module\X509\Model\X509Dn;
 use ipl\Sql\Connection;
-use ipl\Sql\Select;
+use ipl\Sql\Expression;
+use ipl\Stdlib\Filter;
 
 class CertificateUtils
 {
@@ -195,15 +200,14 @@ class CertificateUtils
 
         $fingerprint = openssl_x509_fingerprint($cert, 'sha256', true);
 
-        $row = $db->select(
-            (new Select())
-                ->columns(['id'])
-                ->from('x509_certificate')
-                ->where(['fingerprint = ?' => $dbTool->marshalBinary($fingerprint)])
-        )->fetch();
+        $row = X509Certificate::on($db);
+        $row
+            ->columns(['id'])
+            ->filter(Filter::equal('fingerprint', $fingerprint));
 
-        if ($row !== false) {
-            return (int) $row->id;
+        $row = $row->first();
+        if ($row) {
+            return $row->id;
         }
 
         Logger::debug("Importing certificate: %s", $certInfo['name']);
@@ -226,6 +230,7 @@ class CertificateUtils
         $pubkey = openssl_pkey_get_details(openssl_pkey_get_public($cert));
         $signature = explode('-', $certInfo['signatureTypeSN']);
 
+        // TODO: https://github.com/Icinga/ipl-orm/pull/78
         $db->insert(
             'x509_certificate',
             [
@@ -248,7 +253,7 @@ class CertificateUtils
             ]
         );
 
-        $certId = (int) $db->lastInsertId();
+        $certId = $db->lastInsertId();
 
         CertificateUtils::insertSANs($db, $certId, $certInfo);
 
@@ -266,21 +271,22 @@ class CertificateUtils
 
                 $hash = hash('sha256', sprintf('%s=%s', $type, $value), true);
 
-                $row = $db->select(
-                    (new Select())
-                        ->from('x509_certificate_subject_alt_name')
-                        ->columns('certificate_id')
-                        ->where([
-                            'certificate_id = ?' => $certId,
-                            'hash = ?' => $dbTool->marshalBinary($hash)
-                        ])
-                )->fetch();
+                $row = X509CertificateSubjectAltName::on($db);
+                $row->columns([new Expression('1')]);
+
+                $filter = Filter::all(
+                    Filter::equal('certificate_id', $certId),
+                    Filter::equal('hash', $hash)
+                );
+
+                $row->filter($filter);
 
                 // Ignore duplicate SANs
-                if ($row !== false) {
+                if ($row->execute()->hasResult()) {
                     continue;
                 }
 
+                // TODO: https://github.com/Icinga/ipl-orm/pull/78
                 $db->insert(
                     'x509_certificate_subject_alt_name',
                     [
@@ -315,15 +321,17 @@ class CertificateUtils
         }
         $hash = hash('sha256', $data, true);
 
-        $row = $db->select(
-            (new Select())
-                ->from('x509_dn')
-                ->columns('hash')
-                ->where([ 'hash = ?' => $dbTool->marshalBinary($hash), 'type = ?' => $type ])
-                ->limit(1)
-        )->fetch();
+        $row = X509Dn::on($db);
+        $row
+            ->columns(['hash'])
+            ->filter(Filter::all(
+                Filter::equal('hash', $hash),
+                Filter::equal('type', $type)
+            ))
+            ->limit(1);
 
-        if ($row !== false) {
+        $row = $row->first();
+        if ($row) {
             return $row->hash;
         }
 
@@ -336,6 +344,7 @@ class CertificateUtils
             }
 
             foreach ($values as $value) {
+                // TODO: https://github.com/Icinga/ipl-orm/pull/78
                 $db->insert(
                     'x509_dn',
                     [
@@ -362,23 +371,22 @@ class CertificateUtils
      */
     public static function verifyCertificates(Connection $db)
     {
-        $dbTool = new DbTool($db);
-
         $files = new TemporaryLocalFileStorage();
 
         $caFile = uniqid('ca');
 
-        $cas = $db->select(
-            (new Select())
-                ->from('x509_certificate')
-                ->columns(['certificate'])
-                ->where(['ca = ?' => 'y', 'trusted = ?' => 'y'])
-        );
+        $cas = X509Certificate::on($db);
+        $cas
+            ->columns(['certificate'])
+            ->filter(Filter::all(
+                Filter::equal('ca', true),
+                Filter::equal('trusted', true)
+            ));
 
         $contents = [];
 
         foreach ($cas as $ca) {
-            $contents[] = static::der2pem(DbTool::unmarshalBinary($ca->certificate));
+            $contents[] = $ca->certificate;
         }
 
         if (empty($contents)) {
@@ -392,29 +400,25 @@ class CertificateUtils
         $db->beginTransaction();
 
         try {
-            $chains = $db->select(
-                (new Select())
-                    ->from('x509_certificate_chain c')
-                    ->join('x509_target t', ['t.latest_certificate_chain_id = c.id', 'c.valid = ?' => 'n'])
-                    ->columns('c.id')
-            );
+            $chains = X509CertificateChain::on($db)->utilize('target');
+            $chains
+                ->columns(['id'])
+                ->filter(Filter::equal('valid', false));
 
             foreach ($chains as $chain) {
                 ++$count;
 
-                $certs = $db->select(
-                    (new Select())
-                        ->from('x509_certificate c')
-                        ->columns('c.certificate')
-                        ->join('x509_certificate_chain_link ccl', 'ccl.certificate_id = c.id')
-                        ->where(['ccl.certificate_chain_id = ?' => $chain->id])
-                        ->orderBy(['ccl.order' => 'DESC'])
-                );
+                $certs = X509Certificate::on($db)->utilize('chain');
+                $certs
+                    ->columns(['certificate'])
+                    ->getSelectBase()
+                    ->where(new Expression('%s = %d', ['certificate_chain.id', $chain->id]))
+                    ->orderBy('certificate_link.order', 'DESC');
 
                 $collection = [];
 
                 foreach ($certs as $cert) {
-                    $collection[] = CertificateUtils::der2pem(DbTool::unmarshalBinary($cert->certificate));
+                    $collection[] = $cert->certificate;
                 }
 
                 $certFile = uniqid('cert');
@@ -458,6 +462,7 @@ class CertificateUtils
                     $set = ['valid' => 'y', 'invalid_reason' => null];
                 }
 
+                // TODO: https://github.com/Icinga/ipl-orm/pull/78
                 $db->update(
                     'x509_certificate_chain',
                     $set,

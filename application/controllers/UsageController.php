@@ -4,26 +4,22 @@
 
 namespace Icinga\Module\X509\Controllers;
 
-use Icinga\Data\Filter\FilterExpression;
 use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\Controller;
-use Icinga\Module\X509\DbTool;
-use Icinga\Module\X509\FilterAdapter;
-use Icinga\Module\X509\Job;
-use Icinga\Module\X509\SortAdapter;
-use Icinga\Module\X509\SqlFilter;
+use Icinga\Module\X509\Model\X509Certificate;
 use Icinga\Module\X509\UsageTable;
-use ipl\Web\Control\PaginationControl;
-use ipl\Sql;
-use ipl\Web\Url;
+use Icinga\Module\X509\Web\Control\SearchBar\ObjectSuggestions;
+use ipl\Orm\Query;
+use ipl\Sql\Expression;
+use ipl\Web\Control\LimitControl;
+use ipl\Web\Control\SortControl;
 
 class UsageController extends Controller
 {
     public function indexAction()
     {
-        $this
-            ->initTabs()
-            ->setTitle($this->translate('Certificate Usage'));
+        $this->initTabs();
+        $this->addTitleTab($this->translate('Certificate Usage'));
 
         try {
             $conn = $this->getDb();
@@ -32,110 +28,79 @@ class UsageController extends Controller
             return;
         }
 
-        $select = (new Sql\Select())
-            ->from('x509_target t')
-            ->columns('*')
-            ->join('x509_certificate_chain cc', 'cc.id = t.latest_certificate_chain_id')
-            ->join('x509_certificate_chain_link ccl', 'ccl.certificate_chain_id = cc.id')
-            ->join('x509_certificate c', 'c.id = ccl.certificate_id')
-            ->where(['ccl.order = ?' => 0]);
+        $targets = X509Certificate::on($conn)
+            ->with(['chain', 'chain.target'])
+            ->withColumns([
+                'chain.id',
+                'chain.valid',
+                'chain.target.ip',
+                'chain.target.port',
+                'chain.target.hostname',
+            ]);
 
-        $sortAndFilterColumns = [
-            'hostname'            => $this->translate('Hostname'),
-            'ip'                  => $this->translate('IP'),
-            'port'                => $this->translate('Port'),
-            'subject'             => $this->translate('Certificate'),
-            'issuer'              => $this->translate('Issuer'),
-            'version'             => $this->translate('Version'),
-            'self_signed'         => $this->translate('Is Self-Signed'),
-            'ca'                  => $this->translate('Is Certificate Authority'),
-            'trusted'             => $this->translate('Is Trusted'),
-            'pubkey_algo'         => $this->translate('Public Key Algorithm'),
-            'pubkey_bits'         => $this->translate('Public Key Strength'),
-            'signature_algo'      => $this->translate('Signature Algorithm'),
-            'signature_hash_algo' => $this->translate('Signature Hash Algorithm'),
-            'valid_from'          => $this->translate('Valid From'),
-            'valid_to'            => $this->translate('Valid To'),
-            'valid'               => $this->translate('Chain Is Valid'),
-            'duration'            => $this->translate('Duration'),
-            'expires'             => $this->translate('Expiration')
+        $targets
+            ->getSelectBase()
+            ->where(new Expression('certificate_link.order = 0'));
+
+        $sortColumns = [
+            'chain.target.hostname' => $this->translate('Hostname'),
+            'chain.target.ip'       => $this->translate('IP'),
+            'chain.target.port'     => $this->translate('Port'),
+            'subject'               => $this->translate('Certificate'),
+            'issuer'                => $this->translate('Issuer'),
+            'version'               => $this->translate('Version'),
+            'self_signed'           => $this->translate('Is Self-Signed'),
+            'ca'                    => $this->translate('Is Certificate Authority'),
+            'trusted'               => $this->translate('Is Trusted'),
+            'pubkey_algo'           => $this->translate('Public Key Algorithm'),
+            'pubkey_bits'           => $this->translate('Public Key Strength'),
+            'signature_algo'        => $this->translate('Signature Algorithm'),
+            'signature_hash_algo'   => $this->translate('Signature Hash Algorithm'),
+            'valid_from'            => $this->translate('Valid From'),
+            'valid_to'              => $this->translate('Valid To'),
+            'chain.valid'           => $this->translate('Chain Is Valid'),
+            'duration'              => $this->translate('Duration'),
+            'expires'               => $this->translate('Expiration')
         ];
 
-        $this->view->paginator = new PaginationControl(new Sql\Cursor($conn, $select), Url::fromRequest());
-        $this->view->paginator->apply();
+        $limitControl = $this->createLimitControl();
+        $paginator = $this->createPaginationControl($targets);
+        $sortControl = $this->createSortControl($targets, $sortColumns);
 
-        $this->setupSortControl(
-            $sortAndFilterColumns,
-            new SortAdapter($select, function ($field) {
-                if ($field === 'duration') {
-                    return '(valid_to - valid_from)';
-                } elseif ($field === 'expires') {
-                    return 'CASE WHEN UNIX_TIMESTAMP() > valid_to'
-                        . ' THEN 0 ELSE (valid_to - UNIX_TIMESTAMP()) / 86400 END';
-                }
-            })
-        );
+        $searchBar = $this->createSearchBar($targets, [
+            $limitControl->getLimitParam(),
+            $sortControl->getSortParam()
+        ]);
 
-        $this->setupLimitControl();
-
-        $filterAdapter = new FilterAdapter();
-        $this->setupFilterControl(
-            $filterAdapter,
-            $sortAndFilterColumns,
-            ['hostname', 'subject'],
-            ['format']
-        );
-
-        (new SqlFilter($conn))->apply($select, $filterAdapter->getFilter(), function (FilterExpression $filter) {
-            switch ($filter->getColumn()) {
-                case 'ip':
-                    $value = $filter->getExpression();
-
-                    if (is_array($value)) {
-                        $value = array_map('Job::binary', $value);
-                    } else {
-                        $value = Job::binary($value);
-                    }
-
-                    return $filter->setExpression($value);
-                case 'issuer_hash':
-                    $value = $filter->getExpression();
-
-                    if (is_array($value)) {
-                        $value = array_map('hex2bin', $value);
-                    } else {
-                        $value = hex2bin($value);
-                    }
-
-                    return $filter->setExpression($value);
-                case 'duration':
-                    return $filter->setColumn('(valid_to - valid_from)');
-                case 'expires':
-                    return $filter->setColumn(
-                        'CASE WHEN UNIX_TIMESTAMP() > valid_to THEN 0 ELSE (valid_to - UNIX_TIMESTAMP()) / 86400 END'
-                    );
-                case 'valid_from':
-                case 'valid_to':
-                    $expr = $filter->getExpression();
-                    if (! is_numeric($expr)) {
-                        return $filter->setExpression(strtotime($expr));
-                    }
-
-                    // expression doesn't need changing
-                default:
-                    return false;
+        if ($searchBar->hasBeenSent() && ! $searchBar->isValid()) {
+            if ($searchBar->hasBeenSubmitted()) {
+                $filter = $this->getFilter();
+            } else {
+                $this->addControl($searchBar);
+                $this->sendMultipartUpdate();
+                return;
             }
-        });
+        } else {
+            $filter = $searchBar->getFilter();
+        }
 
-        $formatQuery = clone $select;
-        $formatQuery->resetColumns()->columns([
+        $targets->peekAhead($this->view->compact);
+
+        $targets->filter($filter);
+
+        $this->addControl($paginator);
+        $this->addControl($sortControl);
+        $this->addControl($limitControl);
+        $this->addControl($searchBar);
+
+        $exportable = array_flip([
             'valid', 'hostname', 'ip', 'port', 'subject', 'issuer', 'version',
-            'self_signed', 'ca', 'trusted', 'pubkey_algo',  'pubkey_bits',
+            'self_signed', 'ca', 'trusted', 'pubkey_algo', 'pubkey_bits',
             'signature_algo', 'signature_hash_algo', 'valid_from', 'valid_to'
         ]);
 
-        $this->handleFormatRequest($conn, $formatQuery, function (\PDOStatement $stmt) use ($conn) {
-            foreach ($stmt as $usage) {
+        $this->handleFormatRequest($targets, function (Query $targets) use ($conn, $exportable) {
+            foreach ($targets as $usage) {
                 $usage['valid_from'] = (new \DateTime())
                     ->setTimestamp($usage['valid_from'])
                     ->format('l F jS, Y H:i:s e');
@@ -143,21 +108,45 @@ class UsageController extends Controller
                     ->setTimestamp($usage['valid_to'])
                     ->format('l F jS, Y H:i:s e');
 
-                $ip = $usage['ip'];
-                if ($conn->getAdapter() instanceof Sql\Adapter\Pgsql) {
-                    $ip = DbTool::unmarshalBinary($ip);
-                }
+                $ip = $usage->chain->target->ip;
 
                 $ipv4 = ltrim($ip, "\0");
                 if (strlen($ipv4) === 4) {
                     $ip = $ipv4;
                 }
-                $usage['ip'] = inet_ntop($ip);
 
-                yield $usage;
+                $usage->ip = inet_ntop($ip);
+                $usage->hostname = $usage->chain->target->hostname;
+                $usage->port = $usage->chain->target->port;
+                $usage->valid = $usage->chain->valid;
+
+                yield array_intersect_key(iterator_to_array($usage->getIterator()), $exportable);
             }
         });
 
-        $this->view->usageTable = (new UsageTable())->setData($conn->select($select));
+        $this->addContent((new UsageTable())->setData($targets));
+
+        if (! $searchBar->hasBeenSubmitted() && $searchBar->hasBeenSent()) {
+            $this->sendMultipartUpdate(); // Updates the browser search bar
+        }
+    }
+
+    public function completeAction()
+    {
+        $suggestions = new ObjectSuggestions();
+        $suggestions->setModel(X509Certificate::class);
+        $suggestions->forRequest($this->getServerRequest());
+        $this->getDocument()->add($suggestions);
+    }
+
+    public function searchEditorAction()
+    {
+        $editor = $this->createSearchEditor(X509Certificate::on($this->getDb()), [
+            LimitControl::DEFAULT_LIMIT_PARAM,
+            SortControl::DEFAULT_SORT_PARAM
+        ]);
+
+        $this->getDocument()->add($editor);
+        $this->setTitle(t('Adjust Filter'));
     }
 }

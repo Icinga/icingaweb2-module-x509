@@ -4,24 +4,21 @@
 
 namespace Icinga\Module\X509\Controllers;
 
-use Icinga\Data\Filter\FilterExpression;
 use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\CertificatesTable;
 use Icinga\Module\X509\Controller;
-use Icinga\Module\X509\FilterAdapter;
-use Icinga\Module\X509\SortAdapter;
-use Icinga\Module\X509\SqlFilter;
-use ipl\Web\Control\PaginationControl;
-use ipl\Sql;
-use ipl\Web\Url;
+use Icinga\Module\X509\Model\X509Certificate;
+use Icinga\Module\X509\Web\Control\SearchBar\ObjectSuggestions;
+use ipl\Orm\Query;
+use ipl\Web\Control\LimitControl;
+use ipl\Web\Control\SortControl;
 
 class CertificatesController extends Controller
 {
     public function indexAction()
     {
-        $this
-            ->initTabs()
-            ->setTitle($this->translate('Certificates'));
+        $this->initTabs();
+        $this->addTitleTab($this->translate('Certificates'));
 
         try {
             $conn = $this->getDb();
@@ -30,89 +27,65 @@ class CertificatesController extends Controller
             return;
         }
 
-        $select = (new Sql\Select())
-            ->from('x509_certificate c')
-            ->columns([
-                'c.id', 'c.subject', 'c.issuer', 'c.version', 'c.self_signed', 'c.ca', 'c.trusted',
-                'c.pubkey_algo',  'c.pubkey_bits', 'c.signature_algo', 'c.signature_hash_algo',
-                'c.valid_from', 'c.valid_to',
-            ]);
+        $certificates = X509Certificate::on($conn);
 
-        $this->view->paginator = new PaginationControl(new Sql\Cursor($conn, $select), Url::fromRequest());
-        $this->view->paginator->apply();
-
-        $sortAndFilterColumns = [
-            'subject' => $this->translate('Certificate'),
-            'issuer' => $this->translate('Issuer'),
-            'version' => $this->translate('Version'),
-            'self_signed' => $this->translate('Is Self-Signed'),
-            'ca' => $this->translate('Is Certificate Authority'),
-            'trusted' => $this->translate('Is Trusted'),
-            'pubkey_algo' => $this->translate('Public Key Algorithm'),
-            'pubkey_bits' => $this->translate('Public Key Strength'),
-            'signature_algo' => $this->translate('Signature Algorithm'),
+        $sortColumns = [
+            'subject'             => $this->translate('Certificate'),
+            'issuer'              => $this->translate('Issuer'),
+            'version'             => $this->translate('Version'),
+            'self_signed'         => $this->translate('Is Self-Signed'),
+            'ca'                  => $this->translate('Is Certificate Authority'),
+            'trusted'             => $this->translate('Is Trusted'),
+            'pubkey_algo'         => $this->translate('Public Key Algorithm'),
+            'pubkey_bits'         => $this->translate('Public Key Strength'),
+            'signature_algo'      => $this->translate('Signature Algorithm'),
             'signature_hash_algo' => $this->translate('Signature Hash Algorithm'),
-            'valid_from' => $this->translate('Valid From'),
-            'valid_to' => $this->translate('Valid To'),
-            'duration' => $this->translate('Duration'),
-            'expires' => $this->translate('Expiration')
+            'valid_from'          => $this->translate('Valid From'),
+            'valid_to'            => $this->translate('Valid To'),
+            'duration'            => $this->translate('Duration'),
+            'expires'             => $this->translate('Expiration')
         ];
 
-        $this->setupSortControl(
-            $sortAndFilterColumns,
-            new SortAdapter($select, function ($field) {
-                if ($field === 'duration') {
-                    return '(valid_to - valid_from)';
-                } elseif ($field === 'expires') {
-                    return 'CASE WHEN UNIX_TIMESTAMP() > valid_to'
-                        . ' THEN 0 ELSE (valid_to - UNIX_TIMESTAMP()) / 86400 END';
-                }
-            })
-        );
+        $limitControl = $this->createLimitControl();
+        $paginator = $this->createPaginationControl($certificates);
+        $sortControl = $this->createSortControl($certificates, $sortColumns);
 
-        $this->setupLimitControl();
+        $searchBar = $this->createSearchBar($certificates, [
+            $limitControl->getLimitParam(),
+            $sortControl->getSortParam()
+        ]);
 
-        $filterAdapter = new FilterAdapter();
-        $this->setupFilterControl(
-            $filterAdapter,
-            $sortAndFilterColumns,
-            ['subject', 'issuer'],
-            ['format']
-        );
-
-        (new SqlFilter($conn))->apply($select, $filterAdapter->getFilter(), function (FilterExpression $filter) {
-            switch ($filter->getColumn()) {
-                case 'issuer_hash':
-                    $value = $filter->getExpression();
-
-                    if (is_array($value)) {
-                        $value = array_map('hex2bin', $value);
-                    } else {
-                        $value = hex2bin($value);
-                    }
-
-                    return $filter->setExpression($value);
-                case 'duration':
-                    return $filter->setColumn('(valid_to - valid_from)');
-                case 'expires':
-                    return $filter->setColumn(
-                        'CASE WHEN UNIX_TIMESTAMP() > valid_to THEN 0 ELSE (valid_to - UNIX_TIMESTAMP()) / 86400 END'
-                    );
-                case 'valid_from':
-                case 'valid_to':
-                    $expr = $filter->getExpression();
-                    if (! is_numeric($expr)) {
-                        return $filter->setExpression(strtotime($expr));
-                    }
-
-                    // expression doesn't need changing
-                default:
-                    return false;
+        if ($searchBar->hasBeenSent() && ! $searchBar->isValid()) {
+            if ($searchBar->hasBeenSubmitted()) {
+                $filter = $this->getFilter();
+            } else {
+                $this->addControl($searchBar);
+                $this->sendMultipartUpdate();
+                return;
             }
-        });
+        } else {
+            $filter = $searchBar->getFilter();
+        }
 
-        $this->handleFormatRequest($conn, $select, function (\PDOStatement $stmt) {
-            foreach ($stmt as $cert) {
+        $certificates->peekAhead($this->view->compact);
+
+        $certificates->filter($filter);
+
+        $this->addControl($paginator);
+        $this->addControl($sortControl);
+        $this->addControl($limitControl);
+        $this->addControl($searchBar);
+
+        // List of allowed columns to be exported
+        $exportable = array_flip([
+            'id', 'subject', 'issuer', 'version', 'self_signed', 'ca', 'trusted',
+            'pubkey_algo', 'pubkey_bits', 'signature_algo', 'signature_hash_algo',
+            'valid_from', 'valid_to'
+        ]);
+
+        $this->handleFormatRequest($certificates, function (Query $certificates) use ($exportable) {
+            /** @var X509Certificate $cert */
+            foreach ($certificates as $cert) {
                 $cert['valid_from'] = (new \DateTime())
                     ->setTimestamp($cert['valid_from'])
                     ->format('l F jS, Y H:i:s e');
@@ -120,10 +93,33 @@ class CertificatesController extends Controller
                     ->setTimestamp($cert['valid_to'])
                     ->format('l F jS, Y H:i:s e');
 
-                yield $cert;
+                yield array_intersect_key(iterator_to_array($cert->getIterator()), $exportable);
             }
         });
 
-        $this->view->certificatesTable = (new CertificatesTable())->setData($conn->select($select));
+        $this->addContent((new CertificatesTable())->setData($certificates));
+
+        if (! $searchBar->hasBeenSubmitted() && $searchBar->hasBeenSent()) {
+            $this->sendMultipartUpdate(); // Updates the browser search bar
+        }
+    }
+
+    public function completeAction()
+    {
+        $suggestions = new ObjectSuggestions();
+        $suggestions->setModel(X509Certificate::class);
+        $suggestions->forRequest($this->getServerRequest());
+        $this->getDocument()->add($suggestions);
+    }
+
+    public function searchEditorAction()
+    {
+        $editor = $this->createSearchEditor(X509Certificate::on($this->getDb()), [
+            LimitControl::DEFAULT_LIMIT_PARAM,
+            SortControl::DEFAULT_SORT_PARAM
+        ]);
+
+        $this->getDocument()->add($editor);
+        $this->setTitle(t('Adjust Filter'));
     }
 }

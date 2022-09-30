@@ -4,18 +4,23 @@
 
 namespace Icinga\Module\X509;
 
-use Icinga\Application\Config;
+use DateTime;
+use Exception;
 use Icinga\Application\Logger;
 use Icinga\Data\ConfigObject;
 use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\React\StreamOptsCaptureConnector;
-use Icinga\Util\StringHelper;
+use Icinga\Util\Json;
+use ipl\Scheduler\Common\TaskProperties;
+use ipl\Scheduler\Contract\Task;
 use ipl\Sql\Connection;
 use ipl\Sql\Expression;
-use ipl\Sql\Insert;
 use ipl\Sql\Select;
-use ipl\Sql\Update;
-use React\EventLoop\Factory;
+use ipl\Stdlib\Str;
+use LogicException;
+use Ramsey\Uuid\Uuid;
+use React\EventLoop\Loop;
+use React\Promise;
 use React\Socket\ConnectionInterface;
 use React\Socket\Connector;
 use React\Socket\ConnectorInterface;
@@ -23,53 +28,107 @@ use React\Socket\SecureConnector;
 use React\Socket\TimeoutConnector;
 use Throwable;
 
-class Job
+class Job implements Task
 {
     use Database;
+    use TaskProperties;
 
-    /**
-     * @var Connection
-     */
+    /** @var Connection x509 database connection */
     private $db;
+
+    /** @var DbTool Database utils for marshalling and unmarshalling binary data */
     private $dbTool;
-    private $loop;
+
+    /** @var ConfigObject A config for this job loaded from the jobs.ini file */
+    protected $config;
+
     private $pendingTargets = 0;
     private $totalTargets = 0;
     private $finishedTargets = 0;
-    private $targets;
-    private $jobId;
-    private $jobDescription;
-    private $snimap;
-    private $parallel;
-    private $name;
 
-    public function __construct($name, ConfigObject $jobDescription, array $snimap, $parallel)
+    /** @var \Generator */
+    private $targets;
+    private $snimap;
+
+    protected $jobId;
+
+    /** @var Promise\Deferred React promise deferred instance used to resolve the running promise */
+    protected $deferred;
+
+    /** @var int Used to control how many targets can be scanned in parallel */
+    protected $parallel;
+
+    /** @var DateTime A formatted date time of this job start time */
+    protected $jobRunStart;
+
+    public function __construct(string $name, ConfigObject $config, array $snimap)
     {
         $this->db = $this->getDb();
         $this->dbTool = new DbTool($this->db);
-        $this->jobDescription = $jobDescription;
         $this->snimap = $snimap;
-        $this->parallel = $parallel;
-        $this->name = $name;
+        $this->config = $config;
+
+        $this->setName($name);
+        $this->setUuid(Uuid::fromBytes($this->getChecksum()));
+    }
+
+    /**
+     * Get this job's config
+     *
+     * @return ConfigObject
+     */
+    public function getConfig(): ConfigObject
+    {
+        return $this->config;
     }
 
     private function getConnector($peerName)
     {
-        $simpleConnector = new Connector($this->loop);
+        $simpleConnector = new Connector();
         $streamCaptureConnector = new StreamOptsCaptureConnector($simpleConnector);
-        $secureConnector = new SecureConnector($streamCaptureConnector, $this->loop, array(
-            'verify_peer' => false,
-            'verify_peer_name' => false,
+        $secureConnector = new SecureConnector($streamCaptureConnector, null, [
+            'verify_peer'             => false,
+            'verify_peer_name'        => false,
             'capture_peer_cert_chain' => true,
-            'SNI_enabled' => true,
-            'peer_name' => $peerName
-        ));
-        return [new TimeoutConnector($secureConnector, 5.0, $this->loop), $streamCaptureConnector];
+            'SNI_enabled'             => true,
+            'peer_name'               => $peerName
+        ]);
+        return [new TimeoutConnector($secureConnector, 5.0), $streamCaptureConnector];
+    }
+
+    /**
+     * Get whether this task has been completed
+     *
+     * @return bool
+     */
+    public function isFinished(): bool
+    {
+        return ! $this->targets->valid() && $this->pendingTargets === 0;
+    }
+
+    public function getParallel()
+    {
+        return $this->parallel;
+    }
+
+    public function setParallel(int $parallel)
+    {
+        $this->parallel = $parallel;
+
+        return $this;
     }
 
     public static function binary($addr)
     {
         return str_pad(inet_pton($addr), 16, "\0", STR_PAD_LEFT);
+    }
+
+    protected function getChecksum()
+    {
+        $config = $this->getConfig()->toArray();
+        ksort($config);
+
+        return md5($this->getName() . Json::encode($config), true);
     }
 
     private static function addrToNumber($addr)
@@ -79,42 +138,35 @@ class Job
 
     private static function numberToAddr($num, $ipv6 = true)
     {
-        if ((bool) $ipv6) {
+        if ($ipv6) {
             return inet_ntop(str_pad(gmp_export($num), 16, "\0", STR_PAD_LEFT));
         } else {
             return inet_ntop(gmp_export($num));
         }
     }
 
-    private static function generateTargets(ConfigObject $jobDescription, array $hostnamesConfig)
+    private function generateTargets()
     {
-        foreach (StringHelper::trimSplit($jobDescription->get('cidrs')) as $cidr) {
-            $pieces = explode('/', $cidr);
+        $config = $this->getConfig();
+        foreach (Str::trimSplit($config->get('cidrs')) as $cidr) {
+            $pieces = Str::trimSplit($cidr, '/');
             if (count($pieces) !== 2) {
-                Logger::warning("CIDR '%s' is in the wrong format.", $cidr);
+                Logger::warning("CIDR %s is in the wrong format", $cidr);
                 continue;
             }
-            $start_ip = $pieces[0];
-            $prefix = $pieces[1];
-//            $subnet = 128;
-//            if (substr($start_ip, 0, 2) === '::') {
-//                if (strtoupper(substr($start_ip, 0, 7)) !== '::FFFF:') {
-//                    $subnet = 32;
-//                }
-//            } elseif (strpos($start_ip, ':') === false) {
-//                $subnet = 32;
-//            }
+
+            list($start_ip, $prefix) = $pieces;
             $ipv6 = filter_var($start_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false;
             $subnet = $ipv6 ? 128 : 32;
             $numIps = pow(2, ($subnet - $prefix)) - 2;
 
-            Logger::info('Scanning %d IPs in the CIDR %s.', $numIps, $cidr);
+            Logger::info('Scanning %d IPs in the CIDR %s', $numIps, $cidr);
 
             $start = static::addrToNumber($start_ip);
             for ($i = 0; $i < $numIps; $i++) {
                 $ip = static::numberToAddr(gmp_add($start, $i), $ipv6);
-                foreach (StringHelper::trimSplit($jobDescription->get('ports')) as $portRange) {
-                    $pieces = StringHelper::trimSplit($portRange, '-');
+                foreach (Str::trimSplit($config->get('ports')) as $portRange) {
+                    $pieces = Str::trimSplit($portRange, '-');
                     if (count($pieces) === 2) {
                         list($start_port, $end_port) = $pieces;
                     } else {
@@ -123,17 +175,12 @@ class Job
                     }
 
                     foreach (range($start_port, $end_port) as $port) {
-                        $hostnames = isset($hostnamesConfig[$ip]) ? $hostnamesConfig[$ip] : [];
-
-                        if (empty($hostnames)) {
-                            $hostnames[] = null;
-                        }
-
-                        foreach ($hostnames as $hostname) {
-                            $target = (object)[];
+                        foreach ($this->snimap[$ip] ?? [] as $hostname) {
+                            $target = (object) [];
                             $target->ip = $ip;
                             $target->port = $port;
                             $target->hostname = $hostname;
+
                             yield $target;
                         }
                     }
@@ -142,12 +189,13 @@ class Job
         }
     }
 
-    private function updateJobStats($finished = false)
+    public function updateJobStats(bool $finished = false): void
     {
         $fields = ['finished_targets' => $this->finishedTargets];
 
         if ($finished) {
             $fields['end_time'] = new Expression('NOW()');
+            $fields['total_targets'] = $this->totalTargets;
         }
 
         $this->db->update(
@@ -177,21 +225,27 @@ class Job
 
     private function startNextTarget()
     {
-        if (!$this->targets->valid()) {
-            if ($this->pendingTargets == 0) {
-                $this->updateJobStats(true);
-                $this->loop->stop();
-            }
+        if ($this->isFinished()) {
+            // No targets to process anymore, so we can now resolve the promise
+            $this->deferred->resolve($this->finishedTargets);
 
+            return;
+        }
+
+        if (! $this->targets->valid()) {
+            // When nothing is yielded, and it's still not finished yet, just get the next target
             return;
         }
 
         $target = $this->targets->current();
         $this->targets->next();
 
+        $this->totalTargets++;
+        $this->pendingTargets++;
+
         $url = "tls://[{$target->ip}]:{$target->port}";
         Logger::debug("Connecting to %s", static::formatTarget($target));
-        $this->pendingTargets++;
+
         /** @var ConnectorInterface $connector */
         /** @var StreamOptsCaptureConnector $streamCapture */
         list($connector, $streamCapture) = $this->getConnector($target->hostname);
@@ -208,7 +262,7 @@ class Job
 
                 $this->processChain($target, $capturedStreamOptions['ssl']['peer_certificate_chain']);
             },
-            function (\Exception $exception) use ($target, $streamCapture) {
+            function (Exception $exception) use ($target, $streamCapture) {
                 Logger::debug("Cannot connect to server: %s", $exception->getMessage());
 
                 $this->finishTarget();
@@ -236,50 +290,63 @@ class Job
                 if ($this->finishedTargets % (int) $step == 0) {
                     $this->updateJobStats();
                 }
-                //$loop->stop();
             }
         )->otherwise(function (Throwable $e) {
-            echo $e->getMessage() . PHP_EOL;
-            echo $e->getTraceAsString() . PHP_EOL;
+            Logger::error($e->getMessage());
+            Logger::error($e->getTraceAsString());
         });
     }
 
-    public function getJobId()
+    public function run(): Promise\ExtendedPromiseInterface
     {
-        return $this->jobId;
-    }
+        $this->jobRunStart = new DateTime();
+        // Update the job statistics regardless of whether the job was successful, failed, or canceled.
+        // Otherwise, some database columns might remain null.
+        $updateJobStats = function () {
+            $this->updateJobStats(true);
+        };
+        $this->deferred = new Promise\Deferred($updateJobStats);
+        $this->deferred->promise()->always($updateJobStats);
 
-    public function run()
-    {
-        $this->loop = Factory::create();
+        Loop::futureTick(function () {
+            if (! $this->db->ping()) {
+                $this->deferred->reject(new LogicException('Lost connection to database and failed to reconnect'));
 
-        $this->totalTargets = iterator_count(static::generateTargets($this->jobDescription, $this->snimap));
+                return;
+            }
 
-        if ($this->totalTargets == 0) {
-            return null;
-        }
+            // Reset those statistics for the next run! Is only necessary when
+            // running this job using the scheduler
+            $this->totalTargets = 0;
+            $this->finishedTargets = 0;
+            $this->pendingTargets = 0;
 
-        $this->targets = static::generateTargets($this->jobDescription, $this->snimap);
-
-        $this->db->insert(
-            'x509_job_run',
-            [
-                'name'             => $this->name,
-                'total_targets'    => $this->totalTargets,
+            $this->db->insert('x509_job_run', [
+                'name'             => $this->getName(),
+                'start_time'       => $this->jobRunStart->format('Y-m-d H:i:s'),
+                'ctime'            => new Expression('NOW()'),
+                'total_targets'    => 0,
                 'finished_targets' => 0
-            ]
-        );
+            ]);
 
-        $this->jobId = $this->db->lastInsertId();
+            $this->jobId = $this->db->lastInsertId();
 
-        // Start scanning the first couple of targets...
-        for ($i = 0; $i < $this->parallel; $i++) {
-            $this->startNextTarget();
-        }
+            $this->targets = $this->generateTargets();
 
-        $this->loop->run();
+            if ($this->isFinished()) {
+                // There are no targets to scan, so we can resolve the promise earlier
+                $this->deferred->resolve(0);
 
-        return $this->totalTargets;
+                return;
+            }
+
+            // Start scanning the first couple of targets...
+            for ($i = 0; $i < $this->getParallel() && ! $this->isFinished(); $i++) {
+                $this->startNextTarget();
+            }
+        });
+
+        return $this->deferred->promise();
     }
 
     protected function processChain($target, $chain)
@@ -298,9 +365,9 @@ class Job
                     ->columns(['id'])
                     ->from('x509_target')
                     ->where([
-                        'ip = ?'        => $this->dbTool->marshalBinary(static::binary($target->ip)),
-                        'port = ?'      => $target->port,
-                        'hostname = ?'  => $target->hostname
+                        'ip = ?'       => $this->dbTool->marshalBinary(static::binary($target->ip)),
+                        'port = ?'     => $target->port,
+                        'hostname = ?' => $target->hostname
                     ])
             )->fetch();
 
@@ -373,9 +440,9 @@ class Job
                     $this->db->insert(
                         'x509_certificate_chain_link',
                         [
-                            'certificate_chain_id' => $chainId,
+                            'certificate_chain_id'              => $chainId,
                             $this->db->quoteIdentifier('order') => $index,
-                            'certificate_id'       => $certId
+                            'certificate_id'                    => $certId
                         ]
                     );
                 }

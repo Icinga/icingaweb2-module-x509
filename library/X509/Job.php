@@ -21,6 +21,7 @@ use React\Socket\Connector;
 use React\Socket\ConnectorInterface;
 use React\Socket\SecureConnector;
 use React\Socket\TimeoutConnector;
+use Throwable;
 
 class Job
 {
@@ -237,7 +238,7 @@ class Job
                 }
                 //$loop->stop();
             }
-        )->otherwise(function (\Exception $e) {
+        )->otherwise(function (Throwable $e) {
             echo $e->getMessage() . PHP_EOL;
             echo $e->getTraceAsString() . PHP_EOL;
         });

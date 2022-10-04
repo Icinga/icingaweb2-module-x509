@@ -339,7 +339,7 @@ class Job
                 )->fetchAll();
 
                 foreach ($lastFingerprints as &$lastFingerprint) {
-                    $lastFingerprint = $lastFingerprint[0];
+                    $lastFingerprint = $lastFingerprint->fingerprint;
                 }
 
                 $currentFingerprints = [];

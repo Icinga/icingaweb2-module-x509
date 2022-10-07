@@ -85,14 +85,14 @@ class DataTable extends BaseHtmlElement
 
         foreach ($this->columns as $key => $column) {
             if (! is_int($key) && property_exists($row, $key)) {
-                $data = $row[$key];
+                $data = $row->$key;
             } else {
                 $data = null;
                 if (isset($column['column'])) {
                     if (is_callable($column['column'])) {
                         $data = call_user_func(($column['column']), $row);
                     } elseif (isset($row->{$column['column']})) {
-                        $data = $row[$column['column']];
+                        $data = $row->{$column['column']};
                     }
                 }
             }

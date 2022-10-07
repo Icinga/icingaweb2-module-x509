@@ -135,8 +135,8 @@ class CheckCommand extends Command
             }
 
             $now = new \DateTime();
-            $validFrom = (new \DateTime())->setTimestamp($target['valid_from']);
-            $validTo = (new \DateTime())->setTimestamp($target['valid_to']);
+            $validFrom = (new \DateTime())->setTimestamp($target->valid_from);
+            $validTo = (new \DateTime())->setTimestamp($target->valid_to);
             $criticalAfter = $this->thresholdToDateTime($validFrom, $validTo, $criticalThreshold, $criticalUnit);
             $warningAfter = $this->thresholdToDateTime($validFrom, $validTo, $warningThreshold, $warningUnit);
 
@@ -151,28 +151,28 @@ class CheckCommand extends Command
             $remainingTime = $now->diff($validTo);
             if (! $remainingTime->invert) {
                 // The certificate has not expired yet
-                $output[$target['subject']] = sprintf(
+                $output[$target->subject] = sprintf(
                     '%s expires in %d days',
-                    $target['subject'],
+                    $target->subject,
                     $remainingTime->days
                 );
             } else {
-                $output[$target['subject']] = sprintf(
+                $output[$target->subject] = sprintf(
                     '%s has expired since %d days',
-                    $target['subject'],
+                    $target->subject,
                     $remainingTime->days
                 );
             }
 
-            $perfData[$target['subject']] = sprintf(
+            $perfData[$target->subject] = sprintf(
                 "'%s'=%ds;%d:;%d:;0;%d",
-                $target['subject'],
+                $target->subject,
                 $remainingTime->invert
                     ? 0
-                    : $target['valid_to'] - time(),
-                $target['valid_to'] - $warningAfter->getTimestamp(),
-                $target['valid_to'] - $criticalAfter->getTimestamp(),
-                $target['valid_to'] - $target['valid_from']
+                    : $target->valid_to - time(),
+                $target->valid_to - $warningAfter->getTimestamp(),
+                $target->valid_to - $criticalAfter->getTimestamp(),
+                $target->valid_to - $target->valid_from
             );
         }
 

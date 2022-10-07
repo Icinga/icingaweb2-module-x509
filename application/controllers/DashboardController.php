@@ -78,10 +78,10 @@ class DashboardController extends Controller
                     'a',
                     [
                         'href' => Url::fromPath(
-                            "x509/certificates?duration={$data['duration']}&ca=n"
+                            "x509/certificates?duration={$data->duration}&ca=n"
                         )->getAbsoluteUrl()
                     ],
-                    CertificateUtils::duration($data['duration'])
+                    CertificateUtils::duration($data->duration)
                 );
             });
 
@@ -108,12 +108,12 @@ class DashboardController extends Controller
                         'href' => Url::fromPath(
                             'x509/certificates',
                             [
-                                'pubkey_algo' => $data['pubkey_algo'],
-                                'pubkey_bits' => $data['pubkey_bits']
+                                'pubkey_algo' => $data->pubkey_algo,
+                                'pubkey_bits' => $data->pubkey_bits
                             ]
                         )->getAbsoluteUrl()
                     ],
-                    "{$data['pubkey_algo']} {$data['pubkey_bits']} bits"
+                    "{$data->pubkey_algo} {$data->pubkey_bits} bits"
                 );
             });
 
@@ -140,12 +140,12 @@ class DashboardController extends Controller
                         'href' => Url::fromPath(
                             'x509/certificates',
                             [
-                                'signature_hash_algo' => $data['signature_hash_algo'],
-                                'signature_algo'      => $data['signature_algo']
+                                'signature_hash_algo' => $data->signature_hash_algo,
+                                'signature_algo'      => $data->signature_algo
                             ]
                         )->getAbsoluteUrl()
                     ],
-                    "{$data['signature_hash_algo']} with {$data['signature_algo']}"
+                    "{$data->signature_hash_algo} with {$data->signature_algo}"
                 );
             });
     }

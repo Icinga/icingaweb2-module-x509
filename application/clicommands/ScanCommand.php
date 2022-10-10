@@ -7,11 +7,14 @@ namespace Icinga\Module\X509\Clicommands;
 use Icinga\Application\Logger;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\Common\ScanUtils;
 use Icinga\Module\X509\Hook\SniHook;
 use Icinga\Module\X509\Job;
 
 class ScanCommand extends Command
 {
+    use ScanUtils;
+
     /**
      * Scans IP and port ranges to find X.509 certificates.
      *
@@ -24,43 +27,6 @@ class ScanCommand extends Command
      */
     public function indexAction()
     {
-        $name = $this->params->shiftRequired('job');
-
-        $parallel = (int) $this->Config()->get('scan', 'parallel', 256);
-
-        if ($parallel <= 0) {
-            $this->fail("The 'parallel' option must be set to at least 1.");
-        }
-
-        $jobs = $this->Config('jobs');
-
-        if (! $jobs->hasSection($name)) {
-            $this->fail('Job not found.');
-        }
-
-        $jobDescription = $this->Config('jobs')->getSection($name);
-
-        if (! strlen($jobDescription->get('cidrs'))) {
-            $this->fail('The job does not specify any CIDRs.');
-        }
-
-        $job = new Job($name, $jobDescription, SniHook::getAll(), $parallel);
-
-        $finishedTargets = $job->run();
-
-        if ($finishedTargets === null) {
-            Logger::warning("The job '%s' does not have any targets.", $name);
-        } else {
-            Logger::info(
-                "Scanned %s target%s in job '%s'.\n",
-                $finishedTargets,
-                $finishedTargets != 1 ? 's' : '',
-                $name
-            );
-
-            $verified = CertificateUtils::verifyCertificates($this->getDb());
-
-            Logger::info("Checked %d certificate chain%s.", $verified, $verified !== 1 ? 's' : '');
-        }
+        $this->runJob($this->getJob());
     }
 }

@@ -4,17 +4,14 @@
 
 namespace Icinga\Module\X509;
 
-use Icinga\Application\Config;
 use Icinga\Application\Logger;
 use Icinga\Data\ConfigObject;
 use Icinga\Module\X509\Common\Database;
+use Icinga\Module\X509\Common\JobUtils;
 use Icinga\Module\X509\React\StreamOptsCaptureConnector;
-use Icinga\Util\StringHelper;
 use ipl\Sql\Connection;
 use ipl\Sql\Expression;
-use ipl\Sql\Insert;
 use ipl\Sql\Select;
-use ipl\Sql\Update;
 use React\EventLoop\Factory;
 use React\Socket\ConnectionInterface;
 use React\Socket\Connector;
@@ -25,6 +22,7 @@ use React\Socket\TimeoutConnector;
 class Job
 {
     use Database;
+    use JobUtils;
 
     /**
      * @var Connection
@@ -37,19 +35,29 @@ class Job
     private $finishedTargets = 0;
     private $targets;
     private $jobId;
-    private $jobDescription;
     private $snimap;
     private $parallel;
     private $name;
 
-    public function __construct($name, ConfigObject $jobDescription, array $snimap, $parallel)
+    public function __construct(string $name, ConfigObject $jobConfig, array $snimap, $parallel)
     {
         $this->db = $this->getDb();
         $this->dbTool = new DbTool($this->db);
-        $this->jobDescription = $jobDescription;
         $this->snimap = $snimap;
         $this->parallel = $parallel;
         $this->name = $name;
+
+        $this->setJobConfig($jobConfig);
+    }
+
+    /**
+     * Get the name of this job
+     *
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
     }
 
     private function getConnector($peerName)
@@ -66,35 +74,10 @@ class Job
         return [new TimeoutConnector($secureConnector, 5.0, $this->loop), $streamCaptureConnector];
     }
 
-    public static function binary($addr)
+    private function generateTargets()
     {
-        return str_pad(inet_pton($addr), 16, "\0", STR_PAD_LEFT);
-    }
-
-    private static function addrToNumber($addr)
-    {
-        return gmp_import(static::binary($addr));
-    }
-
-    private static function numberToAddr($num, $ipv6 = true)
-    {
-        if ((bool) $ipv6) {
-            return inet_ntop(str_pad(gmp_export($num), 16, "\0", STR_PAD_LEFT));
-        } else {
-            return inet_ntop(gmp_export($num));
-        }
-    }
-
-    private static function generateTargets(ConfigObject $jobDescription, array $hostnamesConfig)
-    {
-        foreach (StringHelper::trimSplit($jobDescription->get('cidrs')) as $cidr) {
-            $pieces = explode('/', $cidr);
-            if (count($pieces) !== 2) {
-                Logger::warning("CIDR '%s' is in the wrong format.", $cidr);
-                continue;
-            }
-            $start_ip = $pieces[0];
-            $prefix = $pieces[1];
+        foreach ($this->getCidrs() as $cidr) {
+            list($startIp, $prefix) = $cidr;
 //            $subnet = 128;
 //            if (substr($start_ip, 0, 2) === '::') {
 //                if (strtoupper(substr($start_ip, 0, 7)) !== '::FFFF:') {
@@ -103,25 +86,18 @@ class Job
 //            } elseif (strpos($start_ip, ':') === false) {
 //                $subnet = 32;
 //            }
-            $ipv6 = filter_var($start_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false;
+            $ipv6 = self::isIPV6($startIp);
             $subnet = $ipv6 ? 128 : 32;
             $numIps = pow(2, ($subnet - $prefix)) - 2;
 
             Logger::info('Scanning %d IPs in the CIDR %s.', $numIps, $cidr);
 
-            $start = static::addrToNumber($start_ip);
+            $start = static::addrToNumber($startIp);
             for ($i = 0; $i < $numIps; $i++) {
                 $ip = static::numberToAddr(gmp_add($start, $i), $ipv6);
-                foreach (StringHelper::trimSplit($jobDescription->get('ports')) as $portRange) {
-                    $pieces = StringHelper::trimSplit($portRange, '-');
-                    if (count($pieces) === 2) {
-                        list($start_port, $end_port) = $pieces;
-                    } else {
-                        $start_port = $pieces[0];
-                        $end_port = $pieces[0];
-                    }
-
-                    foreach (range($start_port, $end_port) as $port) {
+                foreach ($this->getPorts() as $portRange) {
+                    list($startPort, $endPort) = $portRange;
+                    foreach (range($startPort, $endPort) as $port) {
                         $hostnames = isset($hostnamesConfig[$ip]) ? $hostnamesConfig[$ip] : [];
 
                         if (empty($hostnames)) {
@@ -133,6 +109,7 @@ class Job
                             $target->ip = $ip;
                             $target->port = $port;
                             $target->hostname = $hostname;
+
                             yield $target;
                         }
                     }
@@ -252,13 +229,13 @@ class Job
     {
         $this->loop = Factory::create();
 
-        $this->totalTargets = iterator_count(static::generateTargets($this->jobDescription, $this->snimap));
+        $this->totalTargets = iterator_count($this->generateTargets());
 
         if ($this->totalTargets == 0) {
             return null;
         }
 
-        $this->targets = static::generateTargets($this->jobDescription, $this->snimap);
+        $this->targets = $this->generateTargets();
 
         $this->db->insert(
             'x509_job_run',

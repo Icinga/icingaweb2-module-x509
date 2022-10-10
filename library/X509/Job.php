@@ -39,6 +39,12 @@ class Job
     private $parallel;
     private $name;
 
+    /** @var int */
+    protected $sinceLastScan;
+
+    /** @var bool Whether job run should only perform a rescan */
+    protected $rescan = false;
+
     public function __construct(string $name, ConfigObject $jobConfig, array $snimap, $parallel)
     {
         $this->db = $this->getDb();
@@ -58,6 +64,37 @@ class Job
     public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * Set whether this job run should do only a rescan or full scan
+     *
+     * @param bool $rescan
+     *
+     * @return $this
+     */
+    public function setRescan(bool $rescan): self
+    {
+        $this->rescan = $rescan;
+
+        return $this;
+    }
+
+    /**
+     * Get whether this job run should do only a rescan
+     *
+     * @return bool
+     */
+    public function isRescan(): bool
+    {
+        return $this->rescan;
+    }
+
+    public function setSinceLastScan(?int $value): self
+    {
+        $this->sinceLastScan = $value;
+
+        return $this;
     }
 
     private function getConnector($peerName)

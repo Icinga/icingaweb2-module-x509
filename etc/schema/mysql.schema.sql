@@ -87,6 +87,7 @@ CREATE TABLE x509_target (
   latest_certificate_chain_id int(10) unsigned NULL DEFAULT NULL,
   ctime timestamp NULL DEFAULT NULL,
   mtime timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  last_scan bigint NOT NULL DEFAULT NULL,
   PRIMARY KEY (id),
   INDEX x509_idx_target_ip_port (ip, port)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -6,13 +6,13 @@ CREATE TYPE dn_type AS ENUM('issuer','subject');
 CREATE TYPE pubkey_algo AS ENUM('unknown','RSA','DSA','DH','EC');
 
 -- Used when sorting certificates by expiration date.
-CREATE OR REPLACE FUNCTION UNIX_TIMESTAMP()
+CREATE OR REPLACE FUNCTION UNIX_TIMESTAMP(datetime timestamptz DEFAULT NOW())
     RETURNS bigint
     LANGUAGE plpgsql
     PARALLEL SAFE
     AS $$
 BEGIN
-RETURN EXTRACT(EPOCH FROM now());
+    RETURN EXTRACT(EPOCH FROM datetime);
 END;
 $$;
 
@@ -99,7 +99,8 @@ CREATE TABLE x509_target (
   hostname varchar(255) NULL DEFAULT NULL,
   latest_certificate_chain_id int NULL DEFAULT NULL,
   ctime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  mtime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+  mtime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_scan bigint NOT NULL DEFAULT (EXTRACT(EPOCH FROM NOW()))
 );
 
 CREATE INDEX x509_idx_target ON x509_target (ip,port,hostname);

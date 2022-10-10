@@ -9,6 +9,7 @@ use Icinga\Data\ConfigObject;
 use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Common\JobUtils;
 use Icinga\Module\X509\React\StreamOptsCaptureConnector;
+use ipl\Sql\Adapter\Pgsql;
 use ipl\Sql\Connection;
 use ipl\Sql\Expression;
 use ipl\Sql\Select;
@@ -135,7 +136,7 @@ class Job
                 foreach ($this->getPorts() as $portRange) {
                     list($startPort, $endPort) = $portRange;
                     foreach (range($startPort, $endPort) as $port) {
-                        $hostnames = isset($hostnamesConfig[$ip]) ? $hostnamesConfig[$ip] : [];
+                        $hostnames = $this->snimap[$ip] ?? [];
 
                         if (empty($hostnames)) {
                             $hostnames[] = null;
@@ -153,6 +154,51 @@ class Job
                 }
             }
         }
+    }
+
+    protected function getScanTargets()
+    {
+        if (! $this->isRescan()) {
+            yield from $this->generateTargets();
+        } else {
+            $targets = (new Select())
+                ->columns(['id', 'ip', 'hostname', 'port'])
+                ->from('x509_target');
+
+            if ($this->sinceLastScan) {
+                $targets->where(new Expression(sprintf('last_scan < %d', $this->sinceLastScan)));
+            }
+
+            foreach ($this->db->select($targets) as $target) {
+                $addr = gmp_import(DbTool::unmarshalBinary($target->ip));
+                $addrFound = false;
+
+                foreach ($this->getCidrs() as $cidr) {
+                    if (self::isAddrInside($cidr, $addr)) {
+                        list($subnet, $_) = $cidr;
+                        $target->ip = self::numberToAddr($addr, self::isIPV6($subnet)); // Replace binary IP
+                        $addrFound = true;
+
+                        break;
+                    }
+                }
+
+                if ($addrFound) {
+                    yield $target;
+                }
+            }
+        }
+    }
+
+    protected function updateLastScan($target)
+    {
+        if (! $this->isRescan()) {
+            return;
+        }
+
+        $this->db->update('x509_target', ['last_scan' => new Expression('UNIX_TIMESTAMP(NOW())')], [
+            'id = ?' => $target->id
+        ]);
     }
 
     private function updateJobStats($finished = false)
@@ -254,6 +300,8 @@ class Job
         )->otherwise(function (\Exception $e) {
             echo $e->getMessage() . PHP_EOL;
             echo $e->getTraceAsString() . PHP_EOL;
+        })->always(function () use ($target) {
+            $this->updateLastScan($target);
         });
     }
 
@@ -266,13 +314,13 @@ class Job
     {
         $this->loop = Factory::create();
 
-        $this->totalTargets = iterator_count($this->generateTargets());
+        $this->totalTargets = iterator_count($this->getScanTargets());
 
         if ($this->totalTargets == 0) {
             return null;
         }
 
-        $this->targets = $this->generateTargets();
+        $this->targets = $this->getScanTargets();
 
         $this->db->insert(
             'x509_job_run',

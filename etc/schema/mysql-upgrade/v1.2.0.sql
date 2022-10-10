@@ -1,0 +1,1 @@
+ALTER TABLE x509_target ADD COLUMN last_scan bigint NOT NULL DEFAULT NULL AFTER mtime;

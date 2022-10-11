@@ -79,7 +79,9 @@ jobs:
           extensions: mysql, gmp
 
       - name: Setup dependencies
-        run: apt-get install -y libgmp-dev php${{ matrix.php }}-gmp
+        run: |
+          apt-get install -y libgmp-dev php${{ matrix.php }}-gmp
+          icingacli module enable test
 
       - name: Running PHPUnit
         run: icingacli test php unit --include "Tests\\Icinga\\Modules\\x509" --verbose

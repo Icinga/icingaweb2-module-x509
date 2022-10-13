@@ -39,4 +39,6 @@ jobs:
     runs-on: 'ubuntu-latest'
 
     steps:
-      - uses: Icinga/gha-module-unit-tests@gha
+      - uses: Icinga/gha-setup-icingaweb2@gha
+        with:
+          enable-modules: test

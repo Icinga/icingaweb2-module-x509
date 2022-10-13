@@ -42,46 +42,7 @@ jobs:
         run: phpcs
 
   test:
-    name: Unit tests with PHP ${{ matrix.php }} on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    container:
-      image: icinga/icingaweb2:master
-      options: --user root # actions/checkout fails to install the source code without this option
-      env:
-        icingaweb.enabledModules: test
-      volumes:
-        - icingaweb:/data
-
-    env:
-      PHPUNIT_VERSION: 9.5
-      ICINGAWEB_LIBRARY_PATH: /usr/share/icingaweb2/library
-      PHP_INCLUDE_PATH: .:/usr/share/php:$ICINGAWEB_LIBRARY_PATH:$ICINGAWEB_LIBRARY_PATH/vendor
-
-    strategy:
-      fail-fast: false
-      matrix:
-        php: [ '7.2', '7.3', '7.4', '8.0', '8.1' ]
-        os: [ 'ubuntu-latest' ]
-        include:
-          - php: '7.2'
-            PHPUNIT_VERSION: 8.5 # PHPUnit 9.5 requires minimum PHP version 7.3
+    runs-on: 'ubuntu-latest'
 
     steps:
-      - name: Checkout code base
-        uses: actions/checkout@v3
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          tools: phpunit:${{ matrix.PHPUNIT_VERSION || env.PHPUNIT_VERSION }}
-          ini-values: include_path=${{ env.PHP_INCLUDE_PATH }}
-          extensions: mysql, gmp
-
-      - name: Setup dependencies
-        run: |
-          apt-get install -y libgmp-dev php${{ matrix.php }}-gmp
-          icingacli module enable test
-
-      - name: Running PHPUnit
-        run: icingacli test php unit --include "Tests\\Icinga\\Modules\\x509" --verbose
+      - uses: Icinga/gha-module-unit-tests@gha

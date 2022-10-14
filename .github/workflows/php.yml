@@ -37,8 +37,12 @@ jobs:
 
   test:
     runs-on: 'ubuntu-latest'
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [ '7.2', '7.3', '7.4', '8.0', '8.1' ]
 
     steps:
-      - uses: Icinga/gha-setup-icingaweb2@gha
+      - uses: Icinga/gha-icingaweb-module-tests@gha
         with:
-          enable-modules: test
+          php-version: ${{ matrix.php }}

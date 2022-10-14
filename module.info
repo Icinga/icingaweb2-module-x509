@@ -1,4 +1,5 @@
 Module: Certificate Monitoring
+Shortname: x509
 Version: 1.1.2
 Requires:
   Libraries: icinga-php-library (>=0.8.1), icinga-php-thirdparty (>=0.10.0)

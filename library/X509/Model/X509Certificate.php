@@ -4,6 +4,7 @@ namespace Icinga\Module\X509\Model;
 
 use Icinga\Module\X509\Model\Behavior\BoolCast;
 use Icinga\Module\X509\Model\Behavior\DistinguishedEncodingRules;
+use Icinga\Module\X509\Model\Behavior\ExpressionInjector;
 use ipl\Orm\Behavior\Binary;
 use ipl\Orm\Behaviors;
 use ipl\Orm\Model;
@@ -103,6 +104,8 @@ class X509Certificate extends Model
             'trusted',
             'self_signed'
         ]));
+
+        $behaviors->add(new ExpressionInjector('duration', 'expires'));
     }
 
     public function createRelations(Relations $relations)

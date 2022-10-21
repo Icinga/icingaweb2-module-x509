@@ -45,7 +45,7 @@ class ImportCommand extends Command
 
                 $db->update(
                     'x509_certificate',
-                    ['trusted' => 'yes'],
+                    ['trusted' => 'y'],
                     ['id = ?' => $id]
                 );
 

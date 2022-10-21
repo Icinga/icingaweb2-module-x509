@@ -29,7 +29,7 @@ class DashboardController extends Controller
             (new Select())
                 ->from('x509_certificate i')
                 ->columns(['i.subject', 'cnt' => 'COUNT(*)'])
-                ->join('x509_certificate c', ['c.issuer_hash = i.subject_hash', 'i.ca = ?' => 'yes'])
+                ->join('x509_certificate c', ['c.issuer_hash = i.subject_hash', 'i.ca = ?' => 'y'])
                 ->groupBy(['i.id'])
                 ->orderBy('cnt', SORT_DESC)
                 ->limit(5)
@@ -55,7 +55,7 @@ class DashboardController extends Controller
                     'duration' => 'valid_to - valid_from',
                     'cnt' => 'COUNT(*)'
                 ])
-                ->where(['ca = ?' => 'no'])
+                ->where(['ca = ?' => 'n'])
                 ->groupBy(['duration'])
                 ->orderBy('cnt', SORT_DESC)
                 ->limit(5)

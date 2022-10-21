@@ -41,7 +41,7 @@ class ChainDetails extends DataTable
             'ca' => [
                 'attributes' => ['class' => 'icon-col'],
                 'renderer' => function ($ca) {
-                    if ($ca === 'no') {
+                    if ($ca === 'n') {
                         return null;
                     }
 
@@ -55,7 +55,7 @@ class ChainDetails extends DataTable
             'self_signed' => [
                 'attributes' => ['class' => 'icon-col'],
                 'renderer' => function ($selfSigned) {
-                    if ($selfSigned === 'no') {
+                    if ($selfSigned === 'n') {
                         return null;
                     }
 
@@ -69,7 +69,7 @@ class ChainDetails extends DataTable
             'trusted' => [
                 'attributes' => ['class' => 'icon-col'],
                 'renderer' => function ($trusted) {
-                    if ($trusted === 'no') {
+                    if ($trusted === 'n') {
                         return null;
                     }
 

@@ -113,7 +113,7 @@ class CheckCommand extends Command
 
         $state = 3;
         foreach ($this->getDb()->select($targets) as $target) {
-            if ($target['valid'] === 'no' && ($target['self_signed'] === 'no' || ! $allowSelfSigned)) {
+            if ($target['valid'] === 'n' && ($target['self_signed'] === 'n' || ! $allowSelfSigned)) {
                 $invalidMessage = $target['subject'] . ': ' . $target['invalid_reason'];
                 $output[$invalidMessage] = $invalidMessage;
                 $state = 2;

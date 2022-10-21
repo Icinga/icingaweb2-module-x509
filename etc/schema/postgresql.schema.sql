@@ -1,6 +1,6 @@
 CREATE DOMAIN uint2 AS int4
     CHECK(VALUE >= 0 AND VALUE < 65536);
-CREATE TYPE yesno AS ENUM ('yes','no');
+CREATE TYPE boolenum AS ENUM ('n', 'y');
 CREATE TYPE certificate_version AS ENUM('1','2','3');
 CREATE TYPE dn_type AS ENUM('issuer','subject');
 CREATE TYPE pubkey_algo AS ENUM('unknown','RSA','DSA','DH','EC');
@@ -24,9 +24,9 @@ CREATE TABLE x509_certificate (
   issuer_hash bytea NOT NULL,
   issuer_certificate_id int DEFAULT NULL,
   version certificate_version NOT NULL,
-  self_signed yesno NOT NULL DEFAULT 'no',
-  ca yesno NOT NULL,
-  trusted yesno NOT NULL DEFAULT 'no',
+  self_signed boolenum NOT NULL DEFAULT 'n',
+  ca boolenum NOT NULL,
+  trusted boolenum NOT NULL DEFAULT 'n',
   pubkey_algo pubkey_algo NOT NULL,
   pubkey_bits uint2 NOT NULL,
   signature_algo varchar(255) NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE x509_certificate_chain (
   id serial PRIMARY KEY,
   target_id int NOT NULL,
   length uint2 NOT NULL,
-  valid yesno NOT NULL DEFAULT 'no',
+  valid boolenum NOT NULL DEFAULT 'n',
   invalid_reason varchar(255) NULL DEFAULT NULL,
   ctime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

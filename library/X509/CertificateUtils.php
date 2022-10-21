@@ -234,8 +234,8 @@ class CertificateUtils
                 'issuer'              => CertificateUtils::shortNameFromDN($certInfo['issuer']),
                 'issuer_hash'         => $dbTool->marshalBinary($issuerHash),
                 'version'             => $certInfo['version'] + 1,
-                'self_signed'         => $subjectHash === $issuerHash ? 'yes' : 'no',
-                'ca'                  => $ca ? 'yes' : 'no',
+                'self_signed'         => $subjectHash === $issuerHash ? 'y' : 'n',
+                'ca'                  => $ca ? 'y' : 'n',
                 'pubkey_algo'         => CertificateUtils::$pubkeyTypes[$pubkey['type']],
                 'pubkey_bits'         => $pubkey['bits'],
                 'signature_algo'      => array_shift($signature), // Support formats like RSA-SHA1 and
@@ -372,7 +372,7 @@ class CertificateUtils
             (new Select())
                 ->from('x509_certificate')
                 ->columns(['certificate'])
-                ->where(['ca = ?' => 'yes', 'trusted = ?' => 'yes'])
+                ->where(['ca = ?' => 'y', 'trusted = ?' => 'y'])
         );
 
         $contents = [];
@@ -395,7 +395,7 @@ class CertificateUtils
             $chains = $db->select(
                 (new Select())
                     ->from('x509_certificate_chain c')
-                    ->join('x509_target t', ['t.latest_certificate_chain_id = c.id', 'c.valid = ?' => 'no'])
+                    ->join('x509_target t', ['t.latest_certificate_chain_id = c.id', 'c.valid = ?' => 'n'])
                     ->columns('c.id')
             );
 
@@ -455,7 +455,7 @@ class CertificateUtils
                 if (!empty($match)) {
                     $set = ['invalid_reason' => trim($match[1])];
                 } else {
-                    $set = ['valid' => 'yes', 'invalid_reason' => null];
+                    $set = ['valid' => 'y', 'invalid_reason' => null];
                 }
 
                 $db->update(

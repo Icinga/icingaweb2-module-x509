@@ -58,7 +58,7 @@ class ChainController extends Controller
 
         $valid = Html::tag('div', ['class' => 'cert-chain']);
 
-        if ($chain['valid'] === 'yes') {
+        if ($chain['valid'] === 'y') {
             $valid->getAttributes()->add('class', '-valid');
             $valid->add(Html::tag('p', $this->translate('Certificate chain is valid.')));
         } else {

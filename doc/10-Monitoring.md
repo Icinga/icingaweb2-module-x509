@@ -107,8 +107,8 @@ host_address          | Set to `host_ip` if it is IPv4 else `null`
 host_address6         | Set to `host_ip` if it is IPv6 else `null`
 cert_subject          | A certificate's common name
 cert_issuer           | The issuer's common name
-cert_self_signed      | Whether the certificate is self-signed (`yes` or `no`)
-cert_trusted          | Whether the certificate is trusted (`yes` or `no`)
+cert_self_signed      | Whether the certificate is self-signed (`y` or `n`)
+cert_trusted          | Whether the certificate is trusted (`y` or `n`)
 cert_valid_from       | The certificate's start time of validity (UNIX timestamp)
 cert_valid_to         | The certificate's end time of validity (UNIX timestamp)
 cert_fingerprint      | The certificate's fingerprint (hex-encoded)

@@ -8,6 +8,7 @@
   * [Icinga PHP Library (ipl)](https://github.com/Icinga/icinga-php-library) (>= 0.8.1)
   * [Icinga PHP Thirdparty](https://github.com/Icinga/icinga-php-thirdparty) (>= 0.10)
 * php-gmp
+* php-pcntl (might already be built into your PHP binary)
 * OpenSSL
 * MySQL / MariaDB or PostgreSQL
 

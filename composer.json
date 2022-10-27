@@ -1,8 +1,0 @@
-{
-    "require": {
-        "dragonmantank/cron-expression": "^2.3.1"
-    },
-    "scripts": {
-        "git-archive": "git archive --format=tar --prefix=x509/ HEAD >icingaweb2-module-x509.tar && tar --transform 's,^,x509/,' --exclude-vcs --exclude '.*' -rf icingaweb2-module-x509.tar vendor composer.lock && gzip -f icingaweb2-module-x509.tar"
-    }
-}

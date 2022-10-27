@@ -23,3 +23,6 @@ UPDATE x509_certificate_chain SET valid = 'y' WHERE valid = 'yes';
 UPDATE x509_certificate_chain SET valid = 'n' WHERE valid = 'no';
 
 ALTER TABLE x509_certificate_chain CHANGE valid valid enum('n', 'y') NOT NULL DEFAULT 'n';
+
+ALTER TABLE x509_target ADD COLUMN last_scan bigint unsigned NOT NULL DEFAULT UNIX_TIMESTAMP() AFTER latest_certificate_chain_id;
+ALTER TABLE x509_target MODIFY COLUMN last_scan bigint unsigned NOT NULL;

@@ -251,8 +251,6 @@ class Job implements Task
         list($connector, $streamCapture) = $this->getConnector($target->hostname);
         $connector->connect($url)->then(
             function (ConnectionInterface $conn) use ($target, $streamCapture) {
-                $this->finishTarget();
-
                 Logger::info("Connected to %s", static::formatTarget($target));
 
                 // Close connection in order to capture stream context options
@@ -261,11 +259,11 @@ class Job implements Task
                 $capturedStreamOptions = $streamCapture->getCapturedStreamOptions();
 
                 $this->processChain($target, $capturedStreamOptions['ssl']['peer_certificate_chain']);
+
+                $this->finishTarget();
             },
             function (Exception $exception) use ($target, $streamCapture) {
                 Logger::debug("Cannot connect to server: %s", $exception->getMessage());
-
-                $this->finishTarget();
 
                 $capturedStreamOptions = $streamCapture->getCapturedStreamOptions();
 
@@ -290,6 +288,8 @@ class Job implements Task
                 if ($this->finishedTargets % (int) $step == 0) {
                     $this->updateJobStats();
                 }
+
+                $this->finishTarget();
             }
         )->otherwise(function (Throwable $e) {
             Logger::error($e->getMessage());

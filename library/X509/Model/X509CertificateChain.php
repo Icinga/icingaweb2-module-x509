@@ -2,7 +2,7 @@
 
 namespace Icinga\Module\X509\Model;
 
-use Icinga\Module\X509\Model\Behavior\BoolCast;
+use ipl\Orm\Behavior\BoolCast;
 use ipl\Orm\Behaviors;
 use ipl\Orm\Model;
 use ipl\Orm\Relations;

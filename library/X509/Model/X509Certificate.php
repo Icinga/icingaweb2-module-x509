@@ -2,10 +2,10 @@
 
 namespace Icinga\Module\X509\Model;
 
-use Icinga\Module\X509\Model\Behavior\BoolCast;
 use Icinga\Module\X509\Model\Behavior\DistinguishedEncodingRules;
 use Icinga\Module\X509\Model\Behavior\ExpressionInjector;
 use ipl\Orm\Behavior\Binary;
+use ipl\Orm\Behavior\BoolCast;
 use ipl\Orm\Behaviors;
 use ipl\Orm\Model;
 use ipl\Orm\Relations;

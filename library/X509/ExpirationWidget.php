@@ -29,17 +29,17 @@ class ExpirationWidget extends BaseHtmlElement
 
         $from = $this->from;
 
-        if ($from > $now) {
+        if ($from->getTimestamp() > $now) {
             $ratio = 0;
-            $dateTip = DateFormatter::formatDateTime($from);
-            $message = sprintf(mt('x509', 'not until after %s'), DateFormatter::timeUntil($from, true));
+            $dateTip = $from->format('Y-m-d H:i:s');
+            $message = sprintf(mt('x509', 'not until after %s'), DateFormatter::timeUntil($from->getTimestamp(), true));
         } else {
             $to = $this->to;
 
-            $secondsRemaining = $to - $now;
+            $secondsRemaining = $to->getTimestamp() - $now;
             $daysRemaining = ($secondsRemaining - $secondsRemaining % 86400) / 86400;
             if ($daysRemaining > 0) {
-                $secondsTotal = $to - $from;
+                $secondsTotal = $to->getTimestamp() - $from->getTimestamp();
                 $daysTotal = ($secondsTotal - $secondsTotal % 86400) / 86400;
 
                 $ratio = min(100, 100 - round(($daysRemaining * 100) / $daysTotal, 2));
@@ -53,7 +53,7 @@ class ExpirationWidget extends BaseHtmlElement
                 }
             }
 
-            $dateTip = DateFormatter::formatDateTime($to);
+            $dateTip = $to->format('Y-m-d H:i:s');
         }
 
         if ($ratio >= 75) {

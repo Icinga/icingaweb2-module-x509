@@ -2,6 +2,8 @@
 
 namespace Icinga\Module\X509\Model;
 
+use ipl\Orm\Behavior\MillisecondTimestamp;
+use ipl\Orm\Behaviors;
 use ipl\Orm\Model;
 
 class X509JobRun extends Model
@@ -27,5 +29,15 @@ class X509JobRun extends Model
             'ctime',
             'mtime'
         ];
+    }
+
+    public function createBehaviors(Behaviors $behaviors)
+    {
+        $behaviors->add(new MillisecondTimestamp([
+            'start_time',
+            'end_time',
+            'ctime',
+            'mtime'
+        ]));
     }
 }

@@ -6,6 +6,7 @@ use Icinga\Module\X509\Model\Behavior\DERBase64;
 use Icinga\Module\X509\Model\Behavior\ExpressionInjector;
 use ipl\Orm\Behavior\Binary;
 use ipl\Orm\Behavior\BoolCast;
+use ipl\Orm\Behavior\MillisecondTimestamp;
 use ipl\Orm\Behaviors;
 use ipl\Orm\Model;
 use ipl\Orm\Relations;
@@ -53,7 +54,7 @@ class X509Certificate extends Model
             'mtime',
             'duration' => new Expression('%s - %s', ['valid_to', 'valid_from']),
             'expires'  => new Expression(
-                'CASE WHEN UNIX_TIMESTAMP() > %1$s THEN 0 ELSE (%1$s - UNIX_TIMESTAMP()) / 86400 END',
+                'CASE WHEN UNIX_TIMESTAMP_MILLI() > %1$s THEN 0 ELSE (%1$s - UNIX_TIMESTAMP_MILLI()) / 86400 END',
                 ['valid_to']
             )
         ];
@@ -126,6 +127,13 @@ class X509Certificate extends Model
             'ca',
             'trusted',
             'self_signed'
+        ]));
+
+        $behaviors->add(new MillisecondTimestamp([
+            'valid_from',
+            'valid_to',
+            'ctime',
+            'mtime'
         ]));
 
         $behaviors->add(new ExpressionInjector('duration', 'expires'));

@@ -8,7 +8,7 @@ CREATE TYPE pubkey_algo AS ENUM('unknown','RSA','DSA','DH','EC');
 
 -- Used when sorting certificates by expiration date.
 CREATE OR REPLACE FUNCTION UNIX_TIMESTAMP(datetime timestamptz DEFAULT NOW())
-    RETURNS bigint
+    RETURNS biguint
     LANGUAGE plpgsql
     PARALLEL SAFE
     AS $$
@@ -46,13 +46,13 @@ CREATE TABLE x509_certificate (
   pubkey_bits uint2 NOT NULL,
   signature_algo varchar(255) NOT NULL,
   signature_hash_algo varchar(255) NOT NULL,
-  valid_from bigint NOT NULL,
-  valid_to bigint NOT NULL,
+  valid_from biguint NOT NULL,
+  valid_to biguint NOT NULL,
   fingerprint bytea NOT NULL,
   serial bytea NOT NULL,
   certificate bytea NOT NULL,
-  ctime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  mtime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ctime biguint NOT NULL,
+  mtime biguint NOT NULL,
   CONSTRAINT x509_idx_certificate_fingerprint UNIQUE(fingerprint),
   CONSTRAINT x509_fk_certificate_issuer_certificate_id FOREIGN KEY (issuer_certificate_id) REFERENCES x509_certificate (id) ON DELETE SET NULL ON UPDATE CASCADE
 );
@@ -63,14 +63,14 @@ CREATE TABLE x509_certificate_chain (
   length uint2 NOT NULL,
   valid boolenum NOT NULL DEFAULT 'n',
   invalid_reason varchar(255) NULL DEFAULT NULL,
-  ctime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+  ctime biguint NOT NULL
 );
 
 CREATE TABLE x509_certificate_chain_link (
   certificate_chain_id int NOT NULL,
   certificate_id int NOT NULL,
   "order" uint2 NOT NULL,
-  ctime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ctime biguint NOT NULL,
   PRIMARY KEY(certificate_chain_id,certificate_id,"order"),
   CONSTRAINT x509_fk_certificate_chain_link_certificate_chain_id FOREIGN KEY (certificate_chain_id) REFERENCES x509_certificate_chain (id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT x509_fk_certificate_chain_link_certificate_id FOREIGN KEY (certificate_id) REFERENCES x509_certificate (id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -81,7 +81,7 @@ CREATE TABLE x509_certificate_subject_alt_name (
   hash bytea NOT NULL,
   type varchar(255) NOT NULL,
   value varchar(255) NOT NULL,
-  ctime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ctime biguint NOT NULL,
   PRIMARY KEY (certificate_id,hash),
   CONSTRAINT x509_fk_certificate_subject_alt_name_certificate_id FOREIGN KEY (certificate_id) REFERENCES x509_certificate (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -92,7 +92,7 @@ CREATE TABLE x509_dn (
   "order" uint2 NOT NULL,
   key varchar(255) NOT NULL,
   value varchar(255) NOT NULL,
-  ctime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ctime biguint NOT NULL,
   PRIMARY KEY (hash,type,"order")
 );
 
@@ -101,10 +101,10 @@ CREATE TABLE x509_job_run (
   name varchar(255) NOT NULL,
   total_targets int NOT NULL,
   finished_targets int NOT NULL,
-  start_time timestamptz NULL DEFAULT NULL,
-  end_time timestamptz NULL DEFAULT NULL,
-  ctime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  mtime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+  start_time biguint NULL DEFAULT NULL,
+  end_time biguint NULL DEFAULT NULL,
+  ctime biguint NOT NULL,
+  mtime biguint NOT NULL
 );
 
 CREATE TABLE x509_target (
@@ -114,8 +114,8 @@ CREATE TABLE x509_target (
   hostname varchar(255) NULL DEFAULT NULL,
   latest_certificate_chain_id int NULL DEFAULT NULL,
   last_scan biguint NOT NULL,
-  ctime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  mtime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+  ctime biguint NOT NULL,
+  mtime biguint NOT NULL
 );
 
 CREATE INDEX x509_idx_target ON x509_target (ip,port,hostname);

@@ -262,10 +262,13 @@ class Job implements Task
 
     public function updateJobStats(bool $finished = false): void
     {
-        $fields = ['finished_targets' => $this->finishedTargets];
+        $fields = [
+            'finished_targets' => $this->finishedTargets,
+            'mtime'            => new Expression('UNIX_TIMESTAMP() * 1000')
+        ];
 
         if ($finished) {
-            $fields['end_time'] = new Expression('NOW()');
+            $fields['end_time'] = new Expression('UNIX_TIMESTAMP() * 1000');
             $fields['total_targets'] = $this->totalTargets;
         }
 
@@ -345,7 +348,10 @@ class Job implements Task
                 } else {
                     $this->db->update(
                         'x509_target',
-                        ['latest_certificate_chain_id' => null],
+                        [
+                            'latest_certificate_chain_id' => null,
+                            'mtime'                       => new Expression('UNIX_TIMESTAMP() * 1000')
+                        ],
                         [
                             'hostname = ?' => $target->hostname,
                             'ip = ?'       => $this->dbTool->marshalBinary(static::binary($target->ip)),
@@ -396,8 +402,8 @@ class Job implements Task
 
             $this->db->insert('x509_job_run', [
                 'name'             => $this->getName(),
-                'start_time'       => $this->jobRunStart->format('Y-m-d H:i:s'),
-                'ctime'            => new Expression('NOW()'),
+                'start_time'       => $this->jobRunStart->getTimestamp() * 1000.0,
+                'ctime'            => new Expression('UNIX_TIMESTAMP() * 1000'),
                 'total_targets'    => 0,
                 'finished_targets' => 0
             ]);
@@ -450,7 +456,8 @@ class Job implements Task
                         'ip'        => $this->dbTool->marshalBinary(static::binary($target->ip)),
                         'port'      => $target->port,
                         'hostname'  => $target->hostname,
-                        'last_scan' => new Expression('UNIX_TIMESTAMP()')
+                        'last_scan' => new Expression('UNIX_TIMESTAMP() * 1000'),
+                        'ctime'     => new Expression('UNIX_TIMESTAMP() * 1000')
                     ]
                 );
                 $targetId = $this->db->lastInsertId();
@@ -500,7 +507,8 @@ class Job implements Task
                     'x509_certificate_chain',
                     [
                         'target_id' => $targetId,
-                        'length'    => count($chain)
+                        'length'    => count($chain),
+                        'ctime'     => new Expression('UNIX_TIMESTAMP() * 1000')
                     ]
                 );
 
@@ -516,7 +524,8 @@ class Job implements Task
                         [
                             'certificate_chain_id'              => $chainId,
                             $this->db->quoteIdentifier('order') => $index,
-                            'certificate_id'                    => $certId
+                            'certificate_id'                    => $certId,
+                            'ctime'                             => new Expression('UNIX_TIMESTAMP() * 1000')
                         ]
                     );
 
@@ -552,7 +561,10 @@ class Job implements Task
 
             $this->db->update(
                 'x509_target',
-                ['latest_certificate_chain_id' => $chainId],
+                [
+                    'latest_certificate_chain_id' => $chainId,
+                    'mtime'                       => new Expression('UNIX_TIMESTAMP() * 1000')
+                ],
                 ['id = ?' => $targetId]
             );
         });

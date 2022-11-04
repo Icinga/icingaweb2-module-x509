@@ -245,11 +245,12 @@ class CertificateUtils
                 'pubkey_bits'         => $pubkey['bits'],
                 'signature_algo'      => array_shift($signature), // Support formats like RSA-SHA1 and
                 'signature_hash_algo' => array_pop($signature),   // ecdsa-with-SHA384
-                'valid_from'          => $certInfo['validFrom_time_t'],
-                'valid_to'            => $certInfo['validTo_time_t'],
+                'valid_from'          => $certInfo['validFrom_time_t'] * 1000.0,
+                'valid_to'            => $certInfo['validTo_time_t'] * 1000.0,
                 'fingerprint'         => $dbTool->marshalBinary($fingerprint),
                 'serial'              => $dbTool->marshalBinary(gmp_export($certInfo['serialNumber'])),
-                'certificate'         => $dbTool->marshalBinary($der)
+                'certificate'         => $dbTool->marshalBinary($der),
+                'ctime'               => new Expression('UNIX_TIMESTAMP() * 1000')
             ]
         );
 
@@ -291,9 +292,10 @@ class CertificateUtils
                     'x509_certificate_subject_alt_name',
                     [
                         'certificate_id' => $certId,
-                        'hash' => $dbTool->marshalBinary($hash),
-                        'type' => $type,
-                        'value' => $value
+                        'hash'           => $dbTool->marshalBinary($hash),
+                        'type'           => $type,
+                        'value'          => $value,
+                        'ctime'          => new Expression('UNIX_TIMESTAMP() * 1000')
                     ]
                 );
             }
@@ -352,7 +354,8 @@ class CertificateUtils
                         $db->quoteIdentifier('key')   => $key,
                         $db->quoteIdentifier('value') => $value,
                         $db->quoteIdentifier('order') => $index,
-                        'type'    => $type
+                        'type'    => $type,
+                        'ctime'   => new Expression('UNIX_TIMESTAMP() * 1000')
                     ]
                 );
                 $index++;

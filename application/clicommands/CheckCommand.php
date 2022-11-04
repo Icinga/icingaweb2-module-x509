@@ -135,8 +135,8 @@ class CheckCommand extends Command
             }
 
             $now = new \DateTime();
-            $validFrom = (new \DateTime())->setTimestamp($target->valid_from);
-            $validTo = (new \DateTime())->setTimestamp($target->valid_to);
+            $validFrom = $target->valid_from;
+            $validTo = $target->valid_to;
             $criticalAfter = $this->thresholdToDateTime($validFrom, $validTo, $criticalThreshold, $criticalUnit);
             $warningAfter = $this->thresholdToDateTime($validFrom, $validTo, $warningThreshold, $warningUnit);
 
@@ -169,10 +169,10 @@ class CheckCommand extends Command
                 $target->subject,
                 $remainingTime->invert
                     ? 0
-                    : $target->valid_to - time(),
-                $target->valid_to - $warningAfter->getTimestamp(),
-                $target->valid_to - $criticalAfter->getTimestamp(),
-                $target->valid_to - $target->valid_from
+                    : $target->valid_to->getTimestamp() - time(),
+                $target->valid_to->getTimestamp() - $warningAfter->getTimestamp(),
+                $target->valid_to->getTimestamp() - $criticalAfter->getTimestamp(),
+                $target->valid_to->getTimestamp() - $target->valid_from->getTimestamp()
             );
         }
 

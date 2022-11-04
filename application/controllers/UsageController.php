@@ -96,12 +96,8 @@ class UsageController extends Controller
 
         $this->handleFormatRequest($targets, function (Query $targets) {
             foreach ($targets as $usage) {
-                $usage->valid_from = (new \DateTime())
-                    ->setTimestamp($usage->valid_from)
-                    ->format('l F jS, Y H:i:s e');
-                $usage->valid_to = (new \DateTime())
-                    ->setTimestamp($usage->valid_to)
-                    ->format('l F jS, Y H:i:s e');
+                $usage->valid_from = $usage->valid_from->format('l F jS, Y H:i:s e');
+                $usage->valid_to = $usage->valid_to->format('l F jS, Y H:i:s e');
 
                 $usage->ip = $usage->chain->target->ip;
                 $usage->hostname = $usage->chain->target->hostname;

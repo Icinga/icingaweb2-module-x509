@@ -61,6 +61,9 @@ class Job implements Task
     /** @var DateTime A formatted date time of this job start time */
     protected $jobRunStart;
 
+    /** @var array A list of excluded IP addresses and host names */
+    protected $excludedTargets = [];
+
     public function __construct(string $name, ConfigObject $config, array $snimap)
     {
         $this->db = $this->getDb();
@@ -80,6 +83,20 @@ class Job implements Task
     public function getConfig(): ConfigObject
     {
         return $this->config;
+    }
+
+    /**
+     * Get excluded IPs and host names
+     *
+     * @return array
+     */
+    protected function getExcludes(): array
+    {
+        if (empty($this->excludedTargets)) {
+            $this->excludedTargets = array_flip(Str::trimSplit($this->getConfig()->get('exclude_targets')));
+        }
+
+        return $this->excludedTargets;
     }
 
     private function getConnector($peerName)
@@ -148,6 +165,7 @@ class Job implements Task
     private function generateTargets()
     {
         $config = $this->getConfig();
+        $excludes = $this->getExcludes();
         foreach (Str::trimSplit($config->get('cidrs')) as $cidr) {
             $pieces = Str::trimSplit($cidr, '/');
             if (count($pieces) !== 2) {
@@ -165,6 +183,11 @@ class Job implements Task
             $start = static::addrToNumber($start_ip);
             for ($i = 0; $i < $numIps; $i++) {
                 $ip = static::numberToAddr(gmp_add($start, $i), $ipv6);
+                if (isset($excludes[$ip])) {
+                    Logger::debug('Excluding IP %s from scan', $ip);
+                    continue;
+                }
+
                 foreach (Str::trimSplit($config->get('ports')) as $portRange) {
                     $pieces = Str::trimSplit($portRange, '-');
                     if (count($pieces) === 2) {
@@ -176,6 +199,11 @@ class Job implements Task
 
                     foreach (range($start_port, $end_port) as $port) {
                         foreach ($this->snimap[$ip] ?? [] as $hostname) {
+                            if (isset($excludes[$hostname])) {
+                                Logger::debug('Excluding host %s from scan', $hostname);
+                                continue;
+                            }
+
                             $target = (object) [];
                             $target->ip = $ip;
                             $target->port = $port;

@@ -43,6 +43,15 @@ class JobConfigForm extends RepositoryForm
                 ]
             ],
             [
+                'textarea',
+                'exclude_targets',
+                [
+                    'description'   => $this->translate('Comma-separated list of addresses/hostnames to exclude'),
+                    'label'         => $this->translate('Exclude Targets'),
+                    'required'      => false
+                ]
+            ],
+            [
                 'text',
                 'schedule',
                 [

@@ -461,9 +461,7 @@ class Job implements Task
                 $chainId = $this->db->lastInsertId();
 
                 foreach ($chain as $index => $cert) {
-                    $certInfo = openssl_x509_parse($cert);
-
-                    $certId = CertificateUtils::findOrInsertCert($this->db, $cert, $certInfo);
+                    $certId = CertificateUtils::findOrInsertCert($this->db, $cert);
 
                     $this->db->insert(
                         'x509_certificate_chain_link',

@@ -54,7 +54,7 @@ class JobUtilsTest extends TestCase
             'JobUtils::isAddrInside() could not determine whether an IP is inside a CIDR'
         );
 
-        $this->assertFalse(
+        $this->assertTrue(
             $this->isAddrInside($cidr, gmp_import(self::binary('10.211.54.35'))),
             'JobUtils::isAddrInside() could not determine whether an IP is not a part of a CIDR'
         );

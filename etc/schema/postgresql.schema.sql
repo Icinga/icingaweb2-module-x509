@@ -1,18 +1,19 @@
 CREATE DOMAIN uint2 AS int4
     CHECK(VALUE >= 0 AND VALUE < 65536);
+CREATE DOMAIN biguint AS bigint CONSTRAINT positive CHECK ( VALUE IS NULL OR 0 <= VALUE );
 CREATE TYPE boolenum AS ENUM ('n', 'y');
 CREATE TYPE certificate_version AS ENUM('1','2','3');
 CREATE TYPE dn_type AS ENUM('issuer','subject');
 CREATE TYPE pubkey_algo AS ENUM('unknown','RSA','DSA','DH','EC');
 
 -- Used when sorting certificates by expiration date.
-CREATE OR REPLACE FUNCTION UNIX_TIMESTAMP()
+CREATE OR REPLACE FUNCTION UNIX_TIMESTAMP(datetime timestamptz DEFAULT NOW())
     RETURNS bigint
     LANGUAGE plpgsql
     PARALLEL SAFE
     AS $$
 BEGIN
-RETURN EXTRACT(EPOCH FROM now());
+    RETURN EXTRACT(EPOCH FROM datetime);
 END;
 $$;
 
@@ -98,6 +99,7 @@ CREATE TABLE x509_target (
   port uint2 NOT NULL,
   hostname varchar(255) NULL DEFAULT NULL,
   latest_certificate_chain_id int NULL DEFAULT NULL,
+  last_scan biguint NOT NULL,
   ctime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
   mtime timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

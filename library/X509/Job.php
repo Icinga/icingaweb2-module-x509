@@ -6,12 +6,13 @@ namespace Icinga\Module\X509;
 
 use DateTime;
 use Exception;
+use Generator;
 use Icinga\Application\Logger;
 use Icinga\Data\ConfigObject;
 use Icinga\Module\X509\Common\Database;
+use Icinga\Module\X509\Common\JobUtils;
 use Icinga\Module\X509\React\StreamOptsCaptureConnector;
 use Icinga\Util\Json;
-use ipl\Scheduler\Common\TaskProperties;
 use ipl\Scheduler\Contract\Task;
 use ipl\Sql\Connection;
 use ipl\Sql\Expression;
@@ -31,7 +32,7 @@ use Throwable;
 class Job implements Task
 {
     use Database;
-    use TaskProperties;
+    use JobUtils;
 
     /** @var Connection x509 database connection */
     private $db;
@@ -39,14 +40,11 @@ class Job implements Task
     /** @var DbTool Database utils for marshalling and unmarshalling binary data */
     private $dbTool;
 
-    /** @var ConfigObject A config for this job loaded from the jobs.ini file */
-    protected $config;
-
     private $pendingTargets = 0;
     private $totalTargets = 0;
     private $finishedTargets = 0;
 
-    /** @var \Generator */
+    /** @var Generator */
     private $targets;
     private $snimap;
 
@@ -64,25 +62,21 @@ class Job implements Task
     /** @var array A list of excluded IP addresses and host names */
     protected $excludedTargets = [];
 
+    /** @var DateTime Since last scan threshold used to filter out scan targets */
+    protected $sinceLastScan;
+
+    /** @var bool Whether job run should only perform a rescan */
+    protected $rescan = false;
+
     public function __construct(string $name, ConfigObject $config, array $snimap)
     {
         $this->db = $this->getDb();
         $this->dbTool = new DbTool($this->db);
         $this->snimap = $snimap;
-        $this->config = $config;
 
+        $this->setConfig($config);
         $this->setName($name);
         $this->setUuid(Uuid::fromBytes($this->getChecksum()));
-    }
-
-    /**
-     * Get this job's config
-     *
-     * @return ConfigObject
-     */
-    public function getConfig(): ConfigObject
-    {
-        return $this->config;
     }
 
     /**
@@ -123,21 +117,65 @@ class Job implements Task
         return ! $this->targets->valid() && $this->pendingTargets === 0;
     }
 
-    public function getParallel()
+    public function getParallel(): int
     {
         return $this->parallel;
     }
 
-    public function setParallel(int $parallel)
+    public function setParallel(int $parallel): self
     {
         $this->parallel = $parallel;
 
         return $this;
     }
 
-    public static function binary($addr)
+    /**
+     * Get whether this job run should do only a rescan
+     *
+     * @return bool
+     */
+    public function isRescan(): bool
     {
-        return str_pad(inet_pton($addr), 16, "\0", STR_PAD_LEFT);
+        return $this->rescan;
+    }
+
+    /**
+     * Set whether this job run should do only a rescan or full scan
+     *
+     * @param bool $rescan
+     *
+     * @return $this
+     */
+    public function setRescan(bool $rescan): self
+    {
+        $this->rescan = $rescan;
+
+        return $this;
+    }
+
+    /**
+     * Set since last scan threshold for the targets to rescan
+     *
+     * @param ?DateTime $dateTime
+     *
+     * @return $this
+     */
+    public function setLastScan(DateTime $dateTime = null): self
+    {
+        $this->sinceLastScan = $dateTime;
+
+        return $this;
+    }
+
+    protected function updateLastScan($target)
+    {
+        if (! $this->isRescan()) {
+            return;
+        }
+
+        $this->db->update('x509_target', [
+            'last_scan' => new Expression('UNIX_TIMESTAMP()')
+        ], ['id = ?' => $target->id]);
     }
 
     protected function getChecksum()
@@ -148,39 +186,51 @@ class Job implements Task
         return md5($this->getName() . Json::encode($config), true);
     }
 
-    private static function addrToNumber($addr)
+    protected function getScanTargets(): Generator
     {
-        return gmp_import(static::binary($addr));
-    }
-
-    private static function numberToAddr($num, $ipv6 = true)
-    {
-        if ($ipv6) {
-            return inet_ntop(str_pad(gmp_export($num), 16, "\0", STR_PAD_LEFT));
+        if (! $this->isRescan()) {
+            yield from $this->generateTargets();
         } else {
-            return inet_ntop(gmp_export($num));
+            $targets = (new Select())
+                ->columns(['id', 'ip', 'hostname', 'port'])
+                ->from('x509_target');
+
+            if ($this->sinceLastScan) {
+                $targets->where(new Expression('last_scan < %d', [$this->sinceLastScan->getTimestamp() * 1000.0]));
+            }
+
+            foreach ($this->db->select($targets) as $target) {
+                $addr = gmp_import(DbTool::unmarshalBinary($target->ip));
+                $addrFound = false;
+                foreach ($this->getCidrs() as $cidr) {
+                    list($subnet, $mask) = $cidr;
+                    if (static::isAddrInside($addr, $subnet, $mask)) {
+                        $target->ip = static::numberToAddr($addr, static::isIPV6($subnet));
+                        $addrFound = true;
+
+                        break;
+                    }
+                }
+
+                if ($addrFound) {
+                    yield $target;
+                }
+            }
         }
     }
 
     private function generateTargets()
     {
-        $config = $this->getConfig();
         $excludes = $this->getExcludes();
-        foreach (Str::trimSplit($config->get('cidrs')) as $cidr) {
-            $pieces = Str::trimSplit($cidr, '/');
-            if (count($pieces) !== 2) {
-                Logger::warning("CIDR %s is in the wrong format", $cidr);
-                continue;
-            }
-
-            list($start_ip, $prefix) = $pieces;
-            $ipv6 = filter_var($start_ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false;
+        foreach ($this->getCidrs() as $cidr) {
+            list($startIp, $prefix) = $cidr;
+            $ipv6 = static::isIPV6($startIp);
             $subnet = $ipv6 ? 128 : 32;
             $numIps = pow(2, ($subnet - $prefix)) - 2;
 
-            Logger::info('Scanning %d IPs in the CIDR %s', $numIps, $cidr);
+            Logger::info('Scanning %d IPs in the CIDR %s', $numIps, implode('/', $cidr));
 
-            $start = static::addrToNumber($start_ip);
+            $start = static::addrToNumber($startIp);
             for ($i = 0; $i < $numIps; $i++) {
                 $ip = static::numberToAddr(gmp_add($start, $i), $ipv6);
                 if (isset($excludes[$ip])) {
@@ -188,16 +238,9 @@ class Job implements Task
                     continue;
                 }
 
-                foreach (Str::trimSplit($config->get('ports')) as $portRange) {
-                    $pieces = Str::trimSplit($portRange, '-');
-                    if (count($pieces) === 2) {
-                        list($start_port, $end_port) = $pieces;
-                    } else {
-                        $start_port = $pieces[0];
-                        $end_port = $pieces[0];
-                    }
-
-                    foreach (range($start_port, $end_port) as $port) {
+                foreach ($this->getPorts() as $portRange) {
+                    list($startPort, $endPort) = $portRange;
+                    foreach (range($startPort, $endPort) as $port) {
                         foreach ($this->snimap[$ip] ?? [] as $hostname) {
                             if (isset($excludes[$hostname])) {
                                 Logger::debug('Excluding host %s from scan', $hostname);
@@ -319,7 +362,9 @@ class Job implements Task
 
                 $this->finishTarget();
             }
-        )->otherwise(function (Throwable $e) {
+        )->always(function () use ($target) {
+            $this->updateLastScan($target);
+        })->otherwise(function (Throwable $e) {
             Logger::error($e->getMessage());
             Logger::error($e->getTraceAsString());
         });
@@ -359,7 +404,7 @@ class Job implements Task
 
             $this->jobId = $this->db->lastInsertId();
 
-            $this->targets = $this->generateTargets();
+            $this->targets = $this->getScanTargets();
 
             if ($this->isFinished()) {
                 // There are no targets to scan, so we can resolve the promise earlier
@@ -403,9 +448,10 @@ class Job implements Task
                 $this->db->insert(
                     'x509_target',
                     [
-                        'ip'       => $this->dbTool->marshalBinary(static::binary($target->ip)),
-                        'port'     => $target->port,
-                        'hostname' => $target->hostname
+                        'ip'        => $this->dbTool->marshalBinary(static::binary($target->ip)),
+                        'port'      => $target->port,
+                        'hostname'  => $target->hostname,
+                        'last_scan' => new Expression('UNIX_TIMESTAMP()')
                     ]
                 );
                 $targetId = $this->db->lastInsertId();

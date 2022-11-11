@@ -196,7 +196,7 @@ class Job implements Task
                 ->from('x509_target');
 
             if ($this->sinceLastScan) {
-                $targets->where(new Expression('last_scan < %d', [$this->sinceLastScan->getTimestamp() * 1000.0]));
+                $targets->where(new Expression('last_scan < %d', [$this->sinceLastScan->getTimestamp()]));
             }
 
             foreach ($this->db->select($targets) as $target) {

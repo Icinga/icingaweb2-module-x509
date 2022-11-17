@@ -34,6 +34,7 @@ class DashboardController extends Controller
                 'cnt' => new Expression('COUNT(*)')
             ])
             ->orderBy('cnt', SORT_DESC)
+            ->orderBy('issuer_certificate.subject')
             ->filter(Filter::equal('issuer_certificate.ca', true))
             ->limit(5)
             ->getSelectBase()

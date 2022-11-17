@@ -126,7 +126,7 @@ class ObjectSuggestions extends Suggestions
                         $value = $value->$col;
                     } while (! empty($columns));
 
-                    if ($value && ! ctype_print($value)) { // Is binary
+                    if ($value && is_string($value) && ! ctype_print($value)) { // Is binary
                         $value = sprintf('\\x%s', bin2hex($value));
                     } elseif (is_bool($value)) {
                         // TODO: The search bar is never going to suggest boolean types, so this

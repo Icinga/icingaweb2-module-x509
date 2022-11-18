@@ -190,7 +190,7 @@ class CertificateUtils
      * @param   Connection  $db
      * @param   mixed       $cert
      *
-     * @return  int
+     * @return  array
      */
     public static function findOrInsertCert(Connection $db, $cert)
     {
@@ -202,12 +202,12 @@ class CertificateUtils
 
         $row = X509Certificate::on($db);
         $row
-            ->columns(['id'])
+            ->columns(['id', 'issuer_hash'])
             ->filter(Filter::equal('fingerprint', $fingerprint));
 
         $row = $row->first();
         if ($row) {
-            return $row->id;
+            return [$row->id, $row->issuer_hash];
         }
 
         Logger::debug("Importing certificate: %s", $certInfo['name']);
@@ -257,7 +257,7 @@ class CertificateUtils
 
         CertificateUtils::insertSANs($db, $certId, $certInfo);
 
-        return $certId;
+        return [$certId, $issuerHash];
     }
 
 
@@ -411,8 +411,8 @@ class CertificateUtils
                 $certs = X509Certificate::on($db)->utilize('chain');
                 $certs
                     ->columns(['certificate'])
+                    ->filter(Filter::equal('chain.id', $chain->id))
                     ->getSelectBase()
-                    ->where(new Expression('%s = %d', ['certificate_chain.id', $chain->id]))
                     ->orderBy('certificate_link.order', 'DESC');
 
                 $collection = [];

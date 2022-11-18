@@ -508,8 +508,10 @@ class Job implements Task
 
                 $chainId = $this->db->lastInsertId();
 
+                $lastCertInfo = [];
                 foreach ($chain as $index => $cert) {
-                    $certId = CertificateUtils::findOrInsertCert($this->db, $cert);
+                    $lastCertInfo = CertificateUtils::findOrInsertCert($this->db, $cert);
+                    list($certId, $_) = $lastCertInfo;
 
                     $this->db->insert(
                         'x509_certificate_chain_link',
@@ -517,6 +519,31 @@ class Job implements Task
                             'certificate_chain_id'              => $chainId,
                             $this->db->quoteIdentifier('order') => $index,
                             'certificate_id'                    => $certId
+                        ]
+                    );
+
+                    $lastCertInfo[] = $index;
+                }
+
+                $rootCa = X509Certificate::on($this->db);
+                $rootCa
+                    ->columns(['id'])
+                    ->filter(Filter::equal('issuer_hash', $lastCertInfo[1]))
+                    ->filter(Filter::equal('trusted', true));
+
+                if (($rootCa = $rootCa->first()) && $rootCa->id !== $lastCertInfo[0]) {
+                    $this->db->update(
+                        'x509_certificate_chain',
+                        ['length' => count($chain) + 1],
+                        ['id = ?' => $chainId]
+                    );
+
+                    $this->db->insert(
+                        'x509_certificate_chain_link',
+                        [
+                            'certificate_chain_id'              => $chainId,
+                            $this->db->quoteIdentifier('order') => $lastCertInfo[2] + 1,
+                            'certificate_id'                    => $rootCa->id
                         ]
                     );
                 }

@@ -24,12 +24,7 @@ class X509CertificateChainLink extends Model
 
     public function getColumns()
     {
-        return [
-            'certificate_chain_id',
-            'certificate_id',
-            'order',
-            'ctime'
-        ];
+        return ['ctime'];
     }
 
     public function createRelations(Relations $relations)

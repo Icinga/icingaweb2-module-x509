@@ -19,7 +19,6 @@ class X509JobRun extends Model
     public function getColumns()
     {
         return [
-            'id',
             'name',
             'total_targets',
             'finished_targets',

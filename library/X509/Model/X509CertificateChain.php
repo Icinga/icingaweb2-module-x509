@@ -27,7 +27,6 @@ class X509CertificateChain extends Model
     public function getColumns()
     {
         return [
-            'id',
             'target_id',
             'length',
             'valid',

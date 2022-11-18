@@ -27,7 +27,6 @@ class X509Target extends Model
     public function getColumns()
     {
         return [
-            'id',
             'ip',
             'port',
             'hostname',

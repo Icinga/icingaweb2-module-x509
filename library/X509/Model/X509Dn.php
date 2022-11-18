@@ -27,9 +27,6 @@ class X509Dn extends Model
     public function getColumns()
     {
         return [
-            'hash',
-            'type',
-            'order',
             'key',
             'value',
             'ctime'

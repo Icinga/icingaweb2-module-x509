@@ -31,7 +31,6 @@ class X509Certificate extends Model
     public function getColumns()
     {
         return [
-            'id',
             'subject',
             'subject_hash',
             'issuer',

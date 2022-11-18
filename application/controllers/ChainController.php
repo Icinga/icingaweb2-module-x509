@@ -11,7 +11,6 @@ use Icinga\Module\X509\Model\X509Certificate;
 use Icinga\Module\X509\Model\X509CertificateChain;
 use ipl\Html\Html;
 use ipl\Html\HtmlDocument;
-use ipl\Sql\Expression;
 use ipl\Stdlib\Filter;
 
 class ChainController extends Controller

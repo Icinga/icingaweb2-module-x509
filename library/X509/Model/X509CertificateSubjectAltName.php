@@ -27,8 +27,6 @@ class X509CertificateSubjectAltName extends Model
     public function getColumns()
     {
         return [
-            'certificate_id',
-            'hash',
             'type',
             'value',
             'ctime'

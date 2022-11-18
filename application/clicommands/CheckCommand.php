@@ -108,12 +108,9 @@ class CheckCommand extends Command
 
         list($validFromSelect, $validFromValues) = $validFrom->dump();
         list($validToSelect, $validToValues) = $validTo->dump();
-
-        $validFromAlias = 'valid_from';
-        $validToAlias = 'valid_to';
         $targets->withColumns([
-            $validFromAlias => new Expression("$validFromSelect", null, ...$validFromValues),
-            $validToAlias   => new Expression("$validToSelect", null, ...$validToValues)
+            'valid_from' => new Expression("$validFromSelect", null, ...$validFromValues),
+            'valid_to'   => new Expression("$validToSelect", null, ...$validToValues)
         ]);
 
         $targets->getSelectBase()->where(new Expression('target_chain_link.order = 0'));

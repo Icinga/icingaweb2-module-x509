@@ -72,7 +72,7 @@ class ObjectSuggestions extends Suggestions
     {
         $model = $this->model;
         $query = $model::on($this->getDb());
-        $query->limit(self::DEFAULT_LIMIT);
+        $query->limit(static::DEFAULT_LIMIT);
 
         if (strpos($column, ' ') !== false) {
             // Searching for `Host Name` and continue typing without accepting/clicking the suggested
@@ -112,32 +112,33 @@ class ObjectSuggestions extends Suggestions
         $query->getSelectBase()->distinct();
 
         try {
-            foreach ($query as $item) {
-                $columns = Str::trimSplit($column, '.');
-                if ($columns[0] === $model->getTableAlias()) {
-                    array_shift($columns);
-                }
+            $steps = Str::trimSplit($column, '.');
+            $columnName = array_pop($steps);
+            if ($steps[0] === $model->getTableAlias()) {
+                array_shift($steps);
+            }
 
-                $value = $item;
-
-                try {
-                    do {
-                        $col = array_shift($columns);
-                        $value = $value->$col;
-                    } while (! empty($columns));
-
-                    if ($value && is_string($value) && ! ctype_print($value)) { // Is binary
-                        $value = sprintf('\\x%s', bin2hex($value));
-                    } elseif (is_bool($value)) {
-                        // TODO: The search bar is never going to suggest boolean types, so this
-                        //  is a hack to workaround this limitation!!
-                        $value = $value ? 'y' : 'n';
+            foreach ($query as $row) {
+                $model = $row;
+                foreach ($steps as $step) {
+                    try {
+                        $model = $model->$step;
+                    } catch (Exception $_) {
+                        // pass
+                        break;
                     }
-
-                    yield $value;
-                } catch (Exception $e) {
-                    // Fatal error!! Should never happen
                 }
+
+                $value = $model->$columnName;
+                if ($value && is_string($value) && ! ctype_print($value)) { // Is binary
+                    $value = sprintf('\\x%s', bin2hex($value));
+                } elseif (is_bool(null)) {
+                    // TODO: The search bar is never going to suggest boolean types, so this
+                    //  is a hack to workaround this limitation!!
+                    $value = $value ? 'y' : 'n';
+                }
+
+                yield $value;
             }
         } catch (InvalidColumnException $e) {
             throw new SearchException(sprintf(t('"%s" is not a valid column'), $e->getColumn()));

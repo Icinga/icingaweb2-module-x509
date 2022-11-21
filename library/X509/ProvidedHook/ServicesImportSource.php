@@ -4,6 +4,7 @@
 
 namespace Icinga\Module\X509\ProvidedHook;
 
+use Icinga\Module\X509\Job;
 use Icinga\Module\X509\Model\X509CertificateSubjectAltName;
 use Icinga\Module\X509\Model\X509Target;
 use ipl\Sql;
@@ -12,15 +13,13 @@ class ServicesImportSource extends X509ImportSource
 {
     public function fetchData()
     {
-        $targets = X509Target::on($this->getDb())->with([
-            'chain',
-            'chain.certificate',
-            'chain.certificate.dn',
-            'chain.certificate.issuer_certificate',
-        ]);
-
-        $targets->getWith()['target.chain.certificate.issuer_certificate']->setJoinType('LEFT');
-        $targets
+        $targets = X509Target::on($this->getDb())
+            ->with([
+                'chain',
+                'chain.certificate',
+                'chain.certificate.dn',
+                'chain.certificate.issuer_certificate'
+            ])
             ->columns([
                 'ip',
                 'host_name'        => 'hostname',
@@ -34,7 +33,10 @@ class ServicesImportSource extends X509ImportSource
                     'chain.certificate.issuer_certificate.self_signed',
                     'chain.certificate.self_signed'
                 ])
-            ])
+            ]);
+
+        $targets->getWith()['target.chain.certificate.issuer_certificate']->setJoinType('LEFT');
+        $targets
             ->getSelectBase()
             ->where(new Sql\Expression('target_chain_link.order = 0'))
             ->groupBy(['ip, hostname, port']);
@@ -87,10 +89,10 @@ class ServicesImportSource extends X509ImportSource
 
         $results = [];
         foreach ($targets as $target) {
-            list($ipv4, $ipv6) = $this->transformIpAddress($target->ip);
-            $target->host_ip = $ipv4 ?: $ipv6;
-            $target->host_address = $ipv4;
-            $target->host_address6 = $ipv6;
+            $isV6 = Job::isIPV6($target->ip);
+            $target->host_ip = $target->ip;
+            $target->host_address = $isV6 ? null : $target->ip;
+            $target->host_address6 = $isV6 ? $target->ip : null;
 
             $target->host_name_ip_and_port = sprintf(
                 '%s/%s:%d',
@@ -102,7 +104,7 @@ class ServicesImportSource extends X509ImportSource
             unset($target->ip); // Isn't needed any more!!
             unset($target->chain); // We don't need any relation properties anymore
 
-            $properties = iterator_to_array($target->getIterator());
+            $properties = iterator_to_array($target);
 
             $results[$target->host_name_ip_and_port] = (object) $properties;
         }

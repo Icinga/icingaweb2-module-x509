@@ -26,10 +26,11 @@ class ChainController extends Controller
             return;
         }
 
-        $chains = X509CertificateChain::on($conn)->with(['target']);
-        $chains->filter(Filter::equal('id', $id));
+        $chain = X509CertificateChain::on($conn)
+            ->with(['target'])
+            ->filter(Filter::equal('id', $id))
+            ->first();
 
-        $chain = $chains->first();
         if (! $chain) {
             $this->httpNotFound($this->translate('Certificate not found.'));
         }
@@ -37,18 +38,12 @@ class ChainController extends Controller
         $this->addTitleTab($this->translate('X.509 Certificate Chain'));
         $this->getTabs()->disableLegacyExtensions();
 
-        $ip = $chain->target->ip;
-        $ipv4 = ltrim($ip, "\0");
-        if (strlen($ipv4) === 4) {
-            $ip = $ipv4;
-        }
-
         $chainInfo = Html::tag('div');
         $chainInfo->add(Html::tag('dl', [
             Html::tag('dt', $this->translate('Host')),
             Html::tag('dd', $chain->target->hostname),
             Html::tag('dt', $this->translate('IP')),
-            Html::tag('dd', inet_ntop($ip)),
+            Html::tag('dd', $chain->target->ip),
             Html::tag('dt', $this->translate('Port')),
             Html::tag('dd', $chain->target->port)
         ]));

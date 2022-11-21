@@ -89,12 +89,13 @@ class CheckCommand extends Command
         ]);
 
         // Sub queries for (valid_from, valid_to) columns
-        $validFrom = X509Certificate::on($conn)->with(['chain', 'issuer_certificate']);
-        $validFrom->getResolver()->setAliasPrefix('sub_');
-        $validFrom->columns([
-            new Expression('MAX(GREATEST(%s, %s))', ['valid_from', 'issuer_certificate.valid_from'])
-        ]);
+        $validFrom = X509Certificate::on($conn)
+            ->with(['chain', 'issuer_certificate'])
+            ->columns([
+                new Expression('MAX(GREATEST(%s, %s))', ['valid_from', 'issuer_certificate.valid_from'])
+            ]);
 
+        $validFrom->getResolver()->setAliasPrefix('sub_');
         $validFrom
             ->getSelectBase()
             ->where(new Expression(
@@ -108,12 +109,13 @@ class CheckCommand extends Command
 
         list($validFromSelect, $validFromValues) = $validFrom->dump();
         list($validToSelect, $validToValues) = $validTo->dump();
-        $targets->withColumns([
-            'valid_from' => new Expression("$validFromSelect", null, ...$validFromValues),
-            'valid_to'   => new Expression("$validToSelect", null, ...$validToValues)
-        ]);
-
-        $targets->getSelectBase()->where(new Expression('target_chain_link.order = 0'));
+        $targets
+            ->withColumns([
+                'valid_from' => new Expression("$validFromSelect", null, ...$validFromValues),
+                'valid_to'   => new Expression("$validToSelect", null, ...$validToValues)
+            ])
+            ->getSelectBase()
+            ->where(new Expression('target_chain_link.order = 0'));
 
         if ($ip !== null) {
             $targets->filter(Filter::equal('ip', Job::binary($ip)));

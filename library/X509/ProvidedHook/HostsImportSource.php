@@ -5,6 +5,7 @@
 namespace Icinga\Module\X509\ProvidedHook;
 
 use Icinga\Module\X509\DbTool;
+use Icinga\Module\X509\Job;
 use Icinga\Module\X509\Model\X509Target;
 use ipl\Sql;
 use ipl\Stdlib\Filter;
@@ -15,13 +16,13 @@ class HostsImportSource extends X509ImportSource
     {
         $targets = X509Target::on($this->getDb())
             ->utilize('chain')
-            ->utilize('chain.certificate');
-
-        $targets
+            ->utilize('chain.certificate')
             ->columns([
                 'ip',
                 'host_name' => 'hostname'
-            ])
+            ]);
+
+        $targets
             ->getSelectBase()
             ->where(new Sql\Expression('target_chain_link.order = 0'))
             ->groupBy(['ip', 'hostname']);
@@ -39,10 +40,10 @@ class HostsImportSource extends X509ImportSource
         $results = [];
         $foundDupes = [];
         foreach ($targets as $target) {
-            list($ipv4, $ipv6) = $this->transformIpAddress($target->ip);
-            $target->host_ip = $ipv4 ?: $ipv6;
-            $target->host_address = $ipv4;
-            $target->host_address6 = $ipv6;
+            $isV6 = Job::isIPV6($target->ip);
+            $target->host_ip = $target->ip;
+            $target->host_address = $isV6 ? null : $target->ip;
+            $target->host_address6 = $isV6 ? $target->ip : null;
 
             if (isset($foundDupes[$target->host_name])) {
                 // For load balanced systems the IP address is the better choice
@@ -62,7 +63,7 @@ class HostsImportSource extends X509ImportSource
             unset($target->ip); // Isn't needed any more!!
             unset($target->chain); // We don't need any relation properties anymore
 
-            $properties = iterator_to_array($target->getIterator());
+            $properties = iterator_to_array($target);
 
             $results[$target->host_name_or_ip] = (object) $properties;
         }

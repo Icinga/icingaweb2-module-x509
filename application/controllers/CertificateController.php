@@ -21,13 +21,13 @@ class CertificateController extends Controller
             $conn = $this->getDb();
         } catch (ConfigurationError $_) {
             $this->render('missing-resource', null, true);
+
             return;
         }
 
-        $certificates = X509Certificate::on($conn);
-        $certificates->filter(Filter::equal('id', $certId));
-
-        $cert = $certificates->first();
+        $cert = X509Certificate::on($conn)
+            ->filter(Filter::equal('id', $certId))
+            ->first();
 
         if (! $cert) {
             $this->httpNotFound($this->translate('Certificate not found.'));

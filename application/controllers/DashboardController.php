@@ -27,8 +27,7 @@ class DashboardController extends Controller
             return;
         }
 
-        $byCa = X509Certificate::on($db);
-        $byCa
+        $byCa = X509Certificate::on($db)
             ->columns([
                 'issuer_certificate.subject',
                 'cnt' => new Expression('COUNT(*)')
@@ -36,7 +35,9 @@ class DashboardController extends Controller
             ->orderBy('cnt', SORT_DESC)
             ->orderBy('issuer_certificate.subject')
             ->filter(Filter::equal('issuer_certificate.ca', true))
-            ->limit(5)
+            ->limit(5);
+
+        $byCa
             ->getSelectBase()
             ->groupBy('certificate_issuer_certificate.id');
 
@@ -55,15 +56,16 @@ class DashboardController extends Controller
                 );
             });
 
-        $duration = X509Certificate::on($db);
-        $duration
+        $duration = X509Certificate::on($db)
             ->columns([
                 'duration',
                 'cnt' => new Expression('COUNT(*)')
             ])
             ->filter(Filter::equal('ca', false))
             ->orderBy('cnt', SORT_DESC)
-            ->limit(5)
+            ->limit(5);
+
+        $duration
             ->getSelectBase()
             ->groupBy('duration');
 
@@ -82,15 +84,16 @@ class DashboardController extends Controller
                 );
             });
 
-        $keyStrength = X509Certificate::on($db);
-        $keyStrength
+        $keyStrength = X509Certificate::on($db)
             ->columns([
                 'pubkey_algo',
                 'pubkey_bits',
                 'cnt' => new Expression('COUNT(*)')
             ])
             ->orderBy('cnt', SORT_DESC)
-            ->limit(5)
+            ->limit(5);
+
+        $keyStrength
             ->getSelectBase()
             ->groupBy(['pubkey_algo', 'pubkey_bits']);
 
@@ -113,15 +116,16 @@ class DashboardController extends Controller
                 );
             });
 
-        $sigAlgos = X509Certificate::on($db);
-        $sigAlgos
+        $sigAlgos = X509Certificate::on($db)
             ->columns([
                 'signature_algo',
                 'signature_hash_algo',
                 'cnt' => new Expression('COUNT(*)')
             ])
             ->orderBy('cnt', SORT_DESC)
-            ->limit(5)
+            ->limit(5);
+
+        $sigAlgos
             ->getSelectBase()
             ->groupBy(['signature_algo', 'signature_hash_algo']);
 

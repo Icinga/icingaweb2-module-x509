@@ -103,13 +103,6 @@ class Controller extends CompatController
         }
     }
 
-    protected function initTabs()
-    {
-        $this->getTabs()->extend(new OutputFormat())->extend(new DashboardAction())->extend(new MenuAction());
-
-        return $this;
-    }
-
     public function preDispatch()
     {
         parent::preDispatch();

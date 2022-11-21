@@ -53,8 +53,8 @@ class X509Certificate extends Model
             'mtime',
             'duration' => new Expression('%s - %s', ['valid_to', 'valid_from']),
             'expires'  => new Expression(
-                'CASE WHEN UNIX_TIMESTAMP() > %s THEN 0 ELSE (%s - UNIX_TIMESTAMP()) / 86400 END',
-                ['valid_to', 'valid_to']
+                'CASE WHEN UNIX_TIMESTAMP() > %1$s THEN 0 ELSE (%1$s - UNIX_TIMESTAMP()) / 86400 END',
+                ['valid_to']
             )
         ];
     }

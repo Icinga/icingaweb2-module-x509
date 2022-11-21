@@ -18,7 +18,7 @@ class UsageController extends Controller
 {
     public function indexAction()
     {
-        $this->initTabs();
+        $this->getTabs()->enableDataExports();
         $this->addTitleTab($this->translate('Certificate Usage'));
 
         try {
@@ -108,19 +108,12 @@ class UsageController extends Controller
                     ->setTimestamp($usage['valid_to'])
                     ->format('l F jS, Y H:i:s e');
 
-                $ip = $usage->chain->target->ip;
-
-                $ipv4 = ltrim($ip, "\0");
-                if (strlen($ipv4) === 4) {
-                    $ip = $ipv4;
-                }
-
-                $usage->ip = inet_ntop($ip);
+                $usage->ip = $usage->chain->target->ip;
                 $usage->hostname = $usage->chain->target->hostname;
                 $usage->port = $usage->chain->target->port;
                 $usage->valid = $usage->chain->valid;
 
-                yield array_intersect_key(iterator_to_array($usage->getIterator()), $exportable);
+                yield array_intersect_key(iterator_to_array($usage), $exportable);
             }
         });
 

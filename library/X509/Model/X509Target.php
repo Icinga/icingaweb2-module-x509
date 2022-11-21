@@ -2,6 +2,7 @@
 
 namespace Icinga\Module\X509\Model;
 
+use Icinga\Module\X509\Model\Behavior\Ip;
 use ipl\Orm\Behavior\Binary;
 use ipl\Orm\Behaviors;
 use ipl\Orm\Model;
@@ -53,6 +54,7 @@ class X509Target extends Model
     public function createBehaviors(Behaviors $behaviors)
     {
         $behaviors->add(new Binary(['ip']));
+        $behaviors->add(new Ip(['ip']));
     }
 
     public function createRelations(Relations $relations)

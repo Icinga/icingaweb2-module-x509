@@ -17,13 +17,14 @@ class CertificatesController extends Controller
 {
     public function indexAction()
     {
-        $this->initTabs();
+        $this->getTabs()->enableDataExports();
         $this->addTitleTab($this->translate('Certificates'));
 
         try {
             $conn = $this->getDb();
         } catch (ConfigurationError $_) {
             $this->render('missing-resource', null, true);
+
             return;
         }
 
@@ -93,7 +94,7 @@ class CertificatesController extends Controller
                     ->setTimestamp($cert['valid_to'])
                     ->format('l F jS, Y H:i:s e');
 
-                yield array_intersect_key(iterator_to_array($cert->getIterator()), $exportable);
+                yield array_intersect_key(iterator_to_array($cert), $exportable);
             }
         });
 

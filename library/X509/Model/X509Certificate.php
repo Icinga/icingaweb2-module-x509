@@ -109,13 +109,16 @@ class X509Certificate extends Model
 
     public function createRelations(Relations $relations)
     {
-        $relations->belongsTo('issuer_certificate', self::class)
+        $relations->belongsTo('issuer_certificate', static::class)
             ->setForeignKey('subject_hash')
             ->setCandidateKey('issuer_hash');
         $relations->belongsToMany('chain', X509CertificateChain::class)
             ->through(X509CertificateChainLink::class)
             ->setForeignKey('certificate_id');
 
+        $relations->hasMany('certificate', static::class)
+            ->setForeignKey('issuer_hash')
+            ->setCandidateKey('subject_hash');
         $relations->hasMany('alt_name', X509CertificateSubjectAltName::class)
             ->setJoinType('LEFT');
         $relations->hasMany('dn', X509Dn::class)

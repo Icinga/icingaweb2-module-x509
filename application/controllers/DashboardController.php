@@ -19,6 +19,7 @@ class DashboardController extends Controller
     public function indexAction()
     {
         $this->addTitleTab($this->translate('Certificate Dashboard'));
+        $this->getTabs()->disableLegacyExtensions();
 
         try {
             $db = $this->getDb();

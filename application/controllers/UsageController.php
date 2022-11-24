@@ -78,6 +78,7 @@ class UsageController extends Controller
             } else {
                 $this->addControl($searchBar);
                 $this->sendMultipartUpdate();
+
                 return;
             }
         } else {
@@ -93,13 +94,7 @@ class UsageController extends Controller
         $this->addControl($limitControl);
         $this->addControl($searchBar);
 
-        $exportable = array_flip([
-            'valid', 'hostname', 'ip', 'port', 'subject', 'issuer', 'version',
-            'self_signed', 'ca', 'trusted', 'pubkey_algo', 'pubkey_bits',
-            'signature_algo', 'signature_hash_algo', 'valid_from', 'valid_to'
-        ]);
-
-        $this->handleFormatRequest($targets, function (Query $targets) use ($conn, $exportable) {
+        $this->handleFormatRequest($targets, function (Query $targets) {
             foreach ($targets as $usage) {
                 $usage['valid_from'] = (new \DateTime())
                     ->setTimestamp($usage['valid_from'])
@@ -113,7 +108,10 @@ class UsageController extends Controller
                 $usage->port = $usage->chain->target->port;
                 $usage->valid = $usage->chain->valid;
 
-                yield array_intersect_key(iterator_to_array($usage), $exportable);
+                yield array_intersect_key(
+                    iterator_to_array($usage),
+                    array_flip(array_merge(['valid', 'hostname', 'ip', 'port'], $usage->getExportableColumns()))
+                );
             }
         });
 
@@ -126,10 +124,11 @@ class UsageController extends Controller
 
     public function completeAction()
     {
-        $suggestions = new ObjectSuggestions();
-        $suggestions->setModel(X509Certificate::class);
-        $suggestions->forRequest($this->getServerRequest());
-        $this->getDocument()->add($suggestions);
+        $this->getDocument()->add(
+            (new ObjectSuggestions())
+                ->setModel(X509Certificate::class)
+                ->forRequest($this->getServerRequest())
+        );
     }
 
     public function searchEditorAction()

@@ -8,7 +8,6 @@ use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\CertificateDetails;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\Model\X509Certificate;
-use ipl\Sql;
 use ipl\Stdlib\Filter;
 
 class CertificateController extends Controller

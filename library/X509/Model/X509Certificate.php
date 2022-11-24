@@ -86,6 +86,30 @@ class X509Certificate extends Model
         return ['subject', 'issuer'];
     }
 
+    /**
+     * Get list of allowed columns to be exported
+     *
+     * @return string[]
+     */
+    public function getExportableColumns(): array
+    {
+        return [
+            'id',
+            'subject',
+            'issuer',
+            'version',
+            'self_signed',
+            'ca',
+            'trusted',
+            'pubkey_algo',
+            'pubkey_bits',
+            'signature_algo',
+            'signature_hash_algo',
+            'valid_from',
+            'valid_to'
+        ];
+    }
+
     public function createBehaviors(Behaviors $behaviors)
     {
         $behaviors->add(new Binary([

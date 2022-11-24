@@ -196,10 +196,7 @@ class Job implements Task
         } else {
             $targets = X509Target::on($this->db)->columns(['id', 'ip', 'hostname', 'port']);
             if ($this->sinceLastScan) {
-                // The filter processor doesn't allow us to filter using expressions
-                $targets
-                    ->getSelectBase()
-                    ->where(new Expression('last_scan < %d', [$this->sinceLastScan->getTimestamp()]));
+                $targets->filter(Filter::lessThan('last_scan', $this->sinceLastScan->getTimestamp()));
             }
 
             foreach ($targets as $target) {
@@ -438,10 +435,10 @@ class Job implements Task
         $this->db->transaction(function () use ($target, $chain) {
             $row = X509Target::on($this->db)->columns(['id']);
 
-            $filter = Filter::all();
-            $filter->add(Filter::equal('ip', static::binary($target->ip)));
-            $filter->add(Filter::equal('port', $target->port));
-            $filter->add(Filter::equal('hostname', $target->hostname));
+            $filter = Filter::all()
+                ->add(Filter::equal('ip', $target->ip))
+                ->add(Filter::equal('port', $target->port))
+                ->add(Filter::equal('hostname', $target->hostname));
 
             $row->filter($filter);
 
@@ -463,13 +460,14 @@ class Job implements Task
 
             $chainUptodate = false;
 
-            $lastChain = X509CertificateChain::on($this->db)->columns(['id']);
-            $lastChain
+            $lastChain = X509CertificateChain::on($this->db)
+                ->columns(['id'])
                 ->filter(Filter::equal('target_id', $targetId))
                 ->orderBy('id', SORT_DESC)
-                ->limit(1);
+                ->limit(1)
+                ->first();
 
-            if (($lastChain = $lastChain->first())) {
+            if ($lastChain) {
                 $lastFingerprints = X509Certificate::on($this->db)->utilize('chain');
                 $lastFingerprints
                     ->columns(['fingerprint'])
@@ -495,7 +493,7 @@ class Job implements Task
             }
 
             if ($chainUptodate) {
-                $chainId = (int) $lastChain->id;
+                $chainId = $lastChain->id;
             } else {
                 // TODO: https://github.com/Icinga/ipl-orm/pull/78
                 $this->db->insert(

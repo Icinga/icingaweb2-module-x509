@@ -6,8 +6,8 @@ namespace Icinga\Module\X509\Clicommands;
 
 use Icinga\Application\Logger;
 use Icinga\Module\X509\Command;
-use Icinga\Module\X509\Job;
 use Icinga\Module\X509\Model\X509Certificate;
+use Icinga\Module\X509\Model\X509CertificateChain;
 use Icinga\Module\X509\Model\X509Target;
 use ipl\Sql\Expression;
 use ipl\Stdlib\Filter;
@@ -89,36 +89,28 @@ class CheckCommand extends Command
         ]);
 
         // Sub queries for (valid_from, valid_to) columns
-        $validFrom = X509Certificate::on($conn)
-            ->with(['chain', 'issuer_certificate'])
-            ->columns([
-                new Expression('MAX(GREATEST(%s, %s))', ['valid_from', 'issuer_certificate.valid_from'])
-            ]);
-
-        $validFrom->getResolver()->setAliasPrefix('sub_');
+        $validFrom = $targets->createSubQuery(new X509Certificate(), 'chain.certificate');
         $validFrom
+            ->columns([new Expression('MAX(GREATEST(%s, %s))', ['valid_from', 'issuer_certificate.valid_from'])])
             ->getSelectBase()
-            ->where(new Expression(
-                'sub_certificate_link.certificate_chain_id = target_chain.id'
-            ));
+            ->resetWhere()
+            ->where(new Expression('sub_certificate_link.certificate_chain_id = target_chain.id'));
 
         $validTo = clone $validFrom;
-        $validTo->columns([
-            new Expression('MIN(LEAST(%s, %s))', ['valid_to', 'issuer_certificate.valid_to'])
-        ]);
+        $validTo->columns([new Expression('MIN(LEAST(%s, %s))', ['valid_to', 'issuer_certificate.valid_to'])]);
 
-        list($validFromSelect, $validFromValues) = $validFrom->dump();
-        list($validToSelect, $validToValues) = $validTo->dump();
+        list($validFromSelect, $_) = $validFrom->dump();
+        list($validToSelect, $_) = $validTo->dump();
         $targets
             ->withColumns([
-                'valid_from' => new Expression("$validFromSelect", null, ...$validFromValues),
-                'valid_to'   => new Expression("$validToSelect", null, ...$validToValues)
+                'valid_from' => new Expression($validFromSelect),
+                'valid_to'   => new Expression($validToSelect)
             ])
             ->getSelectBase()
             ->where(new Expression('target_chain_link.order = 0'));
 
         if ($ip !== null) {
-            $targets->filter(Filter::equal('ip', Job::binary($ip)));
+            $targets->filter(Filter::equal('ip', $ip));
         }
         if ($hostname !== null) {
             $targets->filter(Filter::equal('hostname', $hostname));

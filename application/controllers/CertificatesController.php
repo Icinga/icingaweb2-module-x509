@@ -62,6 +62,7 @@ class CertificatesController extends Controller
             } else {
                 $this->addControl($searchBar);
                 $this->sendMultipartUpdate();
+
                 return;
             }
         } else {
@@ -77,14 +78,7 @@ class CertificatesController extends Controller
         $this->addControl($limitControl);
         $this->addControl($searchBar);
 
-        // List of allowed columns to be exported
-        $exportable = array_flip([
-            'id', 'subject', 'issuer', 'version', 'self_signed', 'ca', 'trusted',
-            'pubkey_algo', 'pubkey_bits', 'signature_algo', 'signature_hash_algo',
-            'valid_from', 'valid_to'
-        ]);
-
-        $this->handleFormatRequest($certificates, function (Query $certificates) use ($exportable) {
+        $this->handleFormatRequest($certificates, function (Query $certificates) {
             /** @var X509Certificate $cert */
             foreach ($certificates as $cert) {
                 $cert['valid_from'] = (new \DateTime())
@@ -94,7 +88,7 @@ class CertificatesController extends Controller
                     ->setTimestamp($cert['valid_to'])
                     ->format('l F jS, Y H:i:s e');
 
-                yield array_intersect_key(iterator_to_array($cert), $exportable);
+                yield array_intersect_key(iterator_to_array($cert), array_flip($cert->getExportableColumns()));
             }
         });
 
@@ -107,10 +101,11 @@ class CertificatesController extends Controller
 
     public function completeAction()
     {
-        $suggestions = new ObjectSuggestions();
-        $suggestions->setModel(X509Certificate::class);
-        $suggestions->forRequest($this->getServerRequest());
-        $this->getDocument()->add($suggestions);
+        $this->getDocument()->add(
+            (new ObjectSuggestions())
+                ->setModel(X509Certificate::class)
+                ->forRequest($this->getServerRequest())
+        );
     }
 
     public function searchEditorAction()

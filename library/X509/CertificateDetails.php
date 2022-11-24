@@ -5,9 +5,9 @@
 namespace Icinga\Module\X509;
 
 use DateTime;
+use Icinga\Module\X509\Model\X509Certificate;
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
-use ipl\Orm\Model;
 
 /**
  * Widget to display X.509 certificate details
@@ -23,7 +23,7 @@ class CertificateDetails extends BaseHtmlElement
      */
     protected $cert;
 
-    public function setCert(Model $cert)
+    public function setCert(X509Certificate $cert)
     {
         $this->cert = $cert;
 

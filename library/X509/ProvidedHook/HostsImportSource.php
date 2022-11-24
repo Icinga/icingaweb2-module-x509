@@ -4,11 +4,9 @@
 
 namespace Icinga\Module\X509\ProvidedHook;
 
-use Icinga\Module\X509\DbTool;
 use Icinga\Module\X509\Job;
 use Icinga\Module\X509\Model\X509Target;
 use ipl\Sql;
-use ipl\Stdlib\Filter;
 
 class HostsImportSource extends X509ImportSource
 {
@@ -29,11 +27,11 @@ class HostsImportSource extends X509ImportSource
 
         if ($this->getDb()->getAdapter() instanceof Sql\Adapter\Pgsql) {
             $targets->withColumns([
-                'host_ports' => new Sql\Expression('ARRAY_TO_STRING(ARRAY_AGG(DISTINCT port),  \',\')')
+                'host_ports' => new Sql\Expression("ARRAY_TO_STRING(ARRAY_AGG(DISTINCT port), ',')")
             ]);
         } else {
             $targets->withColumns([
-                'host_ports' => new Sql\Expression('GROUP_CONCAT(DISTINCT port SEPARATOR \',\')')
+                'host_ports' => new Sql\Expression("GROUP_CONCAT(DISTINCT port SEPARATOR ',')")
             ]);
         }
 
@@ -60,12 +58,12 @@ class HostsImportSource extends X509ImportSource
                 $target->host_name_or_ip = $target->host_ip;
             }
 
-            unset($target->ip); // Isn't needed any more!!
-            unset($target->chain); // We don't need any relation properties anymore
+            // Target ip is now obsolete and must not be included in the results.
+            // The relation is only used to utilize the query and must not be in the result set as well.
+            unset($target->ip);
+            unset($target->chain);
 
-            $properties = iterator_to_array($target);
-
-            $results[$target->host_name_or_ip] = (object) $properties;
+            $results[$target->host_name_or_ip] = (object) iterator_to_array($target);
         }
 
         return $results;

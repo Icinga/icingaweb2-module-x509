@@ -84,7 +84,7 @@ class DataTable extends BaseHtmlElement
         $cells = [];
 
         foreach ($this->columns as $key => $column) {
-            if (! is_int($key) && isset($row->$key)) {
+            if (! is_int($key) && property_exists($row, $key)) {
                 $data = $row[$key];
             } else {
                 $data = null;

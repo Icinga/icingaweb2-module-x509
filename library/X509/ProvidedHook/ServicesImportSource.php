@@ -50,11 +50,11 @@ class ServicesImportSource extends X509ImportSource
         if ($this->getDb()->getAdapter() instanceof Sql\Adapter\Pgsql) {
             $targets
                 ->withColumns([
-                    'cert_fingerprint' => new Sql\Expression('ENCODE(%s, \'hex\')', [
+                    'cert_fingerprint' => new Sql\Expression("ENCODE(%s, 'hex')", [
                         'chain.certificate.fingerprint'
                     ]),
                     'cert_dn'          => new Sql\Expression(
-                        'ARRAY_TO_STRING(ARRAY_AGG(CONCAT(%s, \'=\', %s)), \',\')',
+                        "ARRAY_TO_STRING(ARRAY_AGG(CONCAT(%s, '=', %s)), ',')",
                         [
                             'chain.certificate.dn.key',
                             'chain.certificate.dn.value'
@@ -65,13 +65,13 @@ class ServicesImportSource extends X509ImportSource
                 ->groupBy(['target_chain_certificate.id', 'target_chain_certificate_issuer_certificate.id']);
 
             $certAltName->columns([
-                new Sql\Expression('ARRAY_TO_STRING(ARRAY_AGG(CONCAT(%s, \':\', %s)), \',\')', ['type', 'value'])
+                new Sql\Expression("ARRAY_TO_STRING(ARRAY_AGG(CONCAT(%s, ':', %s)), ',')", ['type', 'value'])
             ]);
         } else {
             $targets->withColumns([
                 'cert_fingerprint' => new Sql\Expression('HEX(%s)', ['chain.certificate.fingerprint']),
                 'cert_dn'          => new Sql\Expression(
-                    'GROUP_CONCAT(CONCAT(%s, \'=\', %s) SEPARATOR \',\')',
+                    "GROUP_CONCAT(CONCAT(%s, '=', %s) SEPARATOR ',')",
                     [
                         'chain.certificate.dn.key',
                         'chain.certificate.dn.value'
@@ -80,7 +80,7 @@ class ServicesImportSource extends X509ImportSource
             ]);
 
             $certAltName->columns([
-                new Sql\Expression('GROUP_CONCAT(CONCAT(%s, \':\', %s) SEPARATOR \',\')', ['type', 'value'])
+                new Sql\Expression("GROUP_CONCAT(CONCAT(%s, ':', %s) SEPARATOR ',')", ['type', 'value'])
             ]);
         }
 
@@ -101,12 +101,12 @@ class ServicesImportSource extends X509ImportSource
                 $target->host_port
             );
 
-            unset($target->ip); // Isn't needed any more!!
-            unset($target->chain); // We don't need any relation properties anymore
+            // Target ip is now obsolete and must not be included in the results.
+            // The relation is only used to utilize the query and must not be in the result set as well.
+            unset($target->ip);
+            unset($target->chain);
 
-            $properties = iterator_to_array($target);
-
-            $results[$target->host_name_ip_and_port] = (object) $properties;
+            $results[$target->host_name_ip_and_port] = (object) iterator_to_array($target);
         }
 
         return $results;

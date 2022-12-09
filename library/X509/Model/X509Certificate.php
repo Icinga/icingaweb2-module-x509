@@ -2,7 +2,7 @@
 
 namespace Icinga\Module\X509\Model;
 
-use Icinga\Module\X509\Model\Behavior\DistinguishedEncodingRules;
+use Icinga\Module\X509\Model\Behavior\DERBase64;
 use Icinga\Module\X509\Model\Behavior\ExpressionInjector;
 use ipl\Orm\Behavior\Binary;
 use ipl\Orm\Behavior\BoolCast;
@@ -120,7 +120,7 @@ class X509Certificate extends Model
             'certificate'
         ]));
 
-        $behaviors->add(new DistinguishedEncodingRules(['certificate']));
+        $behaviors->add(new DERBase64(['certificate']));
 
         $behaviors->add(new BoolCast([
             'ca',

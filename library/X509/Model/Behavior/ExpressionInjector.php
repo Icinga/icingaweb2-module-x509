@@ -7,6 +7,10 @@ use ipl\Orm\Contract\RewriteFilterBehavior;
 use ipl\Orm\Query;
 use ipl\Stdlib\Filter;
 
+/**
+ * Support expression columns (which don't really exist in the database, but rather
+ * resulted e.g. from a `case..when` expression), being used as filter columns
+ */
 class ExpressionInjector implements RewriteFilterBehavior, QueryAwareBehavior
 {
     /** @var array */

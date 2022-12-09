@@ -4,7 +4,10 @@ namespace Icinga\Module\X509\Model\Behavior;
 
 use ipl\Orm\Contract\PropertyBehavior;
 
-class DistinguishedEncodingRules extends PropertyBehavior
+/**
+ * Support automatically transformation of DER-encoded certificates to PEM and vice versa.
+ */
+class DERBase64 extends PropertyBehavior
 {
     public function fromDb($value, $key, $_)
     {

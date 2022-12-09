@@ -4,6 +4,10 @@ namespace Icinga\Module\X509\Model\Behavior;
 
 use ipl\Orm\Contract\PropertyBehavior;
 
+/**
+ * Support automatically transformation of human-readable IP addresses into their respective packed
+ * binary representation and vice versa.
+ */
 class Ip extends PropertyBehavior
 {
     public function fromDb($value, $key, $_)

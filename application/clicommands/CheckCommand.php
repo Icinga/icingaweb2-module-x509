@@ -116,7 +116,7 @@ class CheckCommand extends Command
             $targets->filter(Filter::equal('hostname', $hostname));
         }
         if ($this->params->has('port')) {
-            $targets->filter(Filter::equal('port', (int) $this->params->get('port')));
+            $targets->filter(Filter::equal('port', $this->params->get('port')));
         }
 
         $allowSelfSigned = (bool) $this->params->get('allow-self-signed', false);

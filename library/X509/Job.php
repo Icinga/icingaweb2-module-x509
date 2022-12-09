@@ -455,7 +455,7 @@ class Job implements Task
                 );
                 $targetId = $this->db->lastInsertId();
             } else {
-                $targetId = (int) $row->id;
+                $targetId = $row->id;
             }
 
             $chainUptodate = false;
@@ -474,7 +474,7 @@ class Job implements Task
                     ->getSelectBase()
                     ->where(new Expression(
                         'certificate_link.certificate_chain_id = %d',
-                        [(int) $lastChain->id]
+                        [$lastChain->id]
                     ))
                     ->orderBy('certificate_link.order');
 
@@ -523,13 +523,16 @@ class Job implements Task
                     $lastCertInfo[] = $index;
                 }
 
-                $rootCa = X509Certificate::on($this->db);
-                $rootCa
+                // There might be chains that do not include the self-signed top-level Ca,
+                // so we need to include it manually here, as we need to display the full
+                // chain in the UI.
+                $rootCa = X509Certificate::on($this->db)
                     ->columns(['id'])
-                    ->filter(Filter::equal('issuer_hash', $lastCertInfo[1]))
-                    ->filter(Filter::equal('trusted', true));
+                    ->filter(Filter::equal('subject_hash', $lastCertInfo[1]))
+                    ->filter(Filter::equal('self_signed', true))
+                    ->first();
 
-                if (($rootCa = $rootCa->first()) && $rootCa->id !== $lastCertInfo[0]) {
+                if ($rootCa && $rootCa->id !== $lastCertInfo[0]) {
                     $this->db->update(
                         'x509_certificate_chain',
                         ['length' => count($chain) + 1],

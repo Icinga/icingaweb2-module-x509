@@ -17,8 +17,8 @@ class CertificatesController extends Controller
 {
     public function indexAction()
     {
-        $this->getTabs()->enableDataExports();
         $this->addTitleTab($this->translate('Certificates'));
+        $this->getTabs()->enableDataExports();
 
         try {
             $conn = $this->getDb();

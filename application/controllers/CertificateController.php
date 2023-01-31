@@ -14,6 +14,9 @@ class CertificateController extends Controller
 {
     public function indexAction()
     {
+        $this->addTitleTab($this->translate('X.509 Certificate'));
+        $this->getTabs()->disableLegacyExtensions();
+
         $certId = $this->params->getRequired('cert');
 
         try {
@@ -31,9 +34,6 @@ class CertificateController extends Controller
         if (! $cert) {
             $this->httpNotFound($this->translate('Certificate not found.'));
         }
-
-        $this->addTitleTab($this->translate('X.509 Certificate'));
-        $this->getTabs()->disableLegacyExtensions();
 
         $this->view->certificateDetails = (new CertificateDetails())
             ->setCert($cert);

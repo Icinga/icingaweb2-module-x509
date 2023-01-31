@@ -17,6 +17,9 @@ class ChainController extends Controller
 {
     public function indexAction()
     {
+        $this->addTitleTab($this->translate('X.509 Certificate Chain'));
+        $this->getTabs()->disableLegacyExtensions();
+
         $id = $this->params->getRequired('id');
 
         try {
@@ -34,9 +37,6 @@ class ChainController extends Controller
         if (! $chain) {
             $this->httpNotFound($this->translate('Certificate not found.'));
         }
-
-        $this->addTitleTab($this->translate('X.509 Certificate Chain'));
-        $this->getTabs()->disableLegacyExtensions();
 
         $chainInfo = Html::tag('div');
         $chainInfo->add(Html::tag('dl', [

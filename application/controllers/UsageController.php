@@ -18,8 +18,8 @@ class UsageController extends Controller
 {
     public function indexAction()
     {
-        $this->getTabs()->enableDataExports();
         $this->addTitleTab($this->translate('Certificate Usage'));
+        $this->getTabs()->enableDataExports();
 
         try {
             $conn = $this->getDb();

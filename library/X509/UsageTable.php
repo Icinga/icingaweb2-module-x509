@@ -4,6 +4,7 @@
 
 namespace Icinga\Module\X509;
 
+use Icinga\Module\X509\Model\X509Certificate;
 use Icinga\Web\Url;
 use ipl\Html\Html;
 
@@ -87,7 +88,7 @@ class UsageTable extends DataTable
         ];
     }
 
-    protected function renderRow($row)
+    protected function renderRow(X509Certificate $row)
     {
         $tr = parent::renderRow($row);
 

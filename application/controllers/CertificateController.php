@@ -7,33 +7,33 @@ namespace Icinga\Module\X509\Controllers;
 use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\CertificateDetails;
 use Icinga\Module\X509\Controller;
-use ipl\Sql;
+use Icinga\Module\X509\Model\X509Certificate;
+use ipl\Stdlib\Filter;
 
 class CertificateController extends Controller
 {
     public function indexAction()
     {
+        $this->addTitleTab($this->translate('X.509 Certificate'));
+        $this->getTabs()->disableLegacyExtensions();
+
         $certId = $this->params->getRequired('cert');
 
         try {
             $conn = $this->getDb();
         } catch (ConfigurationError $_) {
             $this->render('missing-resource', null, true);
+
             return;
         }
 
-        $cert = $conn->select(
-            (new Sql\Select())
-                ->from('x509_certificate')
-                ->columns('*')
-                ->where(['id = ?' => $certId])
-        )->fetch();
+        $cert = X509Certificate::on($conn)
+            ->filter(Filter::equal('id', $certId))
+            ->first();
 
-        if ($cert === false) {
+        if (! $cert) {
             $this->httpNotFound($this->translate('Certificate not found.'));
         }
-
-        $this->setTitle($this->translate('X.509 Certificate'));
 
         $this->view->certificateDetails = (new CertificateDetails())
             ->setCert($cert);

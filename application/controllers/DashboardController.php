@@ -8,15 +8,18 @@ use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\Donut;
+use Icinga\Module\X509\Model\X509Certificate;
 use Icinga\Web\Url;
 use ipl\Html\Html;
-use ipl\Sql\Select;
+use ipl\Sql\Expression;
+use ipl\Stdlib\Filter;
 
 class DashboardController extends Controller
 {
     public function indexAction()
     {
-        $this->setTitle($this->translate('Certificate Dashboard'));
+        $this->addTitleTab($this->translate('Certificate Dashboard'));
+        $this->getTabs()->disableLegacyExtensions();
 
         try {
             $db = $this->getDb();
@@ -25,15 +28,19 @@ class DashboardController extends Controller
             return;
         }
 
-        $byCa = $db->select(
-            (new Select())
-                ->from('x509_certificate i')
-                ->columns(['i.subject', 'cnt' => 'COUNT(*)'])
-                ->join('x509_certificate c', ['c.issuer_hash = i.subject_hash', 'i.ca = ?' => 'y'])
-                ->groupBy(['i.id'])
-                ->orderBy('cnt', SORT_DESC)
-                ->limit(5)
-        );
+        $byCa = X509Certificate::on($db)
+            ->columns([
+                'issuer_certificate.subject',
+                'cnt' => new Expression('COUNT(*)')
+            ])
+            ->orderBy('cnt', SORT_DESC)
+            ->orderBy('issuer_certificate.subject')
+            ->filter(Filter::equal('issuer_certificate.ca', true))
+            ->limit(5);
+
+        $byCa
+            ->getSelectBase()
+            ->groupBy('certificate_issuer_certificate.id');
 
         $this->view->byCa = (new Donut())
             ->setHeading($this->translate('Certificates by CA'), 2)
@@ -42,24 +49,26 @@ class DashboardController extends Controller
                 return Html::tag(
                     'a',
                     [
-                        'href' => Url::fromPath('x509/certificates', ['issuer' => $data['subject']])->getAbsoluteUrl()
+                        'href' => Url::fromPath('x509/certificates', [
+                            'issuer' => $data->issuer_certificate->subject
+                        ])->getAbsoluteUrl()
                     ],
-                    $data['subject']
+                    $data->issuer_certificate->subject
                 );
             });
 
-        $duration = $db->select(
-            (new Select())
-                ->from('x509_certificate')
-                ->columns([
-                    'duration' => 'valid_to - valid_from',
-                    'cnt' => 'COUNT(*)'
-                ])
-                ->where(['ca = ?' => 'n'])
-                ->groupBy(['duration'])
-                ->orderBy('cnt', SORT_DESC)
-                ->limit(5)
-        );
+        $duration = X509Certificate::on($db)
+            ->columns([
+                'duration',
+                'cnt' => new Expression('COUNT(*)')
+            ])
+            ->filter(Filter::equal('ca', false))
+            ->orderBy('cnt', SORT_DESC)
+            ->limit(5);
+
+        $duration
+            ->getSelectBase()
+            ->groupBy('duration');
 
         $this->view->duration = (new Donut())
             ->setHeading($this->translate('Certificates by Duration'), 2)
@@ -69,21 +78,25 @@ class DashboardController extends Controller
                     'a',
                     [
                         'href' => Url::fromPath(
-                            "x509/certificates?duration={$data['duration']}&ca=no"
+                            "x509/certificates?duration={$data['duration']}&ca=n"
                         )->getAbsoluteUrl()
                     ],
                     CertificateUtils::duration($data['duration'])
                 );
             });
 
-        $keyStrength = $db->select(
-            (new Select())
-                ->from('x509_certificate')
-                ->columns(['pubkey_algo', 'pubkey_bits', 'cnt' => 'COUNT(*)'])
-                ->groupBy(['pubkey_algo', 'pubkey_bits'])
-                ->orderBy('cnt', SORT_DESC)
-                ->limit(5)
-        );
+        $keyStrength = X509Certificate::on($db)
+            ->columns([
+                'pubkey_algo',
+                'pubkey_bits',
+                'cnt' => new Expression('COUNT(*)')
+            ])
+            ->orderBy('cnt', SORT_DESC)
+            ->limit(5);
+
+        $keyStrength
+            ->getSelectBase()
+            ->groupBy(['pubkey_algo', 'pubkey_bits']);
 
         $this->view->keyStrength = (new Donut())
             ->setHeading($this->translate('Key Strength'), 2)
@@ -104,14 +117,18 @@ class DashboardController extends Controller
                 );
             });
 
-        $sigAlgos = $db->select(
-            (new Select())
-                ->from('x509_certificate')
-                ->columns(['signature_algo', 'signature_hash_algo', 'cnt' => 'COUNT(*)'])
-                ->groupBy(['signature_algo', 'signature_hash_algo'])
-                ->orderBy('cnt', SORT_DESC)
-                ->limit(5)
-        );
+        $sigAlgos = X509Certificate::on($db)
+            ->columns([
+                'signature_algo',
+                'signature_hash_algo',
+                'cnt' => new Expression('COUNT(*)')
+            ])
+            ->orderBy('cnt', SORT_DESC)
+            ->limit(5);
+
+        $sigAlgos
+            ->getSelectBase()
+            ->groupBy(['signature_algo', 'signature_hash_algo']);
 
         $this->view->sigAlgos = (new Donut())
             ->setHeading($this->translate('Signature Algorithms'), 2)
@@ -124,7 +141,7 @@ class DashboardController extends Controller
                             'x509/certificates',
                             [
                                 'signature_hash_algo' => $data['signature_hash_algo'],
-                                'signature_algo' => $data['signature_algo']
+                                'signature_algo'      => $data['signature_algo']
                             ]
                         )->getAbsoluteUrl()
                     ],

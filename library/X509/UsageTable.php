@@ -13,7 +13,7 @@ use ipl\Html\Html;
 class UsageTable extends DataTable
 {
     protected $defaultAttributes = [
-        'class' => 'usage-table common-table table-row-selectable',
+        'class'            => 'usage-table common-table table-row-selectable',
         'data-base-target' => '_next'
     ];
 
@@ -22,19 +22,29 @@ class UsageTable extends DataTable
         return [
             'valid' => [
                 'attributes' => ['class' => 'icon-col'],
-                'renderer' => function ($valid) {
-                    $icon = $valid === 'y' ? 'check -ok' : 'block -critical';
+                'column'     => function ($data) {
+                    return $data->chain->valid;
+                },
+                'renderer'   => function ($valid) {
+                    $icon = $valid ? 'check -ok' : 'block -critical';
 
                     return Html::tag('i', ['class' => "icon icon-{$icon}"]);
                 }
             ],
 
-            'hostname' => mt('x509', 'Hostname'),
+            'hostname' => [
+                'label'  => mt('x509', 'Hostname'),
+                'column' => function ($data) {
+                    return $data->chain->target->hostname;
+                }
+            ],
 
             'ip' => [
-                'label' => mt('x509', 'IP'),
+                'label'    => mt('x509', 'IP'),
+                'column'   => function ($data) {
+                    return $data->chain->target->ip;
+                },
                 'renderer' => function ($ip) {
-                    $ip = DbTool::unmarshalBinary($ip);
                     $ipv4 = ltrim($ip, "\0");
                     if (strlen($ipv4) === 4) {
                         $ip = $ipv4;
@@ -44,19 +54,24 @@ class UsageTable extends DataTable
                 }
             ],
 
-            'port' => mt('x509', 'Port'),
+            'port' => [
+                'label'  => mt('x509', 'Port'),
+                'column' => function ($data) {
+                    return $data->chain->target->port;
+                }
+            ],
 
             'subject' => mt('x509', 'Certificate'),
 
             'signature_algo' => [
-                'label' => mt('x509', 'Signature Algorithm'),
+                'label'    => mt('x509', 'Signature Algorithm'),
                 'renderer' => function ($algo, $data) {
                     return "{$data['signature_hash_algo']} with $algo";
                 }
             ],
 
             'pubkey_algo' => [
-                'label' => mt('x509', 'Public Key'),
+                'label'    => mt('x509', 'Public Key'),
                 'renderer' => function ($algo, $data) {
                     return "$algo {$data['pubkey_bits']} bits";
                 }
@@ -64,8 +79,8 @@ class UsageTable extends DataTable
 
             'valid_to' => [
                 'attributes' => ['class' => 'expiration-col'],
-                'label' => mt('x509', 'Expiration'),
-                'renderer' => function ($to, $data) {
+                'label'      => mt('x509', 'Expiration'),
+                'renderer'   => function ($to, $data) {
                     return new ExpirationWidget($data['valid_from'], $to);
                 }
             ]
@@ -76,7 +91,7 @@ class UsageTable extends DataTable
     {
         $tr = parent::renderRow($row);
 
-        $url = Url::fromPath('x509/chain', ['id' => $row['certificate_chain_id']]);
+        $url = Url::fromPath('x509/chain', ['id' => $row->chain->id]);
 
         $tr->getAttributes()->add(['href' => $url->getAbsoluteUrl()]);
 

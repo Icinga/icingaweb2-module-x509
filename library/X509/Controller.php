@@ -4,21 +4,35 @@
 
 namespace Icinga\Module\X509;
 
-use Icinga\Data\ResourceFactory;
 use Icinga\File\Csv;
 use Icinga\Module\X509\Common\Database;
+use Icinga\Module\X509\Web\Control\SearchBar\ObjectSuggestions;
 use Icinga\Util\Json;
 use Icinga\Web\Widget\Tabextension\DashboardAction;
 use Icinga\Web\Widget\Tabextension\MenuAction;
 use Icinga\Web\Widget\Tabextension\OutputFormat;
+use ipl\Html\Html;
+use ipl\Orm\Query;
 use ipl\Sql;
+use ipl\Stdlib\Filter;
+use ipl\Web\Compat\CompatController;
+use ipl\Web\Compat\SearchControls;
+use ipl\Web\Filter\QueryString;
 use PDO;
 
-class Controller extends \Icinga\Web\Controller
+class Controller extends CompatController
 {
     use Database {
         getDb as private getDbWithOptions;
     }
+    use SearchControls {
+        SearchControls::createSearchBar as private webCreateSearchBar;
+    }
+
+    /** @var Filter\Rule */
+    protected $filter;
+
+    protected $format;
 
     /**
      * Get the connection to the X.509 database
@@ -34,45 +48,32 @@ class Controller extends \Icinga\Web\Controller
         return $this->getDbWithOptions($options);
     }
 
-    /**
-     * Set the title tab of this view
-     *
-     * @param   string  $label
-     *
-     * @return  $this
-     */
-    protected function setTitle($label)
+    public function fetchFilterColumns(Query $query): array
     {
-        $this->getTabs()->add(uniqid(), [
-            'active'    => true,
-            'label'     => (string) $label,
-            'url'       => $this->getRequest()->getUrl()
-        ]);
-
-        return $this;
+        return iterator_to_array(ObjectSuggestions::collectFilterColumns($query->getModel(), $query->getResolver()));
     }
 
-    protected function handleFormatRequest(Sql\Connection $db, Sql\Select $select, callable $callback = null)
+    public function getFilter(): Filter\Rule
     {
-        $desiredContentType = $this->getRequest()->getHeader('Accept');
-        if ($desiredContentType === 'application/json') {
-            $desiredFormat = 'json';
-        } elseif ($desiredContentType === 'text/csv') {
-            $desiredFormat = 'csv';
-        } else {
-            $desiredFormat = strtolower($this->params->get('format', 'html'));
+        if ($this->filter === null) {
+            $this->filter = QueryString::parse((string) $this->params);
         }
 
-        if ($desiredFormat !== 'html' && ! $this->params->has('limit')) {
-            $select->limit(null);  // Resets any default limit and offset
+        return $this->filter;
+    }
+
+    protected function handleFormatRequest(Query $query, callable $callback)
+    {
+        if ($this->format !== 'html' && ! $this->params->has('limit')) {
+            $query->limit(null);  // Resets any default limit and offset
         }
 
-        switch ($desiredFormat) {
-            case 'sql':
-                echo '<pre>'
-                    . var_export((new Sql\QueryBuilder($db->getAdapter()))->assembleSelect($select), true)
-                    . '</pre>';
-                exit;
+        if ($this->format === 'sql') {
+            $this->content->add(Html::tag('pre', $query->dump()[0]));
+            return true;
+        }
+
+        switch ($this->format) {
             case 'json':
                 $response = $this->getResponse();
                 $response
@@ -83,11 +84,7 @@ class Controller extends \Icinga\Web\Controller
                         'inline; filename=' . $this->getRequest()->getActionName() . '.json'
                     )
                     ->appendBody(
-                        Json::encode(
-                            $callback !== null
-                                ? iterator_to_array($callback($db->select($select)))
-                                : $db->select($select)->fetchAll()
-                        )
+                        Json::encode(iterator_to_array($callback($query)))
                     )
                     ->sendResponse();
                 exit;
@@ -100,20 +97,16 @@ class Controller extends \Icinga\Web\Controller
                         'Content-Disposition',
                         'attachment; filename=' . $this->getRequest()->getActionName() . '.csv'
                     )
-                    ->appendBody(
-                        (string) Csv::fromQuery(
-                            $callback !== null ? $callback($db->select($select)) : $db->select($select)
-                        )
-                    )
+                    ->appendBody((string) Csv::fromQuery($callback($query)))
                     ->sendResponse();
                 exit;
         }
     }
 
-    protected function initTabs()
+    public function preDispatch()
     {
-        $this->getTabs()->extend(new OutputFormat())->extend(new DashboardAction())->extend(new MenuAction());
+        parent::preDispatch();
 
-        return $this;
+        $this->format = $this->params->shift('format', 'html');
     }
 }

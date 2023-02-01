@@ -41,7 +41,7 @@ class ImportCommand extends Command
             foreach ($bundle as $data) {
                 $cert = openssl_x509_read($data);
 
-                $id = CertificateUtils::findOrInsertCert($db, $cert);
+                list($id, $_) = CertificateUtils::findOrInsertCert($db, $cert);
 
                 $db->update(
                     'x509_certificate',

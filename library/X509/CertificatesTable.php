@@ -32,7 +32,7 @@ class CertificatesTable extends DataTable
             'ca' => [
                 'attributes' => ['class' => 'icon-col'],
                 'renderer' => function ($ca) {
-                    if ($ca === 'n') {
+                    if (! $ca) {
                         return null;
                     }
 
@@ -46,7 +46,7 @@ class CertificatesTable extends DataTable
             'self_signed' => [
                 'attributes' => ['class' => 'icon-col'],
                 'renderer' => function ($selfSigned) {
-                    if ($selfSigned === 'n') {
+                    if (! $selfSigned) {
                         return null;
                     }
 
@@ -60,7 +60,7 @@ class CertificatesTable extends DataTable
             'trusted' => [
                 'attributes' => ['class' => 'icon-col'],
                 'renderer' => function ($trusted) {
-                    if ($trusted === 'n') {
+                    if (! $trusted) {
                         return null;
                     }
 

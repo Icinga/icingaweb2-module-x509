@@ -4,42 +4,44 @@
 
 namespace Icinga\Module\X509\ProvidedHook;
 
-use Icinga\Module\X509\DbTool;
+use Icinga\Module\X509\Job;
+use Icinga\Module\X509\Model\X509Target;
 use ipl\Sql;
 
 class HostsImportSource extends X509ImportSource
 {
     public function fetchData()
     {
-        $targets = (new Sql\Select())
-            ->from('x509_target t')
+        $targets = X509Target::on($this->getDb())
+            ->utilize('chain')
+            ->utilize('chain.certificate')
             ->columns([
-                'host_ip'   => 't.ip',
-                'host_name' => 't.hostname'
-            ])
-            ->join('x509_certificate_chain cc', 'cc.id = t.latest_certificate_chain_id')
-            ->join('x509_certificate_chain_link ccl', 'ccl.certificate_chain_id = cc.id')
-            ->join('x509_certificate c', 'c.id = ccl.certificate_id')
-            ->where(['ccl.order = ?' => 0])
-            ->groupBy(['t.ip', 't.hostname']);
+                'ip',
+                'host_name' => 'hostname'
+            ]);
 
-        if ($this->getDb()->getConfig()->db === 'pgsql') {
-            $targets->columns(['host_ports' => 'ARRAY_TO_STRING(ARRAY_AGG(DISTINCT t.port),  \',\')']);
+        $targets
+            ->getSelectBase()
+            ->where(new Sql\Expression('target_chain_link.order = 0'))
+            ->groupBy(['ip', 'hostname']);
+
+        if ($this->getDb()->getAdapter() instanceof Sql\Adapter\Pgsql) {
+            $targets->withColumns([
+                'host_ports' => new Sql\Expression("ARRAY_TO_STRING(ARRAY_AGG(DISTINCT port), ',')")
+            ]);
         } else {
-            $targets->columns(['host_ports' => 'GROUP_CONCAT(DISTINCT t.port SEPARATOR ",")']);
+            $targets->withColumns([
+                'host_ports' => new Sql\Expression("GROUP_CONCAT(DISTINCT port SEPARATOR ',')")
+            ]);
         }
 
         $results = [];
         $foundDupes = [];
-        foreach ($this->getDb()->select($targets) as $target) {
-            if ($this->getDb()->getConfig()->db === 'pgsql') {
-                $target->host_ip = DbTool::unmarshalBinary($target->host_ip);
-            }
-
-            list($ipv4, $ipv6) = $this->transformIpAddress($target->host_ip);
-            $target->host_ip = $ipv4 ?: $ipv6;
-            $target->host_address = $ipv4;
-            $target->host_address6 = $ipv6;
+        foreach ($targets as $target) {
+            $isV6 = Job::isIPV6($target->ip);
+            $target->host_ip = $target->ip;
+            $target->host_address = $isV6 ? null : $target->ip;
+            $target->host_address6 = $isV6 ? $target->ip : null;
 
             if (isset($foundDupes[$target->host_name])) {
                 // For load balanced systems the IP address is the better choice
@@ -56,7 +58,12 @@ class HostsImportSource extends X509ImportSource
                 $target->host_name_or_ip = $target->host_ip;
             }
 
-            $results[$target->host_name_or_ip] = $target;
+            // Target ip is now obsolete and must not be included in the results.
+            // The relation is only used to utilize the query and must not be in the result set as well.
+            unset($target->ip);
+            unset($target->chain);
+
+            $results[$target->host_name_or_ip] = (object) iterator_to_array($target);
         }
 
         return $results;

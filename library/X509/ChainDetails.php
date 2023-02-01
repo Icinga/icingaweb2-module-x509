@@ -41,7 +41,7 @@ class ChainDetails extends DataTable
             'ca' => [
                 'attributes' => ['class' => 'icon-col'],
                 'renderer' => function ($ca) {
-                    if ($ca === 'n') {
+                    if (! $ca) {
                         return null;
                     }
 
@@ -55,7 +55,7 @@ class ChainDetails extends DataTable
             'self_signed' => [
                 'attributes' => ['class' => 'icon-col'],
                 'renderer' => function ($selfSigned) {
-                    if ($selfSigned === 'n') {
+                    if (! $selfSigned) {
                         return null;
                     }
 
@@ -69,7 +69,7 @@ class ChainDetails extends DataTable
             'trusted' => [
                 'attributes' => ['class' => 'icon-col'],
                 'renderer' => function ($trusted) {
-                    if ($trusted === 'n') {
+                    if (! $trusted) {
                         return null;
                     }
 
@@ -108,7 +108,7 @@ class ChainDetails extends DataTable
     {
         $tr = parent::renderRow($row);
 
-        $url = Url::fromPath('x509/certificate', ['cert' => $row['certificate_id']]);
+        $url = Url::fromPath('x509/certificate', ['cert' => $row->id]);
 
         $tr->getAttributes()->add(['href' => $url->getAbsoluteUrl()]);
 

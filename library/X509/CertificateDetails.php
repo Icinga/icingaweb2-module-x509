@@ -5,6 +5,7 @@
 namespace Icinga\Module\X509;
 
 use DateTime;
+use Icinga\Module\X509\Model\X509Certificate;
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
 
@@ -22,7 +23,7 @@ class CertificateDetails extends BaseHtmlElement
      */
     protected $cert;
 
-    public function setCert(array $cert)
+    public function setCert(X509Certificate $cert)
     {
         $this->cert = $cert;
 
@@ -31,7 +32,7 @@ class CertificateDetails extends BaseHtmlElement
 
     protected function assemble()
     {
-        $pem = CertificateUtils::der2pem(DbTool::unmarshalBinary($this->cert['certificate']));
+        $pem = $this->cert['certificate'];
         $cert = openssl_x509_parse($pem);
 //        $pubkey = openssl_pkey_get_details(openssl_get_publickey($pem));
 
@@ -54,7 +55,7 @@ class CertificateDetails extends BaseHtmlElement
         $certInfo = Html::tag('dl');
         $certInfo->add([
             Html::tag('dt', mt('x509', 'Serial Number')),
-            Html::tag('dd', bin2hex(DbTool::unmarshalBinary($this->cert['serial']))),
+            Html::tag('dd', bin2hex($this->cert['serial'])),
             Html::tag('dt', mt('x509', 'Version')),
             Html::tag('dd', $this->cert['version']),
             Html::tag('dt', mt('x509', 'Signature Algorithm')),
@@ -86,7 +87,7 @@ class CertificateDetails extends BaseHtmlElement
             Html::tag('dt', 'SHA-256'),
             Html::tag(
                 'dd',
-                wordwrap(strtoupper(bin2hex(DbTool::unmarshalBinary($this->cert['fingerprint']))), 2, ' ', true)
+                wordwrap(strtoupper(bin2hex($this->cert['fingerprint'])), 2, ' ', true)
             )
         ]);
 

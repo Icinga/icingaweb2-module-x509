@@ -4,6 +4,7 @@
 
 namespace Icinga\Module\X509;
 
+use Icinga\Module\X509\Model\X509Certificate;
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
 use ipl\Html\HtmlString;
@@ -79,20 +80,20 @@ class DataTable extends BaseHtmlElement
         return Html::tag('thead', Html::tag('tr', $cells));
     }
 
-    protected function renderRow($row)
+    protected function renderRow(X509Certificate $row)
     {
         $cells = [];
 
         foreach ($this->columns as $key => $column) {
-            if (! is_int($key) && property_exists($row, $key)) {
-                $data = $row[$key];
+            if (! is_int($key) && $row->hasProperty($key)) {
+                $data = $row->$key;
             } else {
                 $data = null;
                 if (isset($column['column'])) {
                     if (is_callable($column['column'])) {
                         $data = call_user_func(($column['column']), $row);
                     } elseif (isset($row->{$column['column']})) {
-                        $data = $row[$column['column']];
+                        $data = $row->{$column['column']};
                     }
                 }
             }

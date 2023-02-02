@@ -4,6 +4,7 @@
 
 namespace Icinga\Module\X509;
 
+use Icinga\Module\X509\Model\X509Certificate;
 use Icinga\Web\Url;
 use ipl\Html\Html;
 
@@ -66,14 +67,14 @@ class UsageTable extends DataTable
             'signature_algo' => [
                 'label'    => mt('x509', 'Signature Algorithm'),
                 'renderer' => function ($algo, $data) {
-                    return "{$data['signature_hash_algo']} with $algo";
+                    return "{$data->signature_hash_algo} with $algo";
                 }
             ],
 
             'pubkey_algo' => [
                 'label'    => mt('x509', 'Public Key'),
                 'renderer' => function ($algo, $data) {
-                    return "$algo {$data['pubkey_bits']} bits";
+                    return "$algo {$data->pubkey_bits} bits";
                 }
             ],
 
@@ -81,13 +82,13 @@ class UsageTable extends DataTable
                 'attributes' => ['class' => 'expiration-col'],
                 'label'      => mt('x509', 'Expiration'),
                 'renderer'   => function ($to, $data) {
-                    return new ExpirationWidget($data['valid_from'], $to);
+                    return new ExpirationWidget($data->valid_from, $to);
                 }
             ]
         ];
     }
 
-    protected function renderRow($row)
+    protected function renderRow(X509Certificate $row)
     {
         $tr = parent::renderRow($row);
 

@@ -81,11 +81,11 @@ class CertificatesController extends Controller
         $this->handleFormatRequest($certificates, function (Query $certificates) {
             /** @var X509Certificate $cert */
             foreach ($certificates as $cert) {
-                $cert['valid_from'] = (new \DateTime())
-                    ->setTimestamp($cert['valid_from'])
+                $cert->valid_from = (new \DateTime())
+                    ->setTimestamp($cert->valid_from)
                     ->format('l F jS, Y H:i:s e');
-                $cert['valid_to'] = (new \DateTime())
-                    ->setTimestamp($cert['valid_to'])
+                $cert->valid_to = (new \DateTime())
+                    ->setTimestamp($cert->valid_to)
                     ->format('l F jS, Y H:i:s e');
 
                 yield array_intersect_key(iterator_to_array($cert), array_flip($cert->getExportableColumns()));

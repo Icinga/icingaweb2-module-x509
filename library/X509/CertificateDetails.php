@@ -19,7 +19,7 @@ class CertificateDetails extends BaseHtmlElement
     protected $defaultAttributes = ['class' => 'cert-details'];
 
     /**
-     * @var array
+     * @var X509Certificate
      */
     protected $cert;
 
@@ -32,7 +32,7 @@ class CertificateDetails extends BaseHtmlElement
 
     protected function assemble()
     {
-        $pem = $this->cert['certificate'];
+        $pem = $this->cert->certificate;
         $cert = openssl_x509_parse($pem);
 //        $pubkey = openssl_pkey_get_details(openssl_get_publickey($pem));
 
@@ -55,23 +55,23 @@ class CertificateDetails extends BaseHtmlElement
         $certInfo = Html::tag('dl');
         $certInfo->add([
             Html::tag('dt', mt('x509', 'Serial Number')),
-            Html::tag('dd', bin2hex($this->cert['serial'])),
+            Html::tag('dd', bin2hex($this->cert->serial)),
             Html::tag('dt', mt('x509', 'Version')),
-            Html::tag('dd', $this->cert['version']),
+            Html::tag('dd', $this->cert->version),
             Html::tag('dt', mt('x509', 'Signature Algorithm')),
-            Html::tag('dd', $this->cert['signature_algo'] . ' with ' . $this->cert['signature_hash_algo']),
+            Html::tag('dd', $this->cert->signature_algo . ' with ' . $this->cert->signature_hash_algo),
             Html::tag('dt', mt('x509', 'Not Valid Before')),
-            Html::tag('dd', (new DateTime())->setTimestamp($this->cert['valid_from'])->format('l F jS, Y H:i:s e')),
+            Html::tag('dd', (new DateTime())->setTimestamp($this->cert->valid_from)->format('l F jS, Y H:i:s e')),
             Html::tag('dt', mt('x509', 'Not Valid After')),
-            Html::tag('dd', (new DateTime())->setTimestamp($this->cert['valid_to'])->format('l F jS, Y H:i:s e')),
+            Html::tag('dd', (new DateTime())->setTimestamp($this->cert->valid_to)->format('l F jS, Y H:i:s e')),
         ]);
 
         $pubkeyInfo = Html::tag('dl');
         $pubkeyInfo->add([
             Html::tag('dt', mt('x509', 'Algorithm')),
-            Html::tag('dd', $this->cert['pubkey_algo']),
+            Html::tag('dd', $this->cert->pubkey_algo),
             Html::tag('dt', mt('x509', 'Key Size')),
-            Html::tag('dd', $this->cert['pubkey_bits'])
+            Html::tag('dd', $this->cert->pubkey_bits)
         ]);
 
         $extensions = Html::tag('dl');
@@ -87,12 +87,12 @@ class CertificateDetails extends BaseHtmlElement
             Html::tag('dt', 'SHA-256'),
             Html::tag(
                 'dd',
-                wordwrap(strtoupper(bin2hex($this->cert['fingerprint'])), 2, ' ', true)
+                wordwrap(strtoupper(bin2hex($this->cert->fingerprint)), 2, ' ', true)
             )
         ]);
 
         $this->add([
-            Html::tag('h2', [Html::tag('i', ['class' => 'x509-icon-cert']), $this->cert['subject']]),
+            Html::tag('h2', [Html::tag('i', ['class' => 'x509-icon-cert']), $this->cert->subject]),
             Html::tag('h3', mt('x509', 'Subject Name')),
             $subject,
             Html::tag('h3', mt('x509', 'Issuer Name')),

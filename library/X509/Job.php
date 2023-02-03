@@ -553,7 +553,8 @@ class Job implements Task
                         [
                             'certificate_chain_id'              => $chainId,
                             $this->db->quoteIdentifier('order') => $lastCertInfo[2] + 1,
-                            'certificate_id'                    => $rootCa->id
+                            'certificate_id'                    => $rootCa->id,
+                            'ctime'                             => new Expression('UNIX_TIMESTAMP() * 1000')
                         ]
                     );
                 }

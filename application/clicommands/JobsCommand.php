@@ -12,6 +12,7 @@ use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
 use Icinga\Module\X509\Hook\SniHook;
 use Icinga\Module\X509\Job;
+use ipl\Scheduler\Contract\Frequency;
 use ipl\Scheduler\Contract\Task;
 use ipl\Scheduler\Cron;
 use ipl\Scheduler\Scheduler;
@@ -67,16 +68,35 @@ class JobsCommand extends Command
 
             $newJobs = array_diff_key($jobs, $scheduled);
             foreach ($newJobs as $job) {
-                $config = $job->getConfig();
-                $schedule = $config->get('schedule');
-                if (! Cron::isValid($schedule)) {
-                    Logger::error('Job %s has invalid schedule expression %s', $job->getName(), $schedule);
+                $job->setParallel($parallel);
 
-                    continue;
+                $config = $job->getConfig();
+                if (! isset($config->frequencyType)) {
+                    if (! Cron::isValid($config->schedule)) {
+                        Logger::error('Job %s has invalid schedule expression %s', $job->getName(), $config->schedule);
+
+                        continue;
+                    }
+
+                    $frequency = new Cron($config->schedule);
+                } else {
+                    try {
+                        /** @var Frequency $type */
+                        $type = $config->frequencyType;
+                        $frequency = $type::fromJson($config->schedule);
+                    } catch (Exception $err) {
+                        Logger::error(
+                            'Job %s has invalid schedule expression %s: %s',
+                            $job->getName(),
+                            $config->schedule,
+                            $err->getMessage()
+                        );
+
+                        continue;
+                    }
                 }
 
-                $job->setParallel($parallel);
-                $scheduler->schedule($job, new Cron($schedule));
+                $scheduler->schedule($job, $frequency);
             }
 
             $scheduled = $jobs;
@@ -99,8 +119,9 @@ class JobsCommand extends Command
 
         $jobs = [];
         foreach ($configs as $name => $config) {
-            $schedule = $config->get('schedule', $defaultSchedule);
-            if (! $schedule) {
+            if (! $config->get('schedule', $defaultSchedule)) {
+                Logger::debug('Job %s cannot be scheduled', $name);
+
                 continue;
             }
 
@@ -150,6 +171,10 @@ class JobsCommand extends Command
 
         $scheduler->on(Scheduler::ON_TASK_SCHEDULED, function (Task $job, DateTime $dateTime) {
             Logger::info('Scheduling job %s to run at %s', $job->getName(), $dateTime->format('Y-m-d H:i:s'));
+        });
+
+        $scheduler->on(Scheduler::ON_TASK_EXPIRED, function (Task $task, DateTime $dateTime) {
+            Logger::info(sprintf('Detaching expired job %s at %s', $task->getName(), $dateTime->format('Y-m-d H:i:s')));
         });
     }
 }

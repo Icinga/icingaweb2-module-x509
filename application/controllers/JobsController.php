@@ -4,14 +4,23 @@
 
 namespace Icinga\Module\X509\Controllers;
 
-use Icinga\Exception\NotFoundError;
 use Icinga\Module\X509\Forms\Config\JobConfigForm;
 use Icinga\Module\X509\JobsIniRepository;
-use Icinga\Web\Controller;
 use Icinga\Web\Url;
+use ipl\Html\HtmlElement;
+use ipl\Scheduler\Contract\Frequency;
+use ipl\Scheduler\Cron;
+use ipl\Web\Compat\CompatController;
 
-class JobsController extends Controller
+class JobsController extends CompatController
 {
+    protected function prepareInit()
+    {
+        parent::prepareInit();
+
+        $this->getTabs()->disableLegacyExtensions();
+    }
+
     /**
      * List all jobs
      */
@@ -29,11 +38,10 @@ class JobsController extends Controller
      */
     public function newAction()
     {
-        $form = $this->prepareForm()->add();
+        $form = $this->prepareForm(true);
 
-        $form->handleRequest();
-
-        $this->renderForm($form, $this->translate('New Job'));
+        $this->addTitleTab($this->translate('New Job'));
+        $this->addContent($form);
     }
 
     /**
@@ -41,15 +49,12 @@ class JobsController extends Controller
      */
     public function updateAction()
     {
-        $form = $this->prepareForm()->edit($this->params->getRequired('name'));
+        $name = $this->params->getRequired('name');
+        $form = $this->prepareForm();
 
-        try {
-            $form->handleRequest();
-        } catch (NotFoundError $_) {
-            $this->httpNotFound($this->translate('Job not found'));
-        }
+        $this->addTitleTab($this->translate('Update Job'));
 
-        $this->renderForm($form, $this->translate('Update Job'));
+        $this->addContent($form);
     }
 
     /**
@@ -57,15 +62,13 @@ class JobsController extends Controller
      */
     public function removeAction()
     {
-        $form = $this->prepareForm()->remove($this->params->getRequired('name'));
+        $name = $this->params->getRequired('name');
+        $form = $this->prepareForm();
 
-        try {
-            $form->handleRequest();
-        } catch (NotFoundError $_) {
-            $this->httpNotFound($this->translate('Job not found'));
-        }
+        $this->addTitleTab($this->translate('Remove Job'));
 
-        $this->renderForm($form, $this->translate('Remove Job'));
+        $form->prependHtml(HtmlElement::create('h1', null, sprintf($this->translate('Remove job %s'), $name)));
+        $this->addContent($form);
     }
 
     /**
@@ -73,12 +76,53 @@ class JobsController extends Controller
      *
      * @return  JobConfigForm
      */
-    protected function prepareForm()
+    protected function prepareForm(bool $isNew = false)
     {
         $this->assertPermission('config/x509');
 
-        return (new JobConfigForm())
-            ->setRepository(new JobsIniRepository())
-            ->setRedirectUrl(Url::fromPath('x509/jobs'));
+        $repo = new JobsIniRepository();
+        $form = (new JobConfigForm())
+            ->setRedirectUrl(Url::fromPath('x509/jobs'))
+            ->setRepo($repo);
+
+        $values = [];
+        if (! $isNew) {
+            $name = $this->params->getRequired('name');
+            $query = $repo->select()->where('name', $name);
+
+            if (! $query->hasResult()) {
+                $this->httpNotFound($this->translate('Job not found'));
+            }
+
+            $data = $query->fetchRow();
+            if (! isset($data->frequencyType) && ! empty($data->schedule)) {
+                $frequency = new Cron($data->schedule);
+            } elseif (! empty($data->schedule)) {
+                /** @var Frequency $type */
+                $type = $data->frequencyType;
+                $frequency = $type::fromJson($data->schedule);
+            }
+
+            $values = [
+                'name'             => $data->name,
+                'cidrs'            => $data->cidrs,
+                'ports'            => $data->ports,
+                'schedule-element' => $frequency ?? []
+            ];
+        }
+
+        $form
+            ->populate($values)
+            ->on(JobConfigForm::ON_SUCCESS, function () {
+                $this->redirectNow(Url::fromPath('x509/jobs'));
+            })
+            ->handleRequest($this->getServerRequest());
+
+        $parts = $form->getPartUpdates();
+        if (! empty($parts)) {
+            $this->sendMultipartUpdate(...$parts);
+        }
+
+        return $form;
     }
 }

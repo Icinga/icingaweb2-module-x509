@@ -59,8 +59,7 @@ class UsageController extends Controller
             'valid_from'            => $this->translate('Valid From'),
             'valid_to'              => $this->translate('Valid To'),
             'chain.valid'           => $this->translate('Chain Is Valid'),
-            'duration'              => $this->translate('Duration'),
-            'expires'               => $this->translate('Expiration')
+            'duration'              => $this->translate('Duration')
         ];
 
         $limitControl = $this->createLimitControl();
@@ -96,12 +95,8 @@ class UsageController extends Controller
 
         $this->handleFormatRequest($targets, function (Query $targets) {
             foreach ($targets as $usage) {
-                $usage->valid_from = (new \DateTime())
-                    ->setTimestamp($usage->valid_from)
-                    ->format('l F jS, Y H:i:s e');
-                $usage->valid_to = (new \DateTime())
-                    ->setTimestamp($usage->valid_to)
-                    ->format('l F jS, Y H:i:s e');
+                $usage->valid_from = $usage->valid_from->format('l F jS, Y H:i:s e');
+                $usage->valid_to = $usage->valid_to->format('l F jS, Y H:i:s e');
 
                 $usage->ip = $usage->chain->target->ip;
                 $usage->hostname = $usage->chain->target->hostname;

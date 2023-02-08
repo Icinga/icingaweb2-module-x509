@@ -6,6 +6,7 @@ use Icinga\Module\X509\Model\Behavior\DERBase64;
 use Icinga\Module\X509\Model\Behavior\ExpressionInjector;
 use ipl\Orm\Behavior\Binary;
 use ipl\Orm\Behavior\BoolCast;
+use ipl\Orm\Behavior\MillisecondTimestamp;
 use ipl\Orm\Behaviors;
 use ipl\Orm\Model;
 use ipl\Orm\Relations;
@@ -51,11 +52,7 @@ class X509Certificate extends Model
             'certificate',
             'ctime',
             'mtime',
-            'duration' => new Expression('%s - %s', ['valid_to', 'valid_from']),
-            'expires'  => new Expression(
-                'CASE WHEN UNIX_TIMESTAMP() > %1$s THEN 0 ELSE (%1$s - UNIX_TIMESTAMP()) / 86400 END',
-                ['valid_to']
-            )
+            'duration' => new Expression('%s - %s', ['valid_to', 'valid_from'])
         ];
     }
 
@@ -75,7 +72,6 @@ class X509Certificate extends Model
             'valid_from'          => t('Valid From'),
             'valid_to'            => t('Valid To'),
             'duration'            => t('Duration'),
-            'expires'             => t('Expiration'),
             'subject_hash'        => t('Subject Hash'),
             'issuer_hash'         => t('Issuer Hash'),
         ];
@@ -128,7 +124,15 @@ class X509Certificate extends Model
             'self_signed'
         ]));
 
-        $behaviors->add(new ExpressionInjector('duration', 'expires'));
+        $behaviors->add(new MillisecondTimestamp([
+            'valid_from',
+            'valid_to',
+            'ctime',
+            'mtime',
+            'duration'
+        ]));
+
+        $behaviors->add(new ExpressionInjector('duration'));
     }
 
     public function createRelations(Relations $relations)

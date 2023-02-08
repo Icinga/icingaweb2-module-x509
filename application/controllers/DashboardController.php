@@ -78,10 +78,10 @@ class DashboardController extends Controller
                     'a',
                     [
                         'href' => Url::fromPath(
-                            "x509/certificates?duration={$data->duration}&ca=n"
+                            "x509/certificates?duration={$data->duration->getTimestamp()}&ca=n"
                         )->getAbsoluteUrl()
                     ],
-                    CertificateUtils::duration($data->duration)
+                    CertificateUtils::duration($data->duration->getTimestamp())
                 );
             });
 

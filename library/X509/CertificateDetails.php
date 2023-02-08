@@ -61,9 +61,9 @@ class CertificateDetails extends BaseHtmlElement
             Html::tag('dt', mt('x509', 'Signature Algorithm')),
             Html::tag('dd', $this->cert->signature_algo . ' with ' . $this->cert->signature_hash_algo),
             Html::tag('dt', mt('x509', 'Not Valid Before')),
-            Html::tag('dd', (new DateTime())->setTimestamp($this->cert->valid_from)->format('l F jS, Y H:i:s e')),
+            Html::tag('dd', $this->cert->valid_from->format('l F jS, Y H:i:s e')),
             Html::tag('dt', mt('x509', 'Not Valid After')),
-            Html::tag('dd', (new DateTime())->setTimestamp($this->cert->valid_to)->format('l F jS, Y H:i:s e')),
+            Html::tag('dd', $this->cert->valid_to->format('l F jS, Y H:i:s e')),
         ]);
 
         $pubkeyInfo = Html::tag('dl');

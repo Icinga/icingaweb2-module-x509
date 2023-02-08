@@ -8,6 +8,7 @@ use Icinga\Application\Logger;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
 use ipl\Sql\Connection;
+use ipl\Sql\Expression;
 
 class ImportCommand extends Command
 {
@@ -45,7 +46,10 @@ class ImportCommand extends Command
 
                 $db->update(
                     'x509_certificate',
-                    ['trusted' => 'y'],
+                    [
+                        'trusted' => 'y',
+                        'mtime'   => new Expression('UNIX_TIMESTAMP() * 1000')
+                    ],
                     ['id = ?' => $id]
                 );
 

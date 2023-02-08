@@ -73,7 +73,9 @@ class Donut extends BaseHtmlElement
 
     public function assemble()
     {
-        $colorScheme = (new ColorScheme(['#014573', '#3588A5', '#BBD9B0', '#F5CC0A', '#F04B0D']))->scheme();
+        $palette = ['#FF595E', '#FFCA3A', '#8AC926', '#1982C4', '#6A4C93'];
+
+        $colorScheme = (new ColorScheme($palette))->scheme();
         $donut = new \Icinga\Chart\Donut();
         $legend = new Table();
 

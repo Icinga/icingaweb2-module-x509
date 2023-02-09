@@ -1,5 +1,11 @@
 // Icinga Web 2 X.509 Module | (c) 2018 Icinga GmbH | GPLv2
 
+@cert-segment-color-0: #FF595E;
+@cert-segment-color-1: #FFCA3A;
+@cert-segment-color-2: #8AC926;
+@cert-segment-color-3: #1982C4;
+@cert-segment-color-4: #6A4C93;
+
 .cert-details {
   .x509-icon-cert {
     font-size: 5em;
@@ -72,6 +78,52 @@
 .cert-donut {
   align-self: flex-start;
   padding: 1em;
+
+  .donut-graph {
+    .segment-0 {
+      stroke: @segment-color-0;
+    }
+
+    .segment-1 {
+      stroke: @segment-color-1;
+    }
+
+    .segment-2 {
+      stroke: @segment-color-2;
+    }
+
+    .segment-3 {
+      stroke: @segment-color-3;
+    }
+
+    .segment-4 {
+      stroke: @segment-color-4;
+    }
+  }
+
+  .badge {
+    height: 1.75em;
+
+    &.badge-0 {
+      background: @segment-color-0;
+    }
+
+    &.badge-1 {
+      background: @segment-color-1;
+    }
+
+    &.badge-2 {
+      background: @segment-color-2;
+    }
+
+    &.badge-3 {
+      background: @segment-color-3;
+    }
+
+    &.badge-4 {
+      background: @segment-color-4;
+    }
+  }
 }
 
 .cert-chain {

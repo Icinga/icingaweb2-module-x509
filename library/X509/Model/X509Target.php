@@ -33,6 +33,7 @@ class X509Target extends Model
             'port',
             'hostname',
             'latest_certificate_chain_id',
+            'last_scan',
             'ctime',
             'mtime'
         ];
@@ -59,7 +60,8 @@ class X509Target extends Model
 
         $behaviors->add(new MillisecondTimestamp([
             'ctime',
-            'mtime'
+            'mtime',
+            'last_scan'
         ]));
     }
 

@@ -15,6 +15,7 @@ UPDATE x509_certificate SET trusted = 'y' WHERE trusted = 'yes';
 UPDATE x509_certificate SET trusted = 'n' WHERE trusted = 'no';
 
 UPDATE x509_certificate SET mtime_tmp = UNIX_TIMESTAMP(mtime) * 1000.0, ctime_tmp = UNIX_TIMESTAMP(ctime) * 1000.0;
+UPDATE x509_certificate SET valid_from = valid_from * 1000.0, valid_to = valid_to * 1000.0;
 
 ALTER TABLE x509_certificate
     MODIFY self_signed enum('n', 'y') NOT NULL DEFAULT 'n',

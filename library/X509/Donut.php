@@ -73,16 +73,14 @@ class Donut extends BaseHtmlElement
 
     public function assemble()
     {
-        $colorScheme = (new ColorScheme(['#014573', '#3588A5', '#BBD9B0', '#F5CC0A', '#F04B0D']))->scheme();
         $donut = new \Icinga\Chart\Donut();
         $legend = new Table();
 
-        foreach ($this->data as $data) {
-            $color = $colorScheme();
-            $donut->addSlice((int) $data['cnt'], ['stroke' => $color]);
+        foreach ($this->data as $index => $data) {
+            $donut->addSlice((int) $data['cnt'], ['class' => 'segment-' . $index]);
             $legend->addRow(
                 [
-                    Html::tag('span', ['class' => 'badge', 'style' => "background-color: $color; height: 1.75em;"]),
+                    Html::tag('span', ['class' => 'badge badge-' . $index]),
                     call_user_func($this->labelCallback, $data),
                     $data['cnt']
                 ]

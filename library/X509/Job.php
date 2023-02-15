@@ -71,6 +71,9 @@ class Job implements Task
     /** @var bool Whether job run should only perform a rescan */
     protected $rescan = false;
 
+    /** @var bool Whether the job run should perform a full scan */
+    protected $fullScan = false;
+
     public function __construct(string $name, ConfigObject $config, array $snimap)
     {
         $this->db = $this->getDb();
@@ -157,13 +160,27 @@ class Job implements Task
     }
 
     /**
+     * Set whether this job run should scan all known and unknown targets
+     *
+     * @param bool $fullScan
+     *
+     * @return $this
+     */
+    public function setFullScan(bool $fullScan): self
+    {
+        $this->fullScan = $fullScan;
+
+        return $this;
+    }
+
+    /**
      * Set since last scan threshold for the targets to rescan
      *
      * @param ?DateTime $dateTime
      *
      * @return $this
      */
-    public function setLastScan(DateTime $dateTime = null): self
+    public function setLastScan(?DateTime $dateTime): self
     {
         $this->sinceLastScan = $dateTime;
 
@@ -191,12 +208,14 @@ class Job implements Task
 
     protected function getScanTargets(): Generator
     {
-        if (! $this->isRescan()) {
+        if (! $this->isRescan() || $this->fullScan) {
             yield from $this->generateTargets();
-        } else {
+        }
+
+        if ($this->sinceLastScan !== null || $this->isRescan()) {
             $targets = X509Target::on($this->db)->columns(['id', 'ip', 'hostname', 'port']);
-            if ($this->sinceLastScan) {
-                $targets->filter(Filter::lessThan('last_scan', $this->sinceLastScan->getTimestamp()));
+            if (! $this->fullScan && $this->sinceLastScan) {
+                $targets->filter(Filter::lessThan('last_scan', $this->sinceLastScan));
             }
 
             foreach ($targets as $target) {
@@ -219,7 +238,7 @@ class Job implements Task
         }
     }
 
-    private function generateTargets()
+    private function generateTargets(): Generator
     {
         $excludes = $this->getExcludes();
         foreach ($this->getCidrs() as $cidr) {
@@ -251,6 +270,22 @@ class Job implements Task
                             $target->ip = $ip;
                             $target->port = $port;
                             $target->hostname = $hostname;
+
+                            if (! $this->fullScan) {
+                                $targets = X509Target::on($this->db)
+                                    ->columns([new Expression('1')])
+                                    ->filter(
+                                        Filter::all(
+                                            Filter::equal('ip', $target->ip),
+                                            Filter::equal('hostname', $target->hostname),
+                                            Filter::equal('port', $target->port)
+                                        )
+                                    );
+
+                                if ($targets->execute()->hasResult()) {
+                                    continue;
+                                }
+                            }
 
                             yield $target;
                         }

@@ -27,7 +27,7 @@ ALTER TABLE x509_certificate
     CHANGE COLUMN mtime_tmp mtime bigint unsigned DEFAULT NULL;
 
 ALTER TABLE x509_certificate_chain
-    CHANGE valid valid enum('n', 'y', 'yes', 'no') NOT NULL DEFAULT 'n',
+    MODIFY valid enum('n', 'y', 'yes', 'no') NOT NULL DEFAULT 'n',
     ADD COLUMN ctime_tmp bigint unsigned NOT NULL;
 
 UPDATE x509_certificate_chain SET valid = 'y' WHERE valid = 'yes';

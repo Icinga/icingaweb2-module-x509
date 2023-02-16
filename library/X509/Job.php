@@ -198,7 +198,7 @@ class Job implements Task
         }
 
         $this->db->update('x509_target', [
-            'last_scan' => new Expression('UNIX_TIMESTAMP()')
+            'last_scan' => new Expression('UNIX_TIMESTAMP() * 1000')
         ], ['id = ?' => $target->id]);
     }
 

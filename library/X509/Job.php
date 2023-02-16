@@ -216,7 +216,7 @@ class Job implements Task
             yield from $this->generateTargets();
         }
 
-        if ($this->sinceLastScan !== null || $this->isRescan()) {
+        if ((! $this->fullScan && $this->sinceLastScan !== null) || $this->isRescan()) {
             $targets = X509Target::on($this->db)->columns(['id', 'ip', 'hostname', 'port']);
             if (! $this->fullScan && $this->sinceLastScan) {
                 $targets->filter(Filter::lessThan('last_scan', $this->sinceLastScan));

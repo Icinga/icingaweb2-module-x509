@@ -249,12 +249,12 @@ class Job implements Task
             list($startIp, $prefix) = $cidr;
             $ipv6 = static::isIPV6($startIp);
             $subnet = $ipv6 ? 128 : 32;
-            $numIps = pow(2, ($subnet - $prefix)) - 2;
+            $numIps = pow(2, ($subnet - $prefix));
 
             Logger::info('Scanning %d IPs in the CIDR %s', $numIps, implode('/', $cidr));
 
             $start = static::addrToNumber($startIp);
-            for ($i = 0; $i < $numIps; $i++) {
+            for ($i = 1; $i < $numIps - 1; $i++) {
                 $ip = static::numberToAddr(gmp_add($start, $i), $ipv6);
                 if (isset($excludes[$ip])) {
                     Logger::debug('Excluding IP %s from scan', $ip);

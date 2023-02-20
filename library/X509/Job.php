@@ -63,7 +63,7 @@ class Job implements Task
     protected $jobRunStart;
 
     /** @var array A list of excluded IP addresses and host names */
-    protected $excludedTargets = [];
+    protected $excludedTargets = null;
 
     /** @var DateTime Since last scan threshold used to filter out scan targets */
     protected $sinceLastScan;
@@ -92,8 +92,12 @@ class Job implements Task
      */
     protected function getExcludes(): array
     {
-        if (empty($this->excludedTargets)) {
-            $this->excludedTargets = array_flip(Str::trimSplit($this->getConfig()->get('exclude_targets')));
+        if ($this->excludedTargets === null) {
+            $config = $this->getConfig();
+            $this->excludedTargets = [];
+            if (isset($config['exclude_targets']) && ! empty($config['exclude_targets'])) {
+                $this->excludedTargets = array_flip(Str::trimSplit($config['exclude_targets']));
+            }
         }
 
         return $this->excludedTargets;
@@ -194,7 +198,7 @@ class Job implements Task
         }
 
         $this->db->update('x509_target', [
-            'last_scan' => new Expression('UNIX_TIMESTAMP()')
+            'last_scan' => new Expression('UNIX_TIMESTAMP() * 1000')
         ], ['id = ?' => $target->id]);
     }
 
@@ -212,7 +216,7 @@ class Job implements Task
             yield from $this->generateTargets();
         }
 
-        if ($this->sinceLastScan !== null || $this->isRescan()) {
+        if ((! $this->fullScan && $this->sinceLastScan !== null) || $this->isRescan()) {
             $targets = X509Target::on($this->db)->columns(['id', 'ip', 'hostname', 'port']);
             if (! $this->fullScan && $this->sinceLastScan) {
                 $targets->filter(Filter::lessThan('last_scan', $this->sinceLastScan));
@@ -245,12 +249,12 @@ class Job implements Task
             list($startIp, $prefix) = $cidr;
             $ipv6 = static::isIPV6($startIp);
             $subnet = $ipv6 ? 128 : 32;
-            $numIps = pow(2, ($subnet - $prefix)) - 2;
+            $numIps = pow(2, ($subnet - $prefix));
 
             Logger::info('Scanning %d IPs in the CIDR %s', $numIps, implode('/', $cidr));
 
             $start = static::addrToNumber($startIp);
-            for ($i = 0; $i < $numIps; $i++) {
+            for ($i = 1; $i < $numIps - 1; $i++) {
                 $ip = static::numberToAddr(gmp_add($start, $i), $ipv6);
                 if (isset($excludes[$ip])) {
                     Logger::debug('Excluding IP %s from scan', $ip);
@@ -260,8 +264,8 @@ class Job implements Task
                 foreach ($this->getPorts() as $portRange) {
                     list($startPort, $endPort) = $portRange;
                     foreach (range($startPort, $endPort) as $port) {
-                        foreach ($this->snimap[$ip] ?? [] as $hostname) {
-                            if (isset($excludes[$hostname])) {
+                        foreach ($this->snimap[$ip] ?? [null] as $hostname) {
+                            if (array_key_exists($hostname, $excludes)) {
                                 Logger::debug('Excluding host %s from scan', $hostname);
                                 continue;
                             }

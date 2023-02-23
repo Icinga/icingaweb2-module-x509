@@ -11,8 +11,10 @@ use Icinga\Module\X509\Model\X509Certificate;
 use Icinga\Module\X509\Model\X509CertificateChain;
 use Icinga\Module\X509\Model\X509CertificateSubjectAltName;
 use Icinga\Module\X509\Model\X509Dn;
+use Icinga\Module\X509\Model\X509Target;
 use ipl\Sql\Connection;
 use ipl\Sql\Expression;
+use ipl\Sql\Select;
 use ipl\Stdlib\Filter;
 
 class CertificateUtils
@@ -363,6 +365,49 @@ class CertificateUtils
         }
 
         return $hash;
+    }
+
+    /**
+     * Remove certificates that are no longer in use
+     *
+     * Remove chains that aren't used by any target, certificates that aren't part of any chain, and DNs
+     * that aren't used anywhere.
+     *
+     * @param Connection $conn
+     */
+    public static function cleanupNoLongerUsedCertificates(Connection $conn)
+    {
+        $chainQuery = $conn->delete(
+            'x509_certificate_chain',
+            ['id NOT IN ?' => X509Target::on($conn)->columns('latest_certificate_chain_id')->assembleSelect()]
+        );
+
+        $rows = $chainQuery->rowCount();
+        if ($rows > 0) {
+            Logger::info('Removed %d certificate chains that are not used by any targets', $rows);
+        }
+
+        $certsQuery = $conn->delete('x509_certificate', [
+            'id NOT IN ?' => (new Select())
+                ->from('x509_certificate_chain_link ccl')
+                ->columns(['ccl.certificate_id'])
+                ->distinct(),
+            'trusted = ?' => 'n',
+        ]);
+
+        $rows = $certsQuery->rowCount();
+        if ($rows > 0) {
+            Logger::info('Removed %d certificates that are not part of any chains', $rows);
+        }
+
+        $dnQuery = $conn->delete('x509_dn', [
+            'hash NOT IN ?' => X509Certificate::on($conn)->columns('subject_hash')->assembleSelect()
+        ]);
+
+        $rows = $dnQuery->rowCount();
+        if ($rows > 0) {
+            Logger::info('Removed %d DNs that are not used anywhere', $rows);
+        }
     }
 
     /**

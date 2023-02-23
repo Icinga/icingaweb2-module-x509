@@ -10,18 +10,14 @@ use Icinga\Module\X509\Web\Control\SearchBar\ObjectSuggestions;
 use Icinga\Util\Json;
 use ipl\Html\Html;
 use ipl\Orm\Query;
-use ipl\Sql;
 use ipl\Stdlib\Filter;
 use ipl\Web\Compat\CompatController;
 use ipl\Web\Compat\SearchControls;
 use ipl\Web\Filter\QueryString;
-use PDO;
 
 class Controller extends CompatController
 {
-    use Database {
-        getDb as private getDbWithOptions;
-    }
+    use Database;
     use SearchControls {
         SearchControls::createSearchBar as private webCreateSearchBar;
     }
@@ -30,20 +26,6 @@ class Controller extends CompatController
     protected $filter;
 
     protected $format;
-
-    /**
-     * Get the connection to the X.509 database
-     *
-     * @return  Sql\Connection
-     */
-    protected function getDb()
-    {
-        $options = [
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-        ];
-
-        return $this->getDbWithOptions($options);
-    }
 
     public function fetchFilterColumns(Query $query): array
     {

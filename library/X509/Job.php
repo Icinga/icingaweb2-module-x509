@@ -74,6 +74,9 @@ class Job implements Task
     /** @var bool Whether the job run should perform a full scan */
     protected $fullScan = false;
 
+    /** @var array Cache already known addresses of this job */
+    protected $knownTargets = [];
+
     public function __construct(string $name, ConfigObject $config, array $snimap)
     {
         $this->db = $this->getDb();
@@ -276,17 +279,28 @@ class Job implements Task
                             $target->hostname = $hostname;
 
                             if (! $this->fullScan) {
-                                $targets = X509Target::on($this->db)
-                                    ->columns([new Expression('1')])
-                                    ->filter(
-                                        Filter::all(
-                                            Filter::equal('ip', $target->ip),
-                                            Filter::equal('hostname', $target->hostname),
-                                            Filter::equal('port', $target->port)
-                                        )
-                                    );
+                                if (! isset($this->knownTargets[$ip][$hostname ?? $ip][$port])) {
+                                    $hostnameFilter = Filter::equal('hostname', $target->hostname);
+                                    if (! $hostname) {
+                                        $hostnameFilter = Filter::unlike('hostname', '*');
+                                    }
 
-                                if ($targets->execute()->hasResult()) {
+                                    $result = X509Target::on($this->db)
+                                        ->columns([new Expression('1')])
+                                        ->filter(
+                                            Filter::all(
+                                                $hostnameFilter,
+                                                Filter::equal('ip', $target->ip),
+                                                Filter::equal('port', $target->port)
+                                            )
+                                        )
+                                        ->execute()
+                                        ->hasResult();
+
+                                    $this->knownTargets[$ip][$hostname ?? $ip][$port] = $result;
+                                }
+
+                                if ($this->knownTargets[$ip][$hostname ?? $ip][$port]) {
                                     continue;
                                 }
                             }

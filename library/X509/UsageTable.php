@@ -45,14 +45,6 @@ class UsageTable extends DataTable
                 'column'   => function ($data) {
                     return $data->chain->target->ip;
                 },
-                'renderer' => function ($ip) {
-                    $ipv4 = ltrim($ip, "\0");
-                    if (strlen($ipv4) === 4) {
-                        $ip = $ipv4;
-                    }
-
-                    return inet_ntop($ip);
-                }
             ],
 
             'port' => [

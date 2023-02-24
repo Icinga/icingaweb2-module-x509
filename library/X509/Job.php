@@ -270,19 +270,16 @@ class Job implements Task
                                 continue;
                             }
 
-                            $target = (object) [];
-                            $target->ip = $ip;
-                            $target->port = $port;
-                            $target->hostname = $hostname;
-
                             if (! $this->fullScan) {
                                 $targets = X509Target::on($this->db)
                                     ->columns([new Expression('1')])
                                     ->filter(
                                         Filter::all(
-                                            Filter::equal('ip', $target->ip),
-                                            Filter::equal('hostname', $target->hostname),
-                                            Filter::equal('port', $target->port)
+                                            Filter::equal('ip', $ip),
+                                            Filter::equal('port', $port),
+                                            $hostname !== null
+                                                ? Filter::equal('hostname', $hostname)
+                                                : Filter::unlike('hostname', '*')
                                         )
                                     );
 
@@ -291,7 +288,11 @@ class Job implements Task
                                 }
                             }
 
-                            yield $target;
+                            yield (object) [
+                                'ip'       => $ip,
+                                'port'     => $port,
+                                'hostname' => $hostname
+                            ];
                         }
                     }
                 }

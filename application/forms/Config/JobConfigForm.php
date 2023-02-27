@@ -11,6 +11,9 @@ use Icinga\Module\X509\JobsIniRepository;
 use Icinga\Web\Notification;
 use ipl\Html\HtmlElement;
 use ipl\Scheduler\Contract\Frequency;
+use ipl\Stdlib\Str;
+use ipl\Validator\CallbackValidator;
+use ipl\Validator\CidrValidator;
 use ipl\Web\Compat\CompatForm;
 use ipl\Web\FormElement\ScheduleElement;
 use ipl\Web\Url;
@@ -83,7 +86,23 @@ class JobConfigForm extends CompatForm
             $this->addElement('textarea', 'cidrs', [
                 'description' => t('Comma-separated list of CIDR addresses to scan'),
                 'label'       => t('CIDRs'),
-                'required'    => true
+                'required'    => true,
+                'validators'  => [
+                    new CallbackValidator(function ($value, CallbackValidator $validator): bool {
+                        $cidrValidator = new CidrValidator();
+                        $cidrs = Str::trimSplit($value);
+
+                        foreach ($cidrs as $cidr) {
+                            if (! $cidrValidator->isValid($cidr)) {
+                                $validator->addMessage(...$cidrValidator->getMessages());
+
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    })
+                ]
             ]);
             $this->addElement('textarea', 'ports', [
                 'required'    => true,

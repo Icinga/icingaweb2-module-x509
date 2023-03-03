@@ -1,5 +1,6 @@
 # Exclude all hidden files
 .*
 
-# Except those related to Git
+# Except those related to Git and the mailmap file
 !.git*
+!.mailmap

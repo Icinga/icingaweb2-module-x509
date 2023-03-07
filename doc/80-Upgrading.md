@@ -12,7 +12,7 @@ as well, but you can sort the certificates by `valid_to` instead.
 You may use the following command to apply the database schema upgrade file:
 
 ```sql
-# mysql -u root -p x509 < etc/schema/mysql-upgrade/v1.2.0.sql
+# mysql -u root -p x509 < etc/schema/mysql-upgrades/1.2.0.sql
 ```
 
 ## Upgrading to version 1.1.0
@@ -24,7 +24,7 @@ Please find the upgrade script in **etc/schema/mysql-upgrade**.
 You may use the following command to apply the database schema upgrade file:
 
 ```
-# mysql -u root -p x509 < etc/schema/mysql-upgrade/v1.1.0.sql
+# mysql -u root -p x509 < etc/schema/mysql-upgrade/1.1.0.sql
 ```
 
 ## Upgrading to version 1.0.0
@@ -37,5 +37,5 @@ Please find the upgrade script in **etc/schema/mysql-upgrade**.
 You may use the following command to apply the database schema upgrade file:
 
 ```
-# mysql -u root -p x509 < etc/schema/mysql-upgrade/v1.0.0.sql
+# mysql -u root -p x509 < etc/schema/mysql-upgrade/1.0.0.sql
 ```

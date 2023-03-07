@@ -33,7 +33,7 @@ mysql -p -u root x509 < etc/schema/mysql.schema.sql
 
 ## PostgreSQL
 
-The module needs a PostgreSQL database with the schema that's provided in the `etc/schema/postgresql.schema.sql` file.
+The module needs a PostgreSQL database with the schema that's provided in the `etc/schema/pgsql.schema.sql` file.
 
 You can use the following sample command for creating the PostgreSQL database. Please change the password:
 
@@ -49,7 +49,7 @@ CREATE DATABASE x509
 After, you can import the schema using the following command:
 
 ```
-psql -U x509 x509 -a -f etc/schema/postgresql.schema.sql
+psql -U x509 x509 -a -f etc/schema/pgsql.schema.sql
 ```
 
 ## Installation

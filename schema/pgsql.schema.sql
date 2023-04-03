@@ -52,7 +52,7 @@ CREATE TABLE x509_certificate (
   serial bytea NOT NULL,
   certificate bytea NOT NULL,
   ctime biguint NOT NULL,
-  mtime biguint NOT NULL,
+  mtime biguint DEFAULT NULL,
   CONSTRAINT x509_idx_certificate_fingerprint UNIQUE(fingerprint),
   CONSTRAINT x509_fk_certificate_issuer_certificate_id FOREIGN KEY (issuer_certificate_id) REFERENCES x509_certificate (id) ON DELETE SET NULL ON UPDATE CASCADE
 );
@@ -104,7 +104,7 @@ CREATE TABLE x509_job_run (
   start_time biguint NULL DEFAULT NULL,
   end_time biguint NULL DEFAULT NULL,
   ctime biguint NOT NULL,
-  mtime biguint NOT NULL
+  mtime biguint DEFAULT NULL
 );
 
 CREATE TABLE x509_target (
@@ -115,7 +115,7 @@ CREATE TABLE x509_target (
   latest_certificate_chain_id int NULL DEFAULT NULL,
   last_scan biguint NOT NULL,
   ctime biguint NOT NULL,
-  mtime biguint NOT NULL
+  mtime biguint DEFAULT NULL
 );
 
 CREATE INDEX x509_idx_target ON x509_target (ip,port,hostname);

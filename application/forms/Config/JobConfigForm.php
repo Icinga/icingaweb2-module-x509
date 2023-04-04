@@ -25,6 +25,7 @@ use function ipl\Stdlib\get_php_type;
  */
 class JobConfigForm extends CompatForm
 {
+    /** @var string The name of this job  */
     protected $identifier;
 
     /** @var JobsIniRepository */
@@ -38,9 +39,6 @@ class JobConfigForm extends CompatForm
         $this->identifier = Url::fromRequest()->getParam('name');
         $this->scheduleElement = new ScheduleElement('schedule-element');
         $this->scheduleElement->setIdProtector([Icinga::app()->getRequest(), 'protectId']);
-        if ($this->hasDefaultElementDecorator()) {
-            $this->scheduleElement->setDefaultElementDecorator($this->getDefaultElementDecorator());
-        }
     }
 
     public function setRepo(JobsIniRepository $repo): self

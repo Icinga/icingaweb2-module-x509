@@ -1,9 +1,6 @@
 # Exclude all hidden files
 .*
 
-# Except those related to Git
+# Except those related to Git and the mailmap file
 !.git*
-
-# Exclude composer related files - should be added via git add -f
-composer.lock
-vendor/
+!.mailmap

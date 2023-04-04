@@ -36,7 +36,7 @@ class ChainDetails extends DataTable
             ],
 
             'subject' => [
-                'label' => mt('x509', 'Subject')
+                'label' => mt('x509', 'Subject', 'x509.certificate')
             ],
 
             'ca' => [

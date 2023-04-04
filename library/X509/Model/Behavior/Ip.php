@@ -2,16 +2,18 @@
 
 namespace Icinga\Module\X509\Model\Behavior;
 
+use ipl\Orm\Behavior\Binary;
 use ipl\Orm\Contract\PropertyBehavior;
 
 /**
  * Support automatically transformation of human-readable IP addresses into their respective packed
  * binary representation and vice versa.
  */
-class Ip extends PropertyBehavior
+class Ip extends Binary
 {
     public function fromDb($value, $key, $_)
     {
+        $value = parent::fromDb($value, $key, $_);
         if ($value === null) {
             return null;
         }
@@ -30,6 +32,6 @@ class Ip extends PropertyBehavior
             return $value;
         }
 
-        return str_pad(inet_pton($value), 16, "\0", STR_PAD_LEFT);
+        return parent::toDb(str_pad(inet_pton($value), 16, "\0", STR_PAD_LEFT), $key, $_);
     }
 }

@@ -479,16 +479,17 @@ class Job implements Task
         }
 
         $this->db->transaction(function () use ($target, $chain) {
-            $row = X509Target::on($this->db)->columns(['id']);
+            $row = X509Target::on($this->db)
+                ->columns(['id'])
+                ->filter(
+                    Filter::all(
+                        Filter::equal('ip', $target->ip),
+                        Filter::equal('port', $target->port),
+                        Filter::equal('hostname', $target->hostname)
+                    )
+                )->first();
 
-            $filter = Filter::all()
-                ->add(Filter::equal('ip', $target->ip))
-                ->add(Filter::equal('port', $target->port))
-                ->add(Filter::equal('hostname', $target->hostname));
-
-            $row->filter($filter);
-
-            if (! ($row = $row->first())) {
+            if (! $row) {
                 // TODO: https://github.com/Icinga/ipl-orm/pull/78
                 $this->db->insert(
                     'x509_target',

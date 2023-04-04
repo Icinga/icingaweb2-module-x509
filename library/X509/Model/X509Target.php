@@ -56,7 +56,6 @@ class X509Target extends Model
     public function createBehaviors(Behaviors $behaviors)
     {
         $behaviors->add(new Ip(['ip']));
-        $behaviors->add(new Binary(['ip']));
 
         $behaviors->add(new MillisecondTimestamp([
             'ctime',

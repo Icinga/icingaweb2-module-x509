@@ -72,6 +72,11 @@ class JobConfigForm extends CompatForm
      */
     public function getPartUpdates(): array
     {
+        if ($this->scheduleElement->getFrequency() === 'none') {
+            // Workaround for https://github.com/Icinga/ipl-web/issues/130
+            return [];
+        }
+
         return $this->scheduleElement->prepareMultipartUpdate($this->getRequest());
     }
 

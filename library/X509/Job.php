@@ -254,7 +254,7 @@ class Job implements Task
             Logger::info('Scanning %d IPs in the CIDR %s', $numIps, implode('/', $cidr));
 
             $start = static::addrToNumber($startIp);
-            for ($i = 1; $i < $numIps - 1; $i++) {
+            for ($i = 0; $i < $numIps; $i++) {
                 $ip = static::numberToAddr(gmp_add($start, $i), $ipv6);
                 if (isset($excludes[$ip])) {
                     Logger::debug('Excluding IP %s from scan', $ip);

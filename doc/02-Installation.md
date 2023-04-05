@@ -22,7 +22,12 @@ or install [from source](02-Installation.md.d/From-Source.md).
 
 ### Setting up a MySQL or MariaDB Database
 
-The module needs a MySQL/MariaDB database with the schema that's provided in the `etc/schema/mysql.schema.sql` file.
+The module needs a MySQL/MariaDB database with the schema that's provided in the `/usr/share/icingaweb2/modules/x509/schema/mysql.schema.sql` file.
+<!-- {% if not icingaDocs %} -->
+
+**Note:** If you haven't installed this module from packages, then please adapt the schema path to the correct installation path.
+
+<!-- {% endif %} -->
 
 You can use the following sample command for creating the MySQL/MariaDB database. Please change the password:
 
@@ -34,12 +39,17 @@ GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON x509.
 After, you can import the schema using the following command:
 
 ```
-mysql -p -u root x509 < etc/schema/mysql.schema.sql
+mysql -p -u root x509 < /usr/share/icingaweb2/modules/x509/schema/mysql.schema.sql
 ```
 
 ### Setting up a PostgreSQL Database
 
-The module needs a PostgreSQL database with the schema that's provided in the `etc/schema/pgsql.schema.sql` file.
+The module needs a PostgreSQL database with the schema that's provided in the `/usr/share/icingaweb2/modules/x509/schema/pgsql.schema.sql` file.
+<!-- {% if not icingaDocs %} -->
+
+**Note:** If you haven't installed this module from packages, then please adapt the schema path to the correct installation path.
+
+<!-- {% endif %} -->
 
 You can use the following sample command for creating the PostgreSQL database. Please change the password:
 
@@ -55,7 +65,7 @@ CREATE DATABASE x509
 After, you can import the schema using the following command:
 
 ```
-psql -U x509 x509 -a -f etc/schema/pgsql.schema.sql
+psql -U x509 x509 -a -f /usr/share/icingaweb2/modules/x509/schema/pgsql.schema.sql
 ```
 
 This concludes the installation. You should now be able to import CA certificates and set up scan jobs.

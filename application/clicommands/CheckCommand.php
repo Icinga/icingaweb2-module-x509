@@ -4,6 +4,7 @@
 
 namespace Icinga\Module\X509\Clicommands;
 
+use DateTime;
 use Icinga\Application\Logger;
 use Icinga\Module\X509\Command;
 use Icinga\Module\X509\Model\X509Certificate;
@@ -140,9 +141,9 @@ class CheckCommand extends Command
                 $state = 2;
             }
 
-            $now = new \DateTime();
-            $validFrom = $target->valid_from;
-            $validTo = $target->valid_to;
+            $now = new DateTime();
+            $validFrom = DateTime::createFromFormat('U.u', sprintf('%F', $target->valid_from / 1000.0));
+            $validTo = DateTime::createFromFormat('U.u', sprintf('%F', $target->valid_to / 1000.0));
             $criticalAfter = $this->thresholdToDateTime($validFrom, $validTo, $criticalThreshold, $criticalUnit);
             $warningAfter = $this->thresholdToDateTime($validFrom, $validTo, $warningThreshold, $warningUnit);
 
@@ -175,10 +176,10 @@ class CheckCommand extends Command
                 $target->subject,
                 $remainingTime->invert
                     ? 0
-                    : $target->valid_to->getTimestamp() - time(),
-                $target->valid_to->getTimestamp() - $warningAfter->getTimestamp(),
-                $target->valid_to->getTimestamp() - $criticalAfter->getTimestamp(),
-                $target->valid_to->getTimestamp() - $target->valid_from->getTimestamp()
+                    : $validTo->getTimestamp() - time(),
+                $validTo->getTimestamp() - $warningAfter->getTimestamp(),
+                $validTo->getTimestamp() - $criticalAfter->getTimestamp(),
+                $validTo->getTimestamp() - $validFrom->getTimestamp()
             );
         }
 

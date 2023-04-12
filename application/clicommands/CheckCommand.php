@@ -88,7 +88,7 @@ class CheckCommand extends Command
             ])
         ]);
 
-        // Sub queries for (valid_from, valid_to) columns
+        // Sub query for `valid_from` column
         $validFrom = $targets->createSubQuery(new X509Certificate(), 'chain.certificate');
         $validFrom
             ->columns([new Expression('MAX(GREATEST(%s, %s))', ['valid_from', 'issuer_certificate.valid_from'])])
@@ -96,8 +96,14 @@ class CheckCommand extends Command
             ->resetWhere()
             ->where(new Expression('sub_certificate_link.certificate_chain_id = target_chain.id'));
 
-        $validTo = clone $validFrom;
-        $validTo->columns([new Expression('MIN(LEAST(%s, %s))', ['valid_to', 'issuer_certificate.valid_to'])]);
+        // Sub query for `valid_to` column
+        $validTo = $targets->createSubQuery(new X509Certificate(), 'chain.certificate');
+        $validTo
+            ->columns([new Expression('MIN(LEAST(%s, %s))', ['valid_to', 'issuer_certificate.valid_to'])])
+            ->getSelectBase()
+            // Reset the where clause generated within the createSubQuery() method.
+            ->resetWhere()
+            ->where(new Expression('sub_certificate_link.certificate_chain_id = target_chain.id'));
 
         list($validFromSelect, $_) = $validFrom->dump();
         list($validToSelect, $_) = $validTo->dump();
@@ -244,14 +250,14 @@ class CheckCommand extends Command
     /**
      * Convert the given threshold information to a DateTime object
      *
-     * @param   \DateTime           $from
-     * @param   \DateTime           $to
+     * @param   DateTime           $from
+     * @param   DateTime           $to
      * @param   int|\DateInterval   $thresholdValue
      * @param   string              $thresholdUnit
      *
-     * @return  \DateTime
+     * @return  DateTime
      */
-    protected function thresholdToDateTime(\DateTime $from, \DateTime $to, $thresholdValue, $thresholdUnit)
+    protected function thresholdToDateTime(DateTime $from, DateTime $to, $thresholdValue, $thresholdUnit)
     {
         $to = clone $to;
         if ($thresholdUnit === self::UNIT_INTERVAL) {

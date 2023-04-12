@@ -1,22 +1,33 @@
-# <a id="Installation"></a>Installation
+<!-- {% if index %} -->
+# Installing Icinga Certificate Monitoring
 
-## Requirements
+The recommended way to install Icinga Certificate Monitoring
+and its dependencies is to use prebuilt packages for
+all supported platforms from our official release repository.
+Please note that [Icinga Web](https://icinga.com/docs/icinga-web) is required
+and if it is not already set up, it is best to do this first.
 
-* PHP (>= 7.0)
-* Icinga Web 2 (>= 2.9)
-* Icinga Web 2 libraries:
-  * [Icinga PHP Library (ipl)](https://github.com/Icinga/icinga-php-library) (>= 0.11.0)
-  * [Icinga PHP Thirdparty](https://github.com/Icinga/icinga-php-thirdparty) (>= 0.10)
-* php-gmp
-* php-pcntl (might already be built into your PHP binary)
-* OpenSSL
-* MySQL / MariaDB or PostgreSQL
+The following steps will guide you through installing and setting up Icinga Certificate Monitoring.
+<!-- {% else %} -->
+<!-- {% if not icingaDocs %} -->
 
-## Database Setup
+## Installing the Package
 
-### MySQL / MariaDB
+If the [repository](https://packages.icinga.com) is not configured yet, please add it first.
+Then use your distribution's package manager to install the `icinga-x509` package
+or install [from source](02-Installation.md.d/From-Source.md).
+<!-- {% endif %} -->
 
-The module needs a MySQL/MariaDB database with the schema that's provided in the `etc/schema/mysql.schema.sql` file.
+## Setting up the Database
+
+### Setting up a MySQL or MariaDB Database
+
+The module needs a MySQL/MariaDB database with the schema that's provided in the `/usr/share/icingaweb2/modules/x509/schema/mysql.schema.sql` file.
+<!-- {% if not icingaDocs %} -->
+
+**Note:** If you haven't installed this module from packages, then please adapt the schema path to the correct installation path.
+
+<!-- {% endif %} -->
 
 You can use the following sample command for creating the MySQL/MariaDB database. Please change the password:
 
@@ -28,12 +39,17 @@ GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON x509.
 After, you can import the schema using the following command:
 
 ```
-mysql -p -u root x509 < etc/schema/mysql.schema.sql
+mysql -p -u root x509 < /usr/share/icingaweb2/modules/x509/schema/mysql.schema.sql
 ```
 
-## PostgreSQL
+### Setting up a PostgreSQL Database
 
-The module needs a PostgreSQL database with the schema that's provided in the `etc/schema/pgsql.schema.sql` file.
+The module needs a PostgreSQL database with the schema that's provided in the `/usr/share/icingaweb2/modules/x509/schema/pgsql.schema.sql` file.
+<!-- {% if not icingaDocs %} -->
+
+**Note:** If you haven't installed this module from packages, then please adapt the schema path to the correct installation path.
+
+<!-- {% endif %} -->
 
 You can use the following sample command for creating the PostgreSQL database. Please change the password:
 
@@ -49,19 +65,9 @@ CREATE DATABASE x509
 After, you can import the schema using the following command:
 
 ```
-psql -U x509 x509 -a -f etc/schema/pgsql.schema.sql
+psql -U x509 x509 -a -f /usr/share/icingaweb2/modules/x509/schema/pgsql.schema.sql
 ```
-
-## Installation
-
-1. Install it [like any other module](https://icinga.com/docs/icinga-web-2/latest/doc/08-Modules/#installation).
-Use `x509` as name.
-
-2. Once you've set up the database, create a new Icinga Web 2 resource for it using the
-`Configuration -> Application -> Resources` menu.
-
-3. The next step involves telling the module which database resource to use. This can be done in
-`Configuration -> Modules -> x509 -> Backend`.
 
 This concludes the installation. You should now be able to import CA certificates and set up scan jobs.
 Please read the [Configuration](03-Configuration.md) section for details.
+<!-- {% endif %} --><!-- {# end else if index #} -->

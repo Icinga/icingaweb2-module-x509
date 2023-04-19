@@ -32,6 +32,11 @@ class Ip extends Binary
             return $value;
         }
 
+        /** {@link https://github.com/Icinga/ipl-orm/issues/48} */
+        if (substr($value, 0, 2) === '\\x') {
+            return $value;
+        }
+
         return parent::toDb(str_pad(inet_pton($value), 16, "\0", STR_PAD_LEFT), $key, $_);
     }
 }

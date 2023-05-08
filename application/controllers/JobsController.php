@@ -107,6 +107,7 @@ class JobsController extends CompatController
                 'name'             => $data->name,
                 'cidrs'            => $data->cidrs,
                 'ports'            => $data->ports,
+                'exclude_targets'  => $data->exclude_targets,
                 'schedule-element' => $frequency ?? []
             ];
         }

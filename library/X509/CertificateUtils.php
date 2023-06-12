@@ -8,7 +8,6 @@ use Exception;
 use Icinga\Application\Logger;
 use Icinga\File\Storage\TemporaryLocalFileStorage;
 use Icinga\Module\X509\Model\X509Certificate;
-use Icinga\Module\X509\Model\X509CertificateChain;
 use Icinga\Module\X509\Model\X509CertificateSubjectAltName;
 use Icinga\Module\X509\Model\X509Dn;
 use Icinga\Module\X509\Model\X509Target;
@@ -17,6 +16,8 @@ use ipl\Sql\Expression;
 use ipl\Sql\Select;
 use ipl\Stdlib\Filter;
 use ipl\Stdlib\Str;
+
+use function ipl\Stdlib\yield_groups;
 
 class CertificateUtils
 {
@@ -453,52 +454,39 @@ class CertificateUtils
         $files->create($caFile, implode("\n", $contents));
 
         $count = 0;
+        $certs = X509Certificate::on($db)
+            ->with(['chain'])
+            ->utilize('chain.target')
+            ->columns(['chain.id', 'certificate'])
+            ->filter(Filter::equal('chain.valid', false))
+            ->orderBy('chain.id')
+            ->orderBy(new Expression('certificate_link.order'), SORT_DESC);
 
         $db->beginTransaction();
 
         try {
-            $chains = X509CertificateChain::on($db)->utilize('target');
-            $chains
-                ->columns(['id'])
-                ->filter(Filter::equal('valid', false));
-
-            foreach ($chains as $chain) {
-                ++$count;
-
-                $certs = X509Certificate::on($db)->utilize('chain');
-                $certs
-                    ->columns(['certificate'])
-                    ->filter(Filter::equal('chain.id', $chain->id))
-                    ->getSelectBase()
-                    ->orderBy('certificate_link.order', 'DESC');
-
-                $collection = [];
-
-                foreach ($certs as $cert) {
-                    $collection[] = $cert->certificate;
-                }
-
+            $caFile = escapeshellarg($files->resolvePath($caFile));
+            $verifyCertsFunc = function (int $chainId, array $collection) use ($db, $caFile) {
+                $certFiles = new TemporaryLocalFileStorage();
                 $certFile = uniqid('cert');
-
-                $files->create($certFile, array_pop($collection));
+                $certFiles->create($certFile, array_pop($collection));
 
                 $untrusted = '';
-
                 if (! empty($collection)) {
                     $intermediateFile = uniqid('intermediate');
-                    $files->create($intermediateFile, implode("\n", $collection));
+                    $certFiles->create($intermediateFile, implode("\n", $collection));
 
                     $untrusted = sprintf(
                         ' -untrusted %s',
-                        escapeshellarg($files->resolvePath($intermediateFile))
+                        escapeshellarg($certFiles->resolvePath($intermediateFile))
                     );
                 }
 
                 $command = sprintf(
                     'openssl verify -CAfile %s%s %s 2>&1',
-                    escapeshellarg($files->resolvePath($caFile)),
+                    $caFile,
                     $untrusted,
-                    escapeshellarg($files->resolvePath($certFile))
+                    escapeshellarg($certFiles->resolvePath($certFile))
                 );
 
                 $output = null;
@@ -513,18 +501,24 @@ class CertificateUtils
 
                 preg_match('/^error \d+ at \d+ depth lookup:(.+)$/m', $output, $match);
 
-                if (!empty($match)) {
+                if (! empty($match)) {
                     $set = ['invalid_reason' => trim($match[1])];
                 } else {
                     $set = ['valid' => 'y', 'invalid_reason' => null];
                 }
 
                 // TODO: https://github.com/Icinga/ipl-orm/pull/78
-                $db->update(
-                    'x509_certificate_chain',
-                    $set,
-                    ['id = ?' => $chain->id]
-                );
+                $db->update('x509_certificate_chain', $set, ['id = ?' => $chainId]);
+            };
+
+            $groupBy = function (X509Certificate $cert): array {
+                // Group all the certificates by their chain id.
+                return [$cert->chain->id, $cert->certificate];
+            };
+
+            foreach (yield_groups($certs, $groupBy) as $chainId => $collection) {
+                ++$count;
+                $verifyCertsFunc($chainId, $collection);
             }
 
             $db->commitTransaction();

@@ -1,0 +1,43 @@
+parameters:
+    level: 5
+
+    checkFunctionNameCase: true
+    checkMissingIterableValueType: true
+    checkInternalClassCaseSensitivity: true
+    checkDynamicProperties: true
+    treatPhpDocTypesAsCertain: false # ignore phpDoc failure for now, remove it later
+
+    paths:
+        - application
+        - library
+
+    scanDirectories:
+        - vendor
+
+    ignoreErrors:
+        - '#Call to an undefined method React\\Promise#'
+
+        - '#Call to an undefined method Icinga\\Application\\ApplicationBootstrap::getRequest\(\)#'
+
+        - '#Call to an undefined method ipl\\Sql\\Connection::lastInsertId\(\)#'
+
+        - '#Access to an undefined property React\\Socket\\ConnectionInterface::\$stream#'
+
+        - '#. of static method ipl\\Stdlib\\Filter::lessThan\(\) expects float\|int\|string#'
+
+        - '#Method .*::rewriteCondition\(\) should return .* but return statement is missing#'
+
+        - '#Binary operation .* between GMP and .* results in an error#'
+
+        -
+            message: '#Dead catch - Exception is never thrown in the try block#'
+            path: library/X509/Web/Control/SearchBar/ObjectSuggestions.php
+
+        -
+            message: '#Negated boolean expression is always true#'
+            path: library/X509/Job.php
+
+    universalObjectCratesClasses:
+        - ipl\Orm\Model
+        - Icinga\Web\View
+        - Icinga\Data\ConfigObject

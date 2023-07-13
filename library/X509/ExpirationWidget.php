@@ -4,13 +4,16 @@
 
 namespace Icinga\Module\X509;
 
+use Icinga\Chart\ProgressBar;
 use Icinga\Date\DateFormatter;
 use ipl\Html\BaseHtmlElement;
-use ipl\Html\Html;
-use ipl\Html\HtmlString;
+use ipl\Html\HtmlElement;
 
 class ExpirationWidget extends BaseHtmlElement
 {
+    /** @var int Is used to limit the svg sections of a single progress bar */
+    public const MAX_SVG_SECTIONS = 60;
+
     protected $tag = 'div';
 
     protected $from;
@@ -66,21 +69,13 @@ class ExpirationWidget extends BaseHtmlElement
             $state = 'state-ok';
         }
 
-        $this->add([
-            Html::tag(
-                'span',
-                ['class' => '', 'style' => 'font-size: 0.9em;', 'title' => $dateTip],
-                $message
-            ),
-            Html::tag(
-                'div',
-                ['class' => 'progress-bar dont-print'],
-                Html::tag(
-                    'div',
-                    ['style' => sprintf('width: %.2F%%;', $ratio), 'class' => "bg-stateful {$state}"],
-                    new HtmlString('&nbsp;')
-                )
-            )
-        ]);
+        $progressBar = new ProgressBar(['class' => 'progress-bar'], 35);
+        $progressBar
+            ->markComplete((int) ($ratio * static::MAX_SVG_SECTIONS / 100.0))
+            ->setCompletedCssClass($state)
+            ->setSections(static::MAX_SVG_SECTIONS);
+
+        $this->addHtml(HtmlElement::create('span', ['class' => 'progress-bar-label', 'title' => $dateTip], $message));
+        $this->addHtml($progressBar);
     }
 }

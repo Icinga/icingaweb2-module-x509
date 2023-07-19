@@ -96,7 +96,7 @@ CREATE TABLE x509_job (
 
 CREATE TABLE x509_schedule (
   id int(10) unsigned NOT NULL AUTO_INCREMENT,
-  job_id int(10) NOT NULL,
+  job_id int(10) unsigned NOT NULL,
   name varchar(255) NOT NULL COLLATE utf8mb4_unicode_ci,
   author varchar(255) NOT NULL COLLATE utf8mb4_unicode_ci,
   config text NOT NULL, -- json

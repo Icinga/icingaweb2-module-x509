@@ -8,19 +8,20 @@ use DateTime;
 use Exception;
 use Generator;
 use Icinga\Application\Logger;
-use Icinga\Data\ConfigObject;
 use Icinga\Module\X509\Common\Database;
+use Icinga\Module\X509\Common\JobOptions;
 use Icinga\Module\X509\Common\JobUtils;
 use Icinga\Module\X509\Model\X509Certificate;
 use Icinga\Module\X509\Model\X509CertificateChain;
+use Icinga\Module\X509\Model\X509JobRun;
 use Icinga\Module\X509\Model\X509Target;
 use Icinga\Module\X509\React\StreamOptsCaptureConnector;
 use Icinga\Util\Json;
+use ipl\Scheduler\Common\TaskProperties;
 use ipl\Scheduler\Contract\Task;
 use ipl\Sql\Connection;
 use ipl\Sql\Expression;
 use ipl\Stdlib\Filter;
-use ipl\Stdlib\Str;
 use LogicException;
 use Ramsey\Uuid\Uuid;
 use React\EventLoop\Loop;
@@ -35,7 +36,17 @@ use Throwable;
 class Job implements Task
 {
     use Database;
+    use JobOptions;
     use JobUtils;
+    use TaskProperties;
+
+    /** @var int Number of targets to be scanned in parallel by default */
+    public const DEFAULT_PARALLEL = 256;
+
+    public const DEFAULT_SINCE_LAST_SCAN = '-24 hours';
+
+    /** @var int The database id of this job */
+    protected $id;
 
     /** @var Connection x509 database connection */
     private $db;
@@ -43,67 +54,71 @@ class Job implements Task
     /** @var DbTool Database utils for marshalling and unmarshalling binary data */
     private $dbTool;
 
+    /** @var int Number of pending targets to be scanned */
     private $pendingTargets = 0;
+
+    /** @var int Total number of scan targets */
     private $totalTargets = 0;
+
+    /** @var int Number of scanned targets */
     private $finishedTargets = 0;
 
-    /** @var Generator */
+    /** @var Generator Scan targets generator */
     private $targets;
+
+    /** @var array<string, array<string>> The configured SNI maps */
     private $snimap;
 
-    protected $jobId;
+    /** @var int The id of the last inserted job run entry */
+    private $jobRunId;
 
     /** @var Promise\Deferred React promise deferred instance used to resolve the running promise */
     protected $deferred;
 
-    /** @var int Used to control how many targets can be scanned in parallel */
-    protected $parallel;
-
-    /** @var DateTime A formatted date time of this job start time */
+    /** @var DateTime The start time of this job */
     protected $jobRunStart;
 
-    /** @var ?array A list of excluded IP addresses and host names */
-    protected $excludedTargets = null;
-
-    /** @var ?DateTime Since last scan threshold used to filter out scan targets */
-    protected $sinceLastScan;
-
-    /** @var bool Whether job run should only perform a rescan */
-    protected $rescan = false;
-
-    /** @var bool Whether the job run should perform a full scan */
-    protected $fullScan = false;
-
-    public function __construct(string $name, ConfigObject $config, array $snimap)
+    public function __construct(string $name, string $cidrs, string $ports, array $snimap, Schedule $schedule = null)
     {
         $this->db = $this->getDb();
         $this->dbTool = new DbTool($this->db);
         $this->snimap = $snimap;
 
-        $this->setConfig($config);
+        if ($schedule) {
+            $this->setSchedule($schedule);
+        }
+
         $this->setName($name);
+        $this->setCIDRs($cidrs);
+        $this->setPorts($ports);
         $this->setUuid(Uuid::fromBytes($this->getChecksum()));
     }
 
     /**
-     * Get excluded IPs and host names
+     * Get the database id of this job
      *
-     * @return array
+     * @return int
      */
-    protected function getExcludes(): array
+    public function getId(): int
     {
-        if ($this->excludedTargets === null) {
-            $config = $this->getConfig();
-            $this->excludedTargets = [];
-            if (isset($config['exclude_targets']) && ! empty($config['exclude_targets'])) {
-                $this->excludedTargets = array_flip(Str::trimSplit($config['exclude_targets']));
-            }
-        }
-
-        return $this->excludedTargets;
+        return $this->id;
     }
 
-    private function getConnector($peerName)
+    /**
+     * Set the database id of this job
+     *
+     * @param int $id
+     *
+     * @return $this
+     */
+    public function setId(int $id): self
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    private function getConnector($peerName): array
     {
         $simpleConnector = new Connector();
         $streamCaptureConnector = new StreamOptsCaptureConnector($simpleConnector);
@@ -118,7 +133,7 @@ class Job implements Task
     }
 
     /**
-     * Get whether this task has been completed
+     * Get whether this job has been completed scanning all targets
      *
      * @return bool
      */
@@ -127,71 +142,7 @@ class Job implements Task
         return ! $this->targets->valid() && $this->pendingTargets === 0;
     }
 
-    public function getParallel(): int
-    {
-        return $this->parallel;
-    }
-
-    public function setParallel(int $parallel): self
-    {
-        $this->parallel = $parallel;
-
-        return $this;
-    }
-
-    /**
-     * Get whether this job run should do only a rescan
-     *
-     * @return bool
-     */
-    public function isRescan(): bool
-    {
-        return $this->rescan;
-    }
-
-    /**
-     * Set whether this job run should do only a rescan or full scan
-     *
-     * @param bool $rescan
-     *
-     * @return $this
-     */
-    public function setRescan(bool $rescan): self
-    {
-        $this->rescan = $rescan;
-
-        return $this;
-    }
-
-    /**
-     * Set whether this job run should scan all known and unknown targets
-     *
-     * @param bool $fullScan
-     *
-     * @return $this
-     */
-    public function setFullScan(bool $fullScan): self
-    {
-        $this->fullScan = $fullScan;
-
-        return $this;
-    }
-
-    /**
-     * Set since last scan threshold for the targets to rescan
-     *
-     * @param ?DateTime $dateTime
-     *
-     * @return $this
-     */
-    public function setLastScan(?DateTime $dateTime): self
-    {
-        $this->sinceLastScan = $dateTime;
-
-        return $this;
-    }
-
-    protected function updateLastScan($target)
+    public function updateLastScan($target)
     {
         if (! $this->isRescan()) {
             return;
@@ -202,12 +153,21 @@ class Job implements Task
         ], ['id = ?' => $target->id]);
     }
 
-    protected function getChecksum()
+    public function getChecksum(): string
     {
-        $config = $this->getConfig()->toArray();
-        ksort($config);
+        $data = [
+            'name'            => $this->getName(),
+            'cidrs'           => $this->getCIDRs(),
+            'ports'           => $this->getPorts(),
+            'exclude_targets' => $this->getExcludes(),
+        ];
 
-        return md5($this->getName() . Json::encode($config), true);
+        $schedule = null;
+        if ($this->schedule) {
+            $schedule = $this->getSchedule();
+        }
+
+        return md5(Json::encode($data) . ($schedule ? bin2hex($schedule->getChecksum()) : ''), true);
     }
 
     protected function getScanTargets(): Generator
@@ -225,9 +185,9 @@ class Job implements Task
             foreach ($targets as $target) {
                 $addr = static::addrToNumber($target->ip);
                 $addrFound = false;
-                foreach ($this->getCidrs() as $cidr) {
+                foreach ($this->getCIDRs() as $cidr) {
                     list($subnet, $mask) = $cidr;
-                    if (static::isAddrInside($addr, $subnet, $mask)) {
+                    if (static::isAddrInside($addr, (string) $subnet, (int) $mask)) {
                         $target->ip = static::numberToAddr($addr, static::isIPV6($subnet));
                         $addrFound = true;
 
@@ -245,15 +205,15 @@ class Job implements Task
     private function generateTargets(): Generator
     {
         $excludes = $this->getExcludes();
-        foreach ($this->getCidrs() as $cidr) {
+        foreach ($this->getCIDRs() as $cidr) {
             list($startIp, $prefix) = $cidr;
             $ipv6 = static::isIPV6($startIp);
             $subnet = $ipv6 ? 128 : 32;
-            $numIps = pow(2, ($subnet - $prefix));
+            $numIps = pow(2, ($subnet - (int) $prefix));
 
             Logger::info('Scanning %d IPs in the CIDR %s', $numIps, implode('/', $cidr));
 
-            $start = static::addrToNumber($startIp);
+            $start = static::addrToNumber((string) $startIp);
             for ($i = 0; $i < $numIps; $i++) {
                 $ip = static::numberToAddr(gmp_add($start, $i), $ipv6);
                 if (isset($excludes[$ip])) {
@@ -265,7 +225,7 @@ class Job implements Task
                     list($startPort, $endPort) = $portRange;
                     foreach (range($startPort, $endPort) as $port) {
                         foreach ($this->snimap[$ip] ?? [null] as $hostname) {
-                            if (array_key_exists($hostname, $excludes)) {
+                            if (array_key_exists((string) $hostname, $excludes)) {
                                 Logger::debug('Excluding host %s from scan', $hostname);
                                 continue;
                             }
@@ -302,24 +262,16 @@ class Job implements Task
 
     public function updateJobStats(bool $finished = false): void
     {
-        $fields = [
-            'finished_targets' => $this->finishedTargets,
-            'mtime'            => new Expression('UNIX_TIMESTAMP() * 1000')
-        ];
-
+        $fields = ['finished_targets' => $this->finishedTargets];
         if ($finished) {
             $fields['end_time'] = new Expression('UNIX_TIMESTAMP() * 1000');
             $fields['total_targets'] = $this->totalTargets;
         }
 
-        $this->db->update(
-            'x509_job_run',
-            $fields,
-            ['id = ?' => $this->jobId]
-        );
+        $this->db->update('x509_job_run', $fields, ['id = ?' => $this->jobRunId]);
     }
 
-    private static function formatTarget($target)
+    private static function formatTarget($target): string
     {
         $result = "tls://[{$target->ip}]:{$target->port}";
 
@@ -440,14 +392,20 @@ class Job implements Task
             $this->finishedTargets = 0;
             $this->pendingTargets = 0;
 
+            if ($this->schedule) {
+                $scheduleId = $this->getSchedule()->getId();
+            } else {
+                $scheduleId = new Expression('NULL');
+            }
+
             $this->db->insert('x509_job_run', [
-                'name'             => $this->getName(),
+                'job_id'           => $this->getId(),
+                'schedule_id'      => $scheduleId,
                 'start_time'       => $this->jobRunStart->getTimestamp() * 1000.0,
                 'total_targets'    => 0,
                 'finished_targets' => 0
             ]);
-
-            $this->jobId = $this->db->lastInsertId();
+            $this->jobRunId = (int) $this->db->lastInsertId();
 
             $this->targets = $this->getScanTargets();
 

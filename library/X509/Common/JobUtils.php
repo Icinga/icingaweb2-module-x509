@@ -6,91 +6,109 @@ namespace Icinga\Module\X509\Common;
 
 use GMP;
 use Icinga\Application\Logger;
-use Icinga\Data\ConfigObject;
-use ipl\Scheduler\Common\TaskProperties;
 use ipl\Stdlib\Str;
 
 trait JobUtils
 {
-    use TaskProperties;
+    /** @var array<string> A list of excluded IP addresses and host names */
+    private $excludedTargets = [];
 
-    /** @var ConfigObject A config for this job loaded from the jobs.ini file */
-    private $config;
-
+    /** @var array<string, array<int, int|string>> */
     private $cidrs = [];
 
+    /** @var array<int, array<string>> */
     private $ports = [];
 
     /**
-     * Get this job's config
+     * Get the configured job CIDRS
      *
-     * @return ConfigObject
+     * @return array<string, array<int, int|string>>
      */
-    public function getConfig(): ConfigObject
+    public function getCIDRs(): array
     {
-        return $this->config;
+        return $this->cidrs;
     }
 
     /**
-     * Set the config of this job
+     * Set the CIDRs of this job
      *
-     * @param ConfigObject $jobConfig
+     * @param string $cidrs
      *
      * @return $this
      */
-    public function setConfig(ConfigObject $jobConfig): self
+    public function setCIDRs(string $cidrs): self
     {
-        $this->config = $jobConfig;
+        foreach (Str::trimSplit($cidrs) as $cidr) {
+            $pieces = Str::trimSplit($cidr, '/');
+            if (count($pieces) !== 2) {
+                Logger::warning('CIDR %s is in the wrong format', $cidr);
+                continue;
+            }
+
+            $this->cidrs[$cidr] = $pieces;
+        }
 
         return $this;
     }
 
     /**
-     * Get the configured job CIDRS as an array
-     *
-     * @return array
-     */
-    public function getCidrs(): array
-    {
-        if (empty($this->cidrs) && ! $this->config->isEmpty()) {
-            $cidrs = Str::trimSplit($this->config->get('cidrs'));
-            foreach ($cidrs as $cidr) {
-                $pieces = Str::trimSplit($cidr, '/');
-                if (count($pieces) !== 2) {
-                    Logger::warning('CIDR %s is in the wrong format', $cidr);
-                    continue;
-                }
-
-                $this->cidrs[$cidr] = $pieces;
-            }
-        }
-
-        return $this->cidrs;
-    }
-
-    /**
      * Get the configured ports of this job
      *
-     * @return array
+     * @return array<int, array<string>>
      */
     public function getPorts(): array
     {
-        if (empty($this->ports) && ! $this->config->isEmpty()) {
-            $ports = Str::trimSplit($this->config->get('ports'));
-            foreach ($ports as $portRange) {
-                $pieces = Str::trimSplit($portRange, '-');
-                if (count($pieces) === 2) {
-                    list($start, $end) = $pieces;
-                } else {
-                    $start = $pieces[0];
-                    $end = $pieces[0];
-                }
+        return $this->ports;
+    }
 
-                $this->ports[] = [$start, $end];
+    /**
+     * Set the ports of this job to be scanned
+     *
+     * @param string $ports
+     *
+     * @return $this
+     */
+    public function setPorts(string $ports): self
+    {
+        foreach (Str::trimSplit($ports) as $portRange) {
+            $pieces = Str::trimSplit($portRange, '-');
+            if (count($pieces) === 2) {
+                list($start, $end) = $pieces;
+            } else {
+                $start = $pieces[0];
+                $end = $pieces[0];
             }
+
+            $this->ports[] = [$start, $end];
         }
 
-        return $this->ports;
+        return $this;
+    }
+
+    /**
+     * Get excluded IPs and host names
+     *
+     * @return array<string>
+     */
+    public function getExcludes(): array
+    {
+        return $this->excludedTargets;
+    }
+
+    /**
+     * Set a set of IPs and host names to be excluded from scan
+     *
+     * @param ?string $targets
+     *
+     * @return $this
+     */
+    public function setExcludes(?string $targets): self
+    {
+        if (! empty($targets)) {
+            $this->excludedTargets = array_flip(Str::trimSplit($targets));
+        }
+
+        return $this;
     }
 
     /**

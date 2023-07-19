@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS x509_job (
+CREATE TABLE x509_job (
   id serial PRIMARY KEY,
   name varchar(255) NOT NULL,
   author varchar(255) NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS x509_job (
   UNIQUE (name)
 );
 
-CREATE TABLE IF NOT EXISTS x509_schedule (
+CREATE TABLE x509_schedule (
   id serial PRIMARY KEY,
   job_id int NOT NULL,
   name varchar(255) NOT NULL,
@@ -25,13 +25,25 @@ CREATE TABLE IF NOT EXISTS x509_schedule (
 
 DELETE FROM x509_job_run;
 ALTER TABLE x509_job_run
-  ADD COLUMN IF NOT EXISTS job_id int NOT NULL,
-  ADD COLUMN IF NOT EXISTS schedule_id int DEFAULT NULL,
-  DROP COLUMN IF EXISTS name,
-  DROP COLUMN IF EXISTS ctime,
-  DROP COLUMN IF EXISTS mtime,
-  DROP CONSTRAINT IF EXISTS fk_x509_job_run_job,
-  DROP CONSTRAINT IF EXISTS fk_x509_job_run_schedule;
+  ADD COLUMN job_id int NOT NULL,
+  ADD COLUMN schedule_id int DEFAULT NULL,
+  DROP COLUMN name,
+  DROP COLUMN ctime,
+  DROP COLUMN mtime;
 ALTER TABLE x509_job_run
   ADD CONSTRAINT fk_x509_job_run_job FOREIGN KEY (job_id) REFERENCES x509_job (id) ON DELETE CASCADE,
   ADD CONSTRAINT fk_x509_job_run_schedule FOREIGN KEY (schedule_id) REFERENCES x509_schedule (id) ON DELETE CASCADE;
+
+CREATE TABLE x509_schema (
+  id serial,
+  version varchar(64) NOT NULL,
+  timestamp bigint NOT NULL,
+  success boolenum DEFAULT NULL,
+  reason text DEFAULT NULL,
+
+  CONSTRAINT pk_x509_schema PRIMARY KEY (id),
+  CONSTRAINT idx_x509_schema_version UNIQUE (version)
+);
+
+INSERT INTO x509_schema (version, timestamp, success, reason)
+  VALUES ('1.3.0', UNIX_TIMESTAMP() * 1000, 'y', NULL);

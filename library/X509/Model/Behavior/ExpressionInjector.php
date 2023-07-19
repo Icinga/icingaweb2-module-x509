@@ -1,5 +1,7 @@
 <?php
 
+/* Icinga Web 2 X.509 Module | (c) 2022 Icinga GmbH | GPLv2 */
+
 namespace Icinga\Module\X509\Model\Behavior;
 
 use ipl\Orm\Contract\QueryAwareBehavior;

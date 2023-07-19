@@ -96,17 +96,6 @@ CREATE TABLE x509_dn (
   PRIMARY KEY (hash,type,"order")
 );
 
-CREATE TABLE x509_job_run (
-  id serial PRIMARY KEY,
-  name varchar(255) NOT NULL,
-  total_targets int NOT NULL,
-  finished_targets int NOT NULL,
-  start_time biguint NULL DEFAULT NULL,
-  end_time biguint NULL DEFAULT NULL,
-  ctime biguint NOT NULL,
-  mtime biguint DEFAULT NULL
-);
-
 CREATE TABLE x509_target (
   id serial PRIMARY KEY,
   ip bytea NOT NULL,
@@ -119,3 +108,41 @@ CREATE TABLE x509_target (
 );
 
 CREATE INDEX x509_idx_target ON x509_target (ip,port,hostname);
+
+CREATE TABLE x509_job (
+  id serial PRIMARY KEY,
+  name varchar(255) NOT NULL,
+  author varchar(255) NOT NULL,
+  cidrs text NOT NULL,
+  ports text NOT NULL,
+  exclude_targets text DEFAULT NULL,
+  ctime bigint NOT NULL,
+  mtime bigint NOT NULL,
+
+  UNIQUE (name)
+);
+
+CREATE TABLE x509_schedule (
+  id serial PRIMARY KEY,
+  job_id int NOT NULL,
+  name varchar(255) NOT NULL,
+  author varchar(255) NOT NULL,
+  config text NOT NULL, -- json
+  ctime bigint NOT NULL,
+  mtime bigint NOT NULL,
+
+  CONSTRAINT fk_x509_schedule_job FOREIGN KEY (job_id) REFERENCES x509_job (id) ON DELETE CASCADE
+);
+
+CREATE TABLE x509_job_run (
+  id serial PRIMARY KEY,
+  job_id int NOT NULL,
+  schedule_id int DEFAULT NULL,
+  total_targets int NOT NULL,
+  finished_targets int NOT NULL,
+  start_time biguint NULL DEFAULT NULL,
+  end_time biguint NULL DEFAULT NULL,
+
+  CONSTRAINT fk_x509_job_run_job FOREIGN KEY (job_id) REFERENCES x509_job (id) ON DELETE CASCADE,
+  CONSTRAINT fk_x509_job_run_schedule FOREIGN KEY (schedule_id) REFERENCES x509_schedule (id) ON DELETE CASCADE
+);

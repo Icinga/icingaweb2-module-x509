@@ -443,7 +443,6 @@ class Job implements Task
             $this->db->insert('x509_job_run', [
                 'name'             => $this->getName(),
                 'start_time'       => $this->jobRunStart->getTimestamp() * 1000.0,
-                'ctime'            => new Expression('UNIX_TIMESTAMP() * 1000'),
                 'total_targets'    => 0,
                 'finished_targets' => 0
             ]);

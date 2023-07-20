@@ -144,7 +144,7 @@ class Job implements Task
 
     public function updateLastScan($target)
     {
-        if (! $this->isRescan()) {
+        if (! $this->isRescan() || ! isset($target->id)) {
             return;
         }
 
@@ -172,7 +172,19 @@ class Job implements Task
 
     protected function getScanTargets(): Generator
     {
-        if (! $this->isRescan() || $this->fullScan) {
+        $generate = $this->fullScan || ! $this->isRescan();
+        if (! $generate) {
+            $run = X509JobRun::on($this->db)
+                ->columns([new Expression('1')])
+                ->filter(Filter::equal('schedule.job_id', $this->getId()))
+                ->filter(Filter::unequal('total_targets', 0))
+                ->limit(1)
+                ->execute();
+
+            $generate = ! $run->hasResult();
+        }
+
+        if ($generate) {
             yield from $this->generateTargets();
         }
 

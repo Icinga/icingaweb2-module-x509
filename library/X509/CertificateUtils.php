@@ -16,6 +16,7 @@ use ipl\Sql\Connection;
 use ipl\Sql\Expression;
 use ipl\Sql\Select;
 use ipl\Stdlib\Filter;
+use ipl\Stdlib\Str;
 
 class CertificateUtils
 {
@@ -151,17 +152,24 @@ class CertificateUtils
     /**
      * Split the given Subject Alternative Names into key-value pairs
      *
-     * @param   string  $sans
+     * @param ?string $sanStr
      *
-     * @return  \Generator
+     * @return  array
      */
-    private static function splitSANs($sans)
+    private static function splitSANs(?string $sanStr): array
     {
-        preg_match_all('/(?:^|, )([^:]+):/', $sans, $keys);
-        $values = preg_split('/(^|, )[^:]+:\s*/', $sans);
-        for ($i = 0; $i < count($keys[1]); $i++) {
-            yield [$keys[1][$i], $values[$i + 1]];
+        $sans = [];
+        foreach (Str::trimSplit($sanStr) as $altName) {
+            [$k, $v] = Str::trimSplit($altName, ':');
+            $sans[$k][] = $v;
         }
+
+        $order = array_flip(['DNS', 'URI', 'IP Address', 'email']);
+        uksort($sans, function ($a, $b) use ($order) {
+            return ($order[$a] ?? PHP_INT_MAX) <=> ($order[$b] ?? PHP_INT_MAX);
+        });
+
+        return $sans;
     }
 
     /**
@@ -267,11 +275,8 @@ class CertificateUtils
     private static function insertSANs($db, $certId, array $certInfo)
     {
         $dbTool = new DbTool($db);
-
-        if (isset($certInfo['extensions']['subjectAltName'])) {
-            foreach (CertificateUtils::splitSANs($certInfo['extensions']['subjectAltName']) as $san) {
-                list($type, $value) = $san;
-
+        foreach (CertificateUtils::splitSANs($certInfo['extensions']['subjectAltName'] ?? null) as $type => $values) {
+            foreach ($values as $value) {
                 $hash = hash('sha256', sprintf('%s=%s', $type, $value), true);
 
                 $row = X509CertificateSubjectAltName::on($db);
@@ -303,7 +308,6 @@ class CertificateUtils
             }
         }
     }
-
 
     private static function findOrInsertDn($db, $certInfo, $type)
     {

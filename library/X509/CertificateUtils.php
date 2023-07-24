@@ -124,15 +124,14 @@ class CertificateUtils
      *
      * If the given DN contains a CN, the CN is returned. Else, the DN is returned as string.
      *
-     * @param   array   $dn
+     * @param array $dn
      *
      * @return  string  The CN if it exists or the full DN as string
      */
-    private static function shortNameFromDN(array $dn)
+    private static function shortNameFromDN(array $dn): string
     {
         if (isset($dn['CN'])) {
-            $cn = (array) $dn['CN'];
-            return $cn[0];
+            return ((array) $dn['CN'])[0];
         } else {
             $result = [];
             foreach ($dn as $key => $value) {
@@ -156,7 +155,7 @@ class CertificateUtils
      *
      * @return  array
      */
-    private static function splitSANs(?string $sanStr): array
+    public static function splitSANs(?string $sanStr): array
     {
         $sans = [];
         foreach (Str::trimSplit($sanStr) as $altName) {
@@ -240,11 +239,18 @@ class CertificateUtils
         $pubkey = openssl_pkey_get_details(openssl_pkey_get_public($cert));
         $signature = explode('-', $certInfo['signatureTypeSN']);
 
+        $sans = static::splitSANs($certInfo['extensions']['subjectAltName'] ?? null);
+        if (! isset($certInfo['subject']['CN']) && ! empty($sans)) {
+            $subject = current($sans)[0];
+        } else {
+            $subject = static::shortNameFromDN($certInfo['subject']);
+        }
+
         // TODO: https://github.com/Icinga/ipl-orm/pull/78
         $db->insert(
             'x509_certificate',
             [
-                'subject'             => CertificateUtils::shortNameFromDN($certInfo['subject']),
+                'subject'             => $subject,
                 'subject_hash'        => $dbTool->marshalBinary($subjectHash),
                 'issuer'              => CertificateUtils::shortNameFromDN($certInfo['issuer']),
                 'issuer_hash'         => $dbTool->marshalBinary($issuerHash),
@@ -266,16 +272,15 @@ class CertificateUtils
 
         $certId = $db->lastInsertId();
 
-        CertificateUtils::insertSANs($db, $certId, $certInfo);
+        CertificateUtils::insertSANs($db, $certId, $sans);
 
         return [$certId, $issuerHash];
     }
 
-
-    private static function insertSANs($db, $certId, array $certInfo)
+    private static function insertSANs($db, $certId, iterable $sans): void
     {
         $dbTool = new DbTool($db);
-        foreach (CertificateUtils::splitSANs($certInfo['extensions']['subjectAltName'] ?? null) as $type => $values) {
+        foreach ($sans as $type => $values) {
             foreach ($values as $value) {
                 $hash = hash('sha256', sprintf('%s=%s', $type, $value), true);
 

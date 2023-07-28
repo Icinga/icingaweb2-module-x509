@@ -16,13 +16,6 @@ class JobsController extends CompatController
 {
     use Database;
 
-    protected function prepareInit()
-    {
-        parent::prepareInit();
-
-        $this->getTabs()->disableLegacyExtensions();
-    }
-
     /**
      * List all jobs
      */

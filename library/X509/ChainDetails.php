@@ -7,6 +7,8 @@ namespace Icinga\Module\X509;
 use Icinga\Module\X509\Model\X509Certificate;
 use Icinga\Web\Url;
 use ipl\Html\Html;
+use ipl\Web\Widget\IcingaIcon;
+use ipl\Web\Widget\Icon;
 
 /**
  * Table widget to display X.509 chain details
@@ -24,7 +26,7 @@ class ChainDetails extends DataTable
             [
                 'attributes' => ['class' => 'icon-col'],
                 'renderer' => function () {
-                    return Html::tag('i', ['class' => 'x509-icon-cert']);
+                    return new IcingaIcon('certificate', ['title' => mt('x509', 'Is a x509 certificate')]);
                 }
             ],
 
@@ -46,10 +48,7 @@ class ChainDetails extends DataTable
                         return null;
                     }
 
-                    return Html::tag(
-                        'i',
-                        ['class' => 'x509-icon-ca', 'title' => mt('x509', 'Is Certificate Authority')]
-                    );
+                    return new IcingaIcon('ca-check-circle', ['title' => mt('x509', 'Is Certificate Authority')]);
                 }
             ],
 
@@ -60,10 +59,7 @@ class ChainDetails extends DataTable
                         return null;
                     }
 
-                    return Html::tag(
-                        'i',
-                        ['class' => 'x509-icon-self-signed', 'title' => mt('x509', 'Is Self-Signed')]
-                    );
+                    return new IcingaIcon('refresh-cert', ['title' => mt('x509', 'Is Self-Signed')]);
                 }
             ],
 
@@ -74,10 +70,7 @@ class ChainDetails extends DataTable
                         return null;
                     }
 
-                    return Html::tag(
-                        'i',
-                        ['class' => 'icon icon-thumbs-up', 'title' => mt('x509', 'Is Trusted')]
-                    );
+                    return new Icon('thumbs-up', ['title' => mt('x509', 'Is Trusted')]);
                 }
             ],
 

@@ -145,10 +145,10 @@ trait JobUtils
      */
     public static function isAddrInside(GMP $addr, string $subnet, int $mask): bool
     {
-        $mask = pow(2, ((static::isIPV6($addr) ? 128 : 32) - $mask)) - 1;
-        $subnet = static::addrToNumber($subnet);
-
-        return (gmp_intval($addr) & ~$mask) === (gmp_intval($subnet) & ~$mask);
+        // `gmp_pow()` is like PHP's pow() function, but handles also very large numbers
+        // and `gmp_com()` is like the bitwise NOT (~) operator.
+        $mask = gmp_com(gmp_pow(2, (static::isIPV6($subnet) ? 128 : 32) - $mask) - 1);
+        return gmp_strval(gmp_and($addr, $mask)) === gmp_strval(gmp_and(static::addrToNumber($subnet), $mask));
     }
 
     /**

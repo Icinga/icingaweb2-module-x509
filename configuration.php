@@ -37,5 +37,3 @@ $this->provideConfigTab('sni', array(
     'label' => $this->translate('SNI'),
     'url' => 'sni'
 ));
-
-$this->provideCssFile('icons.less');

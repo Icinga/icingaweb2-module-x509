@@ -18,9 +18,7 @@ use ipl\Web\Filter\QueryString;
 class Controller extends CompatController
 {
     use Database;
-    use SearchControls {
-        SearchControls::createSearchBar as private webCreateSearchBar;
-    }
+    use SearchControls;
 
     /** @var Filter\Rule */
     protected $filter;

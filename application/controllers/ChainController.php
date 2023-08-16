@@ -29,6 +29,7 @@ class ChainController extends Controller
             return;
         }
 
+        /** @var ?X509CertificateChain $chain */
         $chain = X509CertificateChain::on($conn)
             ->with(['target'])
             ->filter(Filter::equal('id', $id))

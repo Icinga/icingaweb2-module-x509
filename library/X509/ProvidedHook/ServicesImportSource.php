@@ -88,6 +88,7 @@ class ServicesImportSource extends X509ImportSource
         $targets->withColumns(['cert_subject_alt_name' => new Sql\Expression("$select", null, ...$values)]);
 
         $results = [];
+        /** @var X509Target $target */
         foreach ($targets as $target) {
             $isV6 = Job::isIPV6($target->ip);
             $target->host_ip = $target->ip;

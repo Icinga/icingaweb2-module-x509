@@ -62,10 +62,10 @@ class Job implements Task
     /** @var DateTime A formatted date time of this job start time */
     protected $jobRunStart;
 
-    /** @var array A list of excluded IP addresses and host names */
+    /** @var ?array A list of excluded IP addresses and host names */
     protected $excludedTargets = null;
 
-    /** @var DateTime Since last scan threshold used to filter out scan targets */
+    /** @var ?DateTime Since last scan threshold used to filter out scan targets */
     protected $sinceLastScan;
 
     /** @var bool Whether job run should only perform a rescan */
@@ -358,14 +358,14 @@ class Job implements Task
         $this->pendingTargets++;
 
         $url = "tls://[{$target->ip}]:{$target->port}";
-        Logger::debug("Connecting to %s", static::formatTarget($target));
+        Logger::debug("Connecting to %s", self::formatTarget($target));
 
         /** @var ConnectorInterface $connector */
         /** @var StreamOptsCaptureConnector $streamCapture */
         list($connector, $streamCapture) = $this->getConnector($target->hostname);
         $connector->connect($url)->then(
             function (ConnectionInterface $conn) use ($target, $streamCapture) {
-                Logger::info("Connected to %s", static::formatTarget($target));
+                Logger::info("Connected to %s", self::formatTarget($target));
 
                 // Close connection in order to capture stream context options
                 $conn->close();
@@ -465,7 +465,9 @@ class Job implements Task
             }
         });
 
-        return $this->deferred->promise();
+        /** @var Promise\ExtendedPromiseInterface $promise */
+        $promise = $this->deferred->promise();
+        return $promise;
     }
 
     protected function processChain($target, $chain)
@@ -540,7 +542,7 @@ class Job implements Task
                 $chainUptodate = $currentFingerprints === $lastFingerprintsArr;
             }
 
-            if ($chainUptodate) {
+            if ($lastChain && $chainUptodate) {
                 $chainId = $lastChain->id;
             } else {
                 // TODO: https://github.com/Icinga/ipl-orm/pull/78

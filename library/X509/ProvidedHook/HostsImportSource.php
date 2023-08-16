@@ -37,6 +37,7 @@ class HostsImportSource extends X509ImportSource
 
         $results = [];
         $foundDupes = [];
+        /** @var X509Target $target */
         foreach ($targets as $target) {
             $isV6 = Job::isIPV6($target->ip);
             $target->host_ip = $target->ip;

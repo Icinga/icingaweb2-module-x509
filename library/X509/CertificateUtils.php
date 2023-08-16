@@ -330,7 +330,7 @@ class CertificateUtils
             }
 
             foreach ($values as $value) {
-                $data .= "{$key}=${value}, ";
+                $data .= "$key=$value, ";
             }
         }
         $hash = hash('sha256', $data, true);

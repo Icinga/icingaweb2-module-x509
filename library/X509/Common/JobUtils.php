@@ -123,9 +123,9 @@ trait JobUtils
      * @param $num
      * @param bool $ipv6
      *
-     * @return ?string
+     * @return false|string
      */
-    public static function numberToAddr($num, bool $ipv6 = true): ?string
+    public static function numberToAddr($num, bool $ipv6 = true)
     {
         if ($ipv6) {
             return inet_ntop(str_pad(gmp_export($num), 16, "\0", STR_PAD_LEFT));

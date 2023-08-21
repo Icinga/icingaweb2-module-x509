@@ -16,6 +16,7 @@ use ipl\Sql\Connection;
 use ipl\Sql\Expression;
 use ipl\Sql\Select;
 use ipl\Stdlib\Filter;
+use ipl\Stdlib\Str;
 
 class CertificateUtils
 {
@@ -123,15 +124,14 @@ class CertificateUtils
      *
      * If the given DN contains a CN, the CN is returned. Else, the DN is returned as string.
      *
-     * @param   array   $dn
+     * @param array $dn
      *
      * @return  string  The CN if it exists or the full DN as string
      */
-    private static function shortNameFromDN(array $dn)
+    private static function shortNameFromDN(array $dn): string
     {
         if (isset($dn['CN'])) {
-            $cn = (array) $dn['CN'];
-            return $cn[0];
+            return ((array) $dn['CN'])[0];
         } else {
             $result = [];
             foreach ($dn as $key => $value) {
@@ -151,17 +151,24 @@ class CertificateUtils
     /**
      * Split the given Subject Alternative Names into key-value pairs
      *
-     * @param   string  $sans
+     * @param ?string $sanStr
      *
-     * @return  \Generator
+     * @return  array
      */
-    private static function splitSANs($sans)
+    public static function splitSANs(?string $sanStr): array
     {
-        preg_match_all('/(?:^|, )([^:]+):/', $sans, $keys);
-        $values = preg_split('/(^|, )[^:]+:\s*/', $sans);
-        for ($i = 0; $i < count($keys[1]); $i++) {
-            yield [$keys[1][$i], $values[$i + 1]];
+        $sans = [];
+        foreach (Str::trimSplit($sanStr) as $altName) {
+            [$k, $v] = Str::trimSplit($altName, ':');
+            $sans[$k][] = $v;
         }
+
+        $order = array_flip(['DNS', 'URI', 'IP Address', 'email']);
+        uksort($sans, function ($a, $b) use ($order) {
+            return ($order[$a] ?? PHP_INT_MAX) <=> ($order[$b] ?? PHP_INT_MAX);
+        });
+
+        return $sans;
     }
 
     /**
@@ -232,11 +239,18 @@ class CertificateUtils
         $pubkey = openssl_pkey_get_details(openssl_pkey_get_public($cert));
         $signature = explode('-', $certInfo['signatureTypeSN']);
 
+        $sans = static::splitSANs($certInfo['extensions']['subjectAltName'] ?? null);
+        if (! isset($certInfo['subject']['CN']) && ! empty($sans)) {
+            $subject = current($sans)[0];
+        } else {
+            $subject = static::shortNameFromDN($certInfo['subject']);
+        }
+
         // TODO: https://github.com/Icinga/ipl-orm/pull/78
         $db->insert(
             'x509_certificate',
             [
-                'subject'             => CertificateUtils::shortNameFromDN($certInfo['subject']),
+                'subject'             => $subject,
                 'subject_hash'        => $dbTool->marshalBinary($subjectHash),
                 'issuer'              => CertificateUtils::shortNameFromDN($certInfo['issuer']),
                 'issuer_hash'         => $dbTool->marshalBinary($issuerHash),
@@ -258,20 +272,16 @@ class CertificateUtils
 
         $certId = $db->lastInsertId();
 
-        CertificateUtils::insertSANs($db, $certId, $certInfo);
+        CertificateUtils::insertSANs($db, $certId, $sans);
 
         return [$certId, $issuerHash];
     }
 
-
-    private static function insertSANs($db, $certId, array $certInfo)
+    private static function insertSANs($db, $certId, iterable $sans): void
     {
         $dbTool = new DbTool($db);
-
-        if (isset($certInfo['extensions']['subjectAltName'])) {
-            foreach (CertificateUtils::splitSANs($certInfo['extensions']['subjectAltName']) as $san) {
-                list($type, $value) = $san;
-
+        foreach ($sans as $type => $values) {
+            foreach ($values as $value) {
                 $hash = hash('sha256', sprintf('%s=%s', $type, $value), true);
 
                 $row = X509CertificateSubjectAltName::on($db);
@@ -303,7 +313,6 @@ class CertificateUtils
             }
         }
     }
-
 
     private static function findOrInsertDn($db, $certInfo, $type)
     {

@@ -37,11 +37,20 @@ class CertificateDetails extends BaseHtmlElement
 //        $pubkey = openssl_pkey_get_details(openssl_get_publickey($pem));
 
         $subject = Html::tag('dl');
-        foreach ($cert['subject'] as $key => $value) {
-            $subject->add([
-                Html::tag('dt', $key),
-                Html::tag('dd', $value)
-            ]);
+        $sans = CertificateUtils::splitSANs($cert['extensions']['subjectAltName'] ?? null);
+        if (! isset($cert['subject']['CN']) && ! empty($sans)) {
+            foreach ($sans as $type => $values) {
+                foreach ($values as $value) {
+                    $subject->addHtml(Html::tag('dt', $type), Html::tag('dd', $value));
+                }
+            }
+        } else {
+            foreach ($cert['subject'] as $key => $value) {
+                $subject->add([
+                    Html::tag('dt', $key),
+                    Html::tag('dd', $value)
+                ]);
+            }
         }
 
         $issuer = Html::tag('dl');

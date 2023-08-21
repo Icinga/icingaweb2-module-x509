@@ -223,7 +223,7 @@ class Job implements Task
             }
 
             foreach ($targets as $target) {
-                $addr = gmp_import($target->ip);
+                $addr = static::addrToNumber($target->ip);
                 $addrFound = false;
                 foreach ($this->getCidrs() as $cidr) {
                     list($subnet, $mask) = $cidr;

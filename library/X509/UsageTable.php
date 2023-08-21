@@ -6,7 +6,7 @@ namespace Icinga\Module\X509;
 
 use Icinga\Module\X509\Model\X509Certificate;
 use Icinga\Web\Url;
-use ipl\Html\Html;
+use ipl\Web\Widget\Icon;
 
 /**
  * Table widget to display X.509 certificate usage
@@ -27,9 +27,7 @@ class UsageTable extends DataTable
                     return $data->chain->valid;
                 },
                 'renderer'   => function ($valid) {
-                    $icon = $valid ? 'check -ok' : 'block -critical';
-
-                    return Html::tag('i', ['class' => "icon icon-{$icon}"]);
+                    return new Icon($valid ? 'circle-check' : 'ban', ['class' => $valid ? '-ok' : '-critical']);
                 }
             ],
 

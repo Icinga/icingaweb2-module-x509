@@ -1,0 +1,1536 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Cannot access offset 'self_signed' on mixed\\.$#"
+			count: 1
+			path: application/clicommands/CheckCommand.php
+
+		-
+			message: "#^Cannot access offset 'subject' on mixed\\.$#"
+			count: 1
+			path: application/clicommands/CheckCommand.php
+
+		-
+			message: "#^Cannot access property \\$chain on mixed\\.$#"
+			count: 2
+			path: application/clicommands/CheckCommand.php
+
+		-
+			message: "#^Cannot access property \\$subject on mixed\\.$#"
+			count: 6
+			path: application/clicommands/CheckCommand.php
+
+		-
+			message: "#^Cannot access property \\$valid_from on mixed\\.$#"
+			count: 1
+			path: application/clicommands/CheckCommand.php
+
+		-
+			message: "#^Cannot access property \\$valid_to on mixed\\.$#"
+			count: 1
+			path: application/clicommands/CheckCommand.php
+
+		-
+			message: "#^Cannot call method getTimestamp\\(\\) on DateTime\\|false\\.$#"
+			count: 5
+			path: application/clicommands/CheckCommand.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Clicommands\\\\CheckCommand\\:\\:hostAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/clicommands/CheckCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$from of method Icinga\\\\Module\\\\X509\\\\Clicommands\\\\CheckCommand\\:\\:thresholdToDateTime\\(\\) expects DateTime, DateTime\\|false given\\.$#"
+			count: 2
+			path: application/clicommands/CheckCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$targetObject of method DateTime\\:\\:diff\\(\\) expects DateTimeInterface, DateTime\\|false given\\.$#"
+			count: 1
+			path: application/clicommands/CheckCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$threshold of method Icinga\\\\Module\\\\X509\\\\Clicommands\\\\CheckCommand\\:\\:splitThreshold\\(\\) expects string, mixed given\\.$#"
+			count: 2
+			path: application/clicommands/CheckCommand.php
+
+		-
+			message: "#^Parameter \\#2 \\$to of method Icinga\\\\Module\\\\X509\\\\Clicommands\\\\CheckCommand\\:\\:thresholdToDateTime\\(\\) expects DateTime, DateTime\\|false given\\.$#"
+			count: 2
+			path: application/clicommands/CheckCommand.php
+
+		-
+			message: "#^Parameter \\#2 \\$value of static method ipl\\\\Stdlib\\\\Filter\\:\\:equal\\(\\) expects array\\|bool\\|float\\|int\\|string, mixed given\\.$#"
+			count: 3
+			path: application/clicommands/CheckCommand.php
+
+		-
+			message: "#^Cannot access offset 0 on mixed\\.$#"
+			count: 1
+			path: application/clicommands/CleanupCommand.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Clicommands\\\\CleanupCommand\\:\\:indexAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/clicommands/CleanupCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$datetime of class DateTime constructor expects string, mixed given\\.$#"
+			count: 1
+			path: application/clicommands/CleanupCommand.php
+
+		-
+			message: "#^Parameter \\#2 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#"
+			count: 1
+			path: application/clicommands/CleanupCommand.php
+
+		-
+			message: "#^Part \\$lastScan \\(mixed\\) of encapsed string cannot be cast to string\\.$#"
+			count: 1
+			path: application/clicommands/CleanupCommand.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Clicommands\\\\ImportCommand\\:\\:indexAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/clicommands/ImportCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$certificate of function openssl_x509_read expects OpenSSLCertificate\\|string, mixed given\\.$#"
+			count: 1
+			path: application/clicommands/ImportCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$file of static method Icinga\\\\Module\\\\X509\\\\CertificateUtils\\:\\:parseBundle\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: application/clicommands/ImportCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$filename of function file_exists expects string, mixed given\\.$#"
+			count: 1
+			path: application/clicommands/ImportCommand.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Clicommands\\\\JobsCommand\\:\\:runAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/clicommands/JobsCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$expression of class ipl\\\\Scheduler\\\\Cron constructor expects string, mixed given\\.$#"
+			count: 1
+			path: application/clicommands/JobsCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$expression of static method ipl\\\\Scheduler\\\\Cron\\:\\:isValid\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: application/clicommands/JobsCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$json of static method ipl\\\\Scheduler\\\\Contract\\\\Frequency\\:\\:fromJson\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: application/clicommands/JobsCommand.php
+
+		-
+			message: "#^Cannot access offset 0 on mixed\\.$#"
+			count: 1
+			path: application/clicommands/ScanCommand.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Clicommands\\\\ScanCommand\\:\\:indexAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/clicommands/ScanCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$datetime of class DateTime constructor expects string, mixed given\\.$#"
+			count: 1
+			path: application/clicommands/ScanCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of class Icinga\\\\Module\\\\X509\\\\Job constructor expects string, mixed given\\.$#"
+			count: 1
+			path: application/clicommands/ScanCommand.php
+
+		-
+			message: "#^Parameter \\#2 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#"
+			count: 3
+			path: application/clicommands/ScanCommand.php
+
+		-
+			message: "#^Part \\$sinceLastScan \\(mixed\\) of encapsed string cannot be cast to string\\.$#"
+			count: 1
+			path: application/clicommands/ScanCommand.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Clicommands\\\\VerifyCommand\\:\\:indexAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/clicommands/VerifyCommand.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\CertificateController\\:\\:indexAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/CertificateController.php
+
+		-
+			message: "#^Parameter \\#1 \\$cert of method Icinga\\\\Module\\\\X509\\\\CertificateDetails\\:\\:setCert\\(\\) expects Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate, Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate\\|null given\\.$#"
+			count: 1
+			path: application/controllers/CertificateController.php
+
+		-
+			message: "#^Parameter \\#2 \\$value of static method ipl\\\\Stdlib\\\\Filter\\:\\:equal\\(\\) expects array\\|bool\\|float\\|int\\|string, mixed given\\.$#"
+			count: 1
+			path: application/controllers/CertificateController.php
+
+		-
+			message: "#^Cannot call method format\\(\\) on mixed\\.$#"
+			count: 2
+			path: application/controllers/CertificatesController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\CertificatesController\\:\\:completeAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/CertificatesController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\CertificatesController\\:\\:indexAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/CertificatesController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\CertificatesController\\:\\:searchEditorAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/CertificatesController.php
+
+		-
+			message: "#^Parameter \\#1 \\$peekAhead of method ipl\\\\Orm\\\\Query\\:\\:peekAhead\\(\\) expects bool, null given\\.$#"
+			count: 1
+			path: application/controllers/CertificatesController.php
+
+		-
+			message: "#^Cannot access property \\$hostname on mixed\\.$#"
+			count: 1
+			path: application/controllers/ChainController.php
+
+		-
+			message: "#^Cannot access property \\$ip on mixed\\.$#"
+			count: 1
+			path: application/controllers/ChainController.php
+
+		-
+			message: "#^Cannot access property \\$port on mixed\\.$#"
+			count: 1
+			path: application/controllers/ChainController.php
+
+		-
+			message: "#^Cannot access property \\$target on Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChain\\|null\\.$#"
+			count: 3
+			path: application/controllers/ChainController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\ChainController\\:\\:indexAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/ChainController.php
+
+		-
+			message: "#^Offset 'invalid_reason' does not exist on Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChain\\|null\\.$#"
+			count: 1
+			path: application/controllers/ChainController.php
+
+		-
+			message: "#^Offset 'valid' does not exist on Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChain\\|null\\.$#"
+			count: 1
+			path: application/controllers/ChainController.php
+
+		-
+			message: "#^Parameter \\#2 \\$value of static method ipl\\\\Stdlib\\\\Filter\\:\\:equal\\(\\) expects array\\|bool\\|float\\|int\\|string, mixed given\\.$#"
+			count: 2
+			path: application/controllers/ChainController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\ConfigController\\:\\:backendAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/ConfigController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\DashboardController\\:\\:indexAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/DashboardController.php
+
+		-
+			message: "#^Cannot access property \\$cidrs on stdClass\\|false\\.$#"
+			count: 1
+			path: application/controllers/JobsController.php
+
+		-
+			message: "#^Cannot access property \\$exclude_targets on stdClass\\|false\\.$#"
+			count: 1
+			path: application/controllers/JobsController.php
+
+		-
+			message: "#^Cannot access property \\$name on stdClass\\|false\\.$#"
+			count: 1
+			path: application/controllers/JobsController.php
+
+		-
+			message: "#^Cannot access property \\$ports on stdClass\\|false\\.$#"
+			count: 1
+			path: application/controllers/JobsController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\JobsController\\:\\:indexAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/JobsController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\JobsController\\:\\:newAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/JobsController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\JobsController\\:\\:prepareInit\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/JobsController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\JobsController\\:\\:removeAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/JobsController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\JobsController\\:\\:updateAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/JobsController.php
+
+		-
+			message: "#^Parameter \\#2 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#"
+			count: 1
+			path: application/controllers/JobsController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\SniController\\:\\:indexAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/SniController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\SniController\\:\\:newAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/SniController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\SniController\\:\\:removeAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/SniController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\SniController\\:\\:updateAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/SniController.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method Icinga\\\\Forms\\\\RepositoryForm\\:\\:edit\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: application/controllers/SniController.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method Icinga\\\\Forms\\\\RepositoryForm\\:\\:remove\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: application/controllers/SniController.php
+
+		-
+			message: "#^Cannot access property \\$chain on mixed\\.$#"
+			count: 4
+			path: application/controllers/UsageController.php
+
+		-
+			message: "#^Cannot access property \\$hostname on mixed\\.$#"
+			count: 1
+			path: application/controllers/UsageController.php
+
+		-
+			message: "#^Cannot access property \\$ip on mixed\\.$#"
+			count: 1
+			path: application/controllers/UsageController.php
+
+		-
+			message: "#^Cannot access property \\$port on mixed\\.$#"
+			count: 1
+			path: application/controllers/UsageController.php
+
+		-
+			message: "#^Cannot access property \\$valid on mixed\\.$#"
+			count: 1
+			path: application/controllers/UsageController.php
+
+		-
+			message: "#^Cannot access property \\$valid_from on mixed\\.$#"
+			count: 2
+			path: application/controllers/UsageController.php
+
+		-
+			message: "#^Cannot access property \\$valid_to on mixed\\.$#"
+			count: 2
+			path: application/controllers/UsageController.php
+
+		-
+			message: "#^Cannot call method getExportableColumns\\(\\) on mixed\\.$#"
+			count: 1
+			path: application/controllers/UsageController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\UsageController\\:\\:completeAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/UsageController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\UsageController\\:\\:indexAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/UsageController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\UsageController\\:\\:searchEditorAction\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/controllers/UsageController.php
+
+		-
+			message: "#^Parameter \\#1 \\$iterator of function iterator_to_array expects Traversable, mixed given\\.$#"
+			count: 1
+			path: application/controllers/UsageController.php
+
+		-
+			message: "#^Parameter \\#1 \\$peekAhead of method ipl\\\\Orm\\\\Query\\:\\:peekAhead\\(\\) expects bool, null given\\.$#"
+			count: 1
+			path: application/controllers/UsageController.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Forms\\\\Config\\\\BackendConfigForm\\:\\:createElements\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/forms/Config/BackendConfigForm.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Forms\\\\Config\\\\BackendConfigForm\\:\\:createElements\\(\\) has parameter \\$formData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: application/forms/Config/BackendConfigForm.php
+
+		-
+			message: "#^Call to an undefined method Icinga\\\\Application\\\\ApplicationBootstrap\\:\\:getRequest\\(\\)\\.$#"
+			count: 1
+			path: application/forms/Config/JobConfigForm.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Forms\\\\Config\\\\JobConfigForm\\:\\:assemble\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/forms/Config/JobConfigForm.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Forms\\\\Config\\\\JobConfigForm\\:\\:createFilter\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/forms/Config/JobConfigForm.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Forms\\\\Config\\\\JobConfigForm\\:\\:getPartUpdates\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: application/forms/Config/JobConfigForm.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Forms\\\\Config\\\\JobConfigForm\\:\\:onSuccess\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/forms/Config/JobConfigForm.php
+
+		-
+			message: "#^Parameter \\#1 \\$protector of method ipl\\\\Web\\\\FormElement\\\\ScheduleElement\\:\\:setIdProtector\\(\\) expects \\(callable\\(\\)\\: mixed\\)\\|null, array\\{mixed, 'protectId'\\} given\\.$#"
+			count: 1
+			path: application/forms/Config/JobConfigForm.php
+
+		-
+			message: "#^Parameter \\#1 \\$request of method ipl\\\\Web\\\\FormElement\\\\ScheduleElement\\:\\:prepareMultipartUpdate\\(\\) expects Psr\\\\Http\\\\Message\\\\RequestInterface, Psr\\\\Http\\\\Message\\\\ServerRequestInterface\\|null given\\.$#"
+			count: 1
+			path: application/forms/Config/JobConfigForm.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Forms\\\\Config\\\\JobConfigForm\\:\\:\\$identifier \\(string\\) does not accept mixed\\.$#"
+			count: 1
+			path: application/forms/Config/JobConfigForm.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Forms\\\\Config\\\\SniConfigForm\\:\\:createDeleteElements\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/forms/Config/SniConfigForm.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Forms\\\\Config\\\\SniConfigForm\\:\\:createDeleteElements\\(\\) has parameter \\$formData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: application/forms/Config/SniConfigForm.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Forms\\\\Config\\\\SniConfigForm\\:\\:createInsertElements\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/forms/Config/SniConfigForm.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Forms\\\\Config\\\\SniConfigForm\\:\\:createInsertElements\\(\\) has parameter \\$formData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: application/forms/Config/SniConfigForm.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Forms\\\\Config\\\\SniConfigForm\\:\\:createUpdateElements\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: application/forms/Config/SniConfigForm.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Forms\\\\Config\\\\SniConfigForm\\:\\:createUpdateElements\\(\\) has parameter \\$formData with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: application/forms/Config/SniConfigForm.php
+
+		-
+			message: "#^Cannot access offset 'issuer' on array\\|false\\.$#"
+			count: 1
+			path: library/X509/CertificateDetails.php
+
+		-
+			message: "#^Cannot access offset 'subject' on array\\|false\\.$#"
+			count: 1
+			path: library/X509/CertificateDetails.php
+
+		-
+			message: "#^Cannot call method format\\(\\) on mixed\\.$#"
+			count: 2
+			path: library/X509/CertificateDetails.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificateDetails\\:\\:assemble\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/CertificateDetails.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificateDetails\\:\\:setCert\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/CertificateDetails.php
+
+		-
+			message: "#^Parameter \\#1 \\$certificate of function openssl_x509_parse expects OpenSSLCertificate\\|string, mixed given\\.$#"
+			count: 1
+			path: library/X509/CertificateDetails.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function bin2hex expects string, mixed given\\.$#"
+			count: 2
+			path: library/X509/CertificateDetails.php
+
+		-
+			message: "#^Parameter \\#2 \\$array of function implode expects array\\|null, array\\<int, string\\>\\|false given\\.$#"
+			count: 1
+			path: library/X509/CertificateDetails.php
+
+		-
+			message: "#^Cannot access offset 'bits' on array\\|false\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Cannot access offset 'issuer' on array\\|false\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Cannot access offset 'name' on array\\|false\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Cannot access offset 'serialNumber' on array\\|false\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Cannot access offset 'signatureTypeSN' on array\\|false\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Cannot access offset 'subject' on array\\|false\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Cannot access offset 'type' on array\\|false\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Cannot access offset 'validFrom_time_t' on array\\|false\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Cannot access offset 'validTo_time_t' on array\\|false\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Cannot access offset 'version' on array\\|false\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Cannot access property \\$id on mixed\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificateUtils\\:\\:cleanupNoLongerUsedCertificates\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificateUtils\\:\\:findOrInsertCert\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificateUtils\\:\\:findOrInsertDn\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificateUtils\\:\\:findOrInsertDn\\(\\) has parameter \\$certInfo with no type specified\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificateUtils\\:\\:findOrInsertDn\\(\\) has parameter \\$db with no type specified\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificateUtils\\:\\:findOrInsertDn\\(\\) has parameter \\$type with no type specified\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificateUtils\\:\\:insertSANs\\(\\) has parameter \\$certId with no type specified\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificateUtils\\:\\:insertSANs\\(\\) has parameter \\$db with no type specified\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificateUtils\\:\\:insertSANs\\(\\) has parameter \\$sans with no value type specified in iterable type iterable\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificateUtils\\:\\:shortNameFromDN\\(\\) has parameter \\$dn with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificateUtils\\:\\:splitSANs\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#1 \\$binary of method Icinga\\\\Module\\\\X509\\\\DbTool\\:\\:marshalBinary\\(\\) expects string, string\\|false given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#1 \\$certificate of function openssl_x509_export expects OpenSSLCertificate\\|string, mixed given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#1 \\$certificate of function openssl_x509_fingerprint expects OpenSSLCertificate\\|string, mixed given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#1 \\$certificate of function openssl_x509_parse expects OpenSSLCertificate\\|string, mixed given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#1 \\$chainId of closure expects int, mixed given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#1 \\$key of function openssl_pkey_get_details expects OpenSSLAsymmetricKey, OpenSSLAsymmetricKey\\|false given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#1 \\$orderBy of method ipl\\\\Orm\\\\Query\\:\\:orderBy\\(\\) expects array\\|int\\|string, ipl\\\\Sql\\\\Expression given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#1 \\$public_key of function openssl_pkey_get_public expects array\\|OpenSSLAsymmetricKey\\|OpenSSLCertificate\\|string, mixed given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#2 \\$collection of closure expects array, mixed given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#2 \\$groupBy of function ipl\\\\Stdlib\\\\yield_groups expects callable\\(mixed, mixed\\)\\: array\\{0\\: mixed, 1\\?\\: mixed, 2\\?\\: mixed\\}, Closure\\(Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate\\)\\: array\\{mixed, mixed\\} given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#2 \\$string of function explode expects string, string\\|false given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificatesTable\\:\\:createColumns\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/CertificatesTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\CertificatesTable\\:\\:renderRow\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/CertificatesTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\ChainDetails\\:\\:createColumns\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/ChainDetails.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\ChainDetails\\:\\:renderRow\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/ChainDetails.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\ColorScheme\\:\\:__construct\\(\\) has parameter \\$colors with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/ColorScheme.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\ColorScheme\\:\\:scheme\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/ColorScheme.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\ColorScheme\\:\\:\\$colors type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/ColorScheme.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Command\\:\\:init\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Command.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Command\\:\\:\\$configs has no type specified\\.$#"
+			count: 1
+			path: library/X509/Command.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controller\\:\\:fetchFilterColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Controller.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controller\\:\\:handleFormatRequest\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Controller.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Controller\\:\\:\\$format has no type specified\\.$#"
+			count: 1
+			path: library/X509/Controller.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:assemble\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:createColumns\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:getData\\(\\) return type has no value type specified in iterable type Traversable\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:getData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:getData\\(\\) return type has no value type specified in iterable type array\\|Traversable\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:renderBody\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:renderBody\\(\\) has parameter \\$data with no type specified\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:renderHeader\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:renderRow\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:setData\\(\\) has parameter \\$data with no value type specified in iterable type Traversable\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:setData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:setData\\(\\) has parameter \\$data with no value type specified in iterable type array\\|Traversable\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:\\$columns type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:\\$data type has no value type specified in iterable type Traversable\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:\\$data type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\DataTable\\:\\:\\$data type has no value type specified in iterable type array\\|Traversable\\.$#"
+			count: 1
+			path: library/X509/DataTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\DbTool\\:\\:unmarshalBinary\\(\\) should return string but returns string\\|false\\.$#"
+			count: 1
+			path: library/X509/DbTool.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\DbTool\\:\\:\\$pgsql has no type specified\\.$#"
+			count: 1
+			path: library/X509/DbTool.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Donut\\:\\:assemble\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Donut\\:\\:getData\\(\\) return type has no value type specified in iterable type Traversable\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Donut\\:\\:getData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Donut\\:\\:getData\\(\\) return type has no value type specified in iterable type array\\|Traversable\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Donut\\:\\:setData\\(\\) has parameter \\$data with no value type specified in iterable type Traversable\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Donut\\:\\:setData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Donut\\:\\:setData\\(\\) has parameter \\$data with no value type specified in iterable type array\\|Traversable\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Donut\\:\\:setHeading\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Donut\\:\\:setHeading\\(\\) has parameter \\$heading with no type specified\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Donut\\:\\:setHeading\\(\\) has parameter \\$level with no type specified\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Donut\\:\\:setLabelCallback\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Donut\\:\\:\\$data type has no value type specified in iterable type Traversable\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Donut\\:\\:\\$data type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Donut\\:\\:\\$data type has no value type specified in iterable type array\\|Traversable\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Donut\\:\\:\\$heading has no type specified\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Donut\\:\\:\\$headingLevel has no type specified\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Donut\\:\\:\\$labelCallback has no type specified\\.$#"
+			count: 1
+			path: library/X509/Donut.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\ExpirationWidget\\:\\:__construct\\(\\) has parameter \\$from with no type specified\\.$#"
+			count: 1
+			path: library/X509/ExpirationWidget.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\ExpirationWidget\\:\\:__construct\\(\\) has parameter \\$to with no type specified\\.$#"
+			count: 1
+			path: library/X509/ExpirationWidget.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\ExpirationWidget\\:\\:assemble\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/ExpirationWidget.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\ExpirationWidget\\:\\:\\$from has no type specified\\.$#"
+			count: 1
+			path: library/X509/ExpirationWidget.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\ExpirationWidget\\:\\:\\$to has no type specified\\.$#"
+			count: 1
+			path: library/X509/ExpirationWidget.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\FilterAdapter\\:\\:addFilter\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/FilterAdapter.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\FilterAdapter\\:\\:applyFilter\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/FilterAdapter.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\FilterAdapter\\:\\:getFilter\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/FilterAdapter.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\FilterAdapter\\:\\:setFilter\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/FilterAdapter.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\FilterAdapter\\:\\:where\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/FilterAdapter.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\FilterAdapter\\:\\:where\\(\\) has parameter \\$condition with no type specified\\.$#"
+			count: 1
+			path: library/X509/FilterAdapter.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\FilterAdapter\\:\\:where\\(\\) has parameter \\$value with no type specified\\.$#"
+			count: 1
+			path: library/X509/FilterAdapter.php
+
+		-
+			message: "#^Parameter \\#1 \\$value of static method Icinga\\\\Util\\\\StringHelper\\:\\:trimSplit\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: library/X509/Hook/SniHook.php
+
+		-
+			message: "#^Cannot access an offset on array\\<int\\<0, max\\>, array\\<int, string\\>\\>\\|float\\|int\\|string\\|false\\|null\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Cannot access offset string on 0\\|0\\.0\\|''\\|'0'\\|array\\<string, non\\-empty\\-array\\<string\\>\\>\\|false\\|null\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Cannot access property \\$fingerprint on mixed\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Cannot access property \\$hostname on mixed\\.$#"
+			count: 2
+			path: library/X509/Job.php
+
+		-
+			message: "#^Cannot access property \\$ip on mixed\\.$#"
+			count: 4
+			path: library/X509/Job.php
+
+		-
+			message: "#^Cannot access property \\$port on mixed\\.$#"
+			count: 2
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:__construct\\(\\) has parameter \\$snimap with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:finishTarget\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:formatTarget\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:formatTarget\\(\\) has parameter \\$target with no type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:getChecksum\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:getCidrs\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:getConnector\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:getConnector\\(\\) has parameter \\$peerName with no type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:getExcludes\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:getPorts\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:isIPV6\\(\\) has parameter \\$addr with no type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:numberToAddr\\(\\) has parameter \\$num with no type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:processChain\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:processChain\\(\\) has parameter \\$chain with no type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:processChain\\(\\) has parameter \\$target with no type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:startNextTarget\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:updateLastScan\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:updateLastScan\\(\\) has parameter \\$target with no type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Negated boolean expression is always true\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Parameter \\#1 \\$addr of static method Icinga\\\\Module\\\\X509\\\\Job\\:\\:isAddrInside\\(\\) expects GMP, GMP\\|null given\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Parameter \\#1 \\$num1 of function gmp_add expects GMP\\|int\\|string, GMP\\|null given\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Parameter \\#1 \\$num1 of function gmp_and expects GMP\\|int\\|string, GMP\\|null given\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function str_pad expects string, string\\|false given\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Parameter \\#1 \\$subject of static method ipl\\\\Stdlib\\\\Str\\:\\:trimSplit\\(\\) expects string\\|null, mixed given\\.$#"
+			count: 3
+			path: library/X509/Job.php
+
+		-
+			message: "#^Parameter \\#2 \\$value of static method ipl\\\\Stdlib\\\\Filter\\:\\:equal\\(\\) expects array\\|bool\\|float\\|int\\|string, mixed given\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Parameter \\#2 \\$value of static method ipl\\\\Stdlib\\\\Filter\\:\\:lessThan\\(\\) expects float\\|int\\|string, DateTime given\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Job\\:\\:\\$cidrs has no type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Job\\:\\:\\$excludedTargets type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Job\\:\\:\\$finishedTargets has no type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Job\\:\\:\\$jobId has no type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Job\\:\\:\\$pendingTargets has no type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Job\\:\\:\\$ports has no type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Job\\:\\:\\$snimap has no type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Job\\:\\:\\$totalTargets has no type specified\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\JobsIniRepository\\:\\:\\$configs type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/JobsIniRepository.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\JobsIniRepository\\:\\:\\$queryColumns type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/JobsIniRepository.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function base64_encode expects string, mixed given\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/DERBase64.php
+
+		-
+			message: "#^Parameter \\#2 \\$string of function explode expects string, mixed given\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/DERBase64.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\Behavior\\\\ExpressionInjector\\:\\:__construct\\(\\) has parameter \\$columns with no type specified\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/ExpressionInjector.php
+
+		-
+			message: "#^Parameter \\#1 \\$path of method ipl\\\\Orm\\\\Resolver\\:\\:resolveRelation\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/ExpressionInjector.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Model\\\\Behavior\\\\ExpressionInjector\\:\\:\\$columns type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/ExpressionInjector.php
+
+		-
+			message: "#^Parameter \\#1 \\$ip of function inet_ntop expects string, mixed given\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/Ip.php
+
+		-
+			message: "#^Parameter \\#1 \\$ip of function inet_pton expects string, mixed given\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/Ip.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function ltrim expects string, mixed given\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/Ip.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function str_pad expects string, string\\|false given\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/Ip.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate\\:\\:createBehaviors\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Model/X509Certificate.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate\\:\\:createRelations\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Model/X509Certificate.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate\\:\\:getColumnDefinitions\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509Certificate.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509Certificate.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509Certificate.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate\\:\\:getSearchColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509Certificate.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChain\\:\\:createBehaviors\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Model/X509CertificateChain.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChain\\:\\:createRelations\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Model/X509CertificateChain.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChain\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509CertificateChain.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChain\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509CertificateChain.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChainLink\\:\\:createBehaviors\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Model/X509CertificateChainLink.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChainLink\\:\\:createRelations\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Model/X509CertificateChainLink.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChainLink\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509CertificateChainLink.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChainLink\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509CertificateChainLink.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateSubjectAltName\\:\\:createBehaviors\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Model/X509CertificateSubjectAltName.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateSubjectAltName\\:\\:createRelations\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Model/X509CertificateSubjectAltName.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateSubjectAltName\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509CertificateSubjectAltName.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateSubjectAltName\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509CertificateSubjectAltName.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Dn\\:\\:createBehaviors\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Model/X509Dn.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Dn\\:\\:createRelations\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Model/X509Dn.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Dn\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509Dn.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Dn\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509Dn.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509JobRun\\:\\:createBehaviors\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Model/X509JobRun.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509JobRun\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509JobRun.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509JobRun\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509JobRun.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Target\\:\\:createBehaviors\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Model/X509Target.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Target\\:\\:createRelations\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Model/X509Target.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Target\\:\\:getColumnDefinitions\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509Target.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Target\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509Target.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Target\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509Target.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Target\\:\\:getSearchColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Model/X509Target.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\ProvidedHook\\\\HostsImportSource\\:\\:fetchData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/ProvidedHook/HostsImportSource.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\ProvidedHook\\\\HostsImportSource\\:\\:listColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/ProvidedHook/HostsImportSource.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\ProvidedHook\\\\ServicesImportSource\\:\\:fetchData\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/ProvidedHook/ServicesImportSource.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\ProvidedHook\\\\ServicesImportSource\\:\\:listColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/ProvidedHook/ServicesImportSource.php
+
+		-
+			message: "#^Parameter \\#2 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#"
+			count: 1
+			path: library/X509/ProvidedHook/ServicesImportSource.php
+
+		-
+			message: "#^Parameter \\#3 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#"
+			count: 1
+			path: library/X509/ProvidedHook/ServicesImportSource.php
+
+		-
+			message: "#^Parameter \\#4 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#"
+			count: 1
+			path: library/X509/ProvidedHook/ServicesImportSource.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\React\\\\StreamOptsCaptureConnector\\:\\:getCapturedStreamOptions\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/React/StreamOptsCaptureConnector.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\React\\\\StreamOptsCaptureConnector\\:\\:setCapturedStreamOptions\\(\\) has parameter \\$capturedStreamOptions with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/React/StreamOptsCaptureConnector.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\React\\\\StreamOptsCaptureConnector\\:\\:\\$capturedStreamOptions type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/React/StreamOptsCaptureConnector.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\SniIniRepository\\:\\:\\$configs type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/SniIniRepository.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\SniIniRepository\\:\\:\\$queryColumns type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/SniIniRepository.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Table\\:\\:addRow\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Table.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Table\\:\\:addRow\\(\\) has parameter \\$attributes with no type specified\\.$#"
+			count: 1
+			path: library/X509/Table.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Table\\:\\:addRow\\(\\) has parameter \\$cells with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Table.php
+
+		-
+			message: "#^Property Icinga\\\\Module\\\\X509\\\\Table\\:\\:\\$rows has no type specified\\.$#"
+			count: 1
+			path: library/X509/Table.php
+
+		-
+			message: "#^Cannot access property \\$id on mixed\\.$#"
+			count: 1
+			path: library/X509/UsageTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\UsageTable\\:\\:createColumns\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/UsageTable.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\UsageTable\\:\\:renderRow\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/UsageTable.php
+
+		-
+			message: "#^Dead catch \\- Exception is never thrown in the try block\\.$#"
+			count: 1
+			path: library/X509/Web/Control/SearchBar/ObjectSuggestions.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Web\\\\Control\\\\SearchBar\\\\ObjectSuggestions\\:\\:collectFilterColumns\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Web/Control/SearchBar/ObjectSuggestions.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Web\\\\Control\\\\SearchBar\\\\ObjectSuggestions\\:\\:collectRelations\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: library/X509/Web/Control/SearchBar/ObjectSuggestions.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Web\\\\Control\\\\SearchBar\\\\ObjectSuggestions\\:\\:collectRelations\\(\\) has parameter \\$models with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Web/Control/SearchBar/ObjectSuggestions.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Web\\\\Control\\\\SearchBar\\\\ObjectSuggestions\\:\\:collectRelations\\(\\) has parameter \\$path with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: library/X509/Web/Control/SearchBar/ObjectSuggestions.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Web\\\\Control\\\\SearchBar\\\\ObjectSuggestions\\:\\:fetchColumnSuggestions\\(\\) return type has no value type specified in iterable type Traversable\\.$#"
+			count: 1
+			path: library/X509/Web/Control/SearchBar/ObjectSuggestions.php
+
+		-
+			message: "#^Method Icinga\\\\Module\\\\X509\\\\Web\\\\Control\\\\SearchBar\\\\ObjectSuggestions\\:\\:fetchValueSuggestions\\(\\) return type has no value type specified in iterable type Traversable\\.$#"
+			count: 1
+			path: library/X509/Web/Control/SearchBar/ObjectSuggestions.php
+
+		-
+			message: "#^Parameter \\#1 \\$path of method ipl\\\\Orm\\\\Resolver\\:\\:qualifyPath\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: library/X509/Web/Control/SearchBar/ObjectSuggestions.php
+
+		-
+			message: "#^Parameter \\#1 \\$subject of static method ipl\\\\Stdlib\\\\Str\\:\\:trimSplit\\(\\) expects string\\|null, mixed given\\.$#"
+			count: 1
+			path: library/X509/Web/Control/SearchBar/ObjectSuggestions.php

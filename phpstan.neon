@@ -16,13 +16,17 @@ parameters:
         - vendor
 
     ignoreErrors:
+        -
+            messages:
+                - '#Unsafe usage of new static\(\)#'
+                - '#. but return statement is missing#'
+            reportUnmatched: false
+
         - '#Call to an undefined method React\\Promise#'
 
         - '#Call to an undefined method ipl\\Sql\\Connection::lastInsertId\(\)#'
 
         - '#Access to an undefined property React\\Socket\\ConnectionInterface::\$stream#'
-
-        - '#.* but return statement is missing#'
 
         - '#Binary operation .* between GMP and .* results in an error#'
 

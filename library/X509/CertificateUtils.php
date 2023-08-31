@@ -161,11 +161,16 @@ class CertificateUtils
     {
         $sans = [];
         foreach (Str::trimSplit($sanStr) as $altName) {
-            [$k, $v] = Str::trimSplit($altName, ':');
+            if (strpos($altName, ':') === false) {
+                [$k, $v] = Str::trimSplit($altName, '=', 2);
+            } else {
+                [$k, $v] = Str::trimSplit($altName, ':', 2);
+            }
+
             $sans[$k][] = $v;
         }
 
-        $order = array_flip(['DNS', 'URI', 'IP Address', 'email']);
+        $order = array_flip(['DNS', 'URI', 'IP Address', 'email', 'DirName']);
         uksort($sans, function ($a, $b) use ($order) {
             return ($order[$a] ?? PHP_INT_MAX) <=> ($order[$b] ?? PHP_INT_MAX);
         });

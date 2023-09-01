@@ -1,0 +1,36 @@
+includes:
+	- phpstan-baseline.neon
+
+parameters:
+    level: max
+
+    checkFunctionNameCase: true
+    checkInternalClassCaseSensitivity: true
+    treatPhpDocTypesAsCertain: false
+
+    paths:
+        - application
+        - library
+
+    scanDirectories:
+        - vendor
+
+    ignoreErrors:
+        -
+            messages:
+                - '#Unsafe usage of new static\(\)#'
+                - '#. but return statement is missing#'
+            reportUnmatched: false
+
+        - '#Call to an undefined method React\\Promise#'
+
+        - '#Call to an undefined method ipl\\Sql\\Connection::lastInsertId\(\)#'
+
+        - '#Access to an undefined property React\\Socket\\ConnectionInterface::\$stream#'
+
+        - '#Binary operation .* between GMP and .* results in an error#'
+
+    universalObjectCratesClasses:
+        - ipl\Orm\Model
+        - Icinga\Web\View
+        - Icinga\Data\ConfigObject

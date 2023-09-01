@@ -27,6 +27,7 @@ class CertificateController extends Controller
             return;
         }
 
+        /** @var ?X509Certificate $cert */
         $cert = X509Certificate::on($conn)
             ->filter(Filter::equal('id', $certId))
             ->first();

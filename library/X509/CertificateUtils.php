@@ -11,6 +11,7 @@ use Icinga\Module\X509\Model\X509Certificate;
 use Icinga\Module\X509\Model\X509CertificateSubjectAltName;
 use Icinga\Module\X509\Model\X509Dn;
 use Icinga\Module\X509\Model\X509Target;
+use ipl\Orm\Model;
 use ipl\Sql\Connection;
 use ipl\Sql\Expression;
 use ipl\Sql\Select;
@@ -244,7 +245,7 @@ class CertificateUtils
         if (! isset($certInfo['subject']['CN']) && ! empty($sans)) {
             $subject = current($sans)[0];
         } else {
-            $subject = static::shortNameFromDN($certInfo['subject']);
+            $subject = self::shortNameFromDN($certInfo['subject']);
         }
 
         // TODO: https://github.com/Icinga/ipl-orm/pull/78
@@ -330,7 +331,7 @@ class CertificateUtils
             }
 
             foreach ($values as $value) {
-                $data .= "{$key}=${value}, ";
+                $data .= "$key=$value, ";
             }
         }
         $hash = hash('sha256', $data, true);
@@ -442,7 +443,7 @@ class CertificateUtils
             ));
 
         $contents = [];
-
+        /** @var Model $ca */
         foreach ($cas as $ca) {
             $contents[] = $ca->certificate;
         }

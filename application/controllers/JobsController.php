@@ -11,6 +11,7 @@ use ipl\Html\HtmlElement;
 use ipl\Scheduler\Contract\Frequency;
 use ipl\Scheduler\Cron;
 use ipl\Web\Compat\CompatController;
+use stdClass;
 
 class JobsController extends CompatController
 {
@@ -89,12 +90,12 @@ class JobsController extends CompatController
         if (! $isNew) {
             $name = $this->params->getRequired('name');
             $query = $repo->select()->where('name', $name);
-
-            if (! $query->hasResult()) {
+            /** @var false|stdClass $data */
+            $data = $query->fetchRow();
+            if ($data === false) {
                 $this->httpNotFound($this->translate('Job not found'));
             }
 
-            $data = $query->fetchRow();
             if (! isset($data->frequencyType) && ! empty($data->schedule)) {
                 $frequency = new Cron($data->schedule);
             } elseif (! empty($data->schedule)) {

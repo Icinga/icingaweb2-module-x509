@@ -4,20 +4,18 @@
 
 namespace Icinga\Module\X509\Clicommands;
 
+use DateInterval;
 use DateTime;
+use DateTimeInterface;
 use Icinga\Application\Logger;
 use Icinga\Module\X509\Command;
 use Icinga\Module\X509\Model\X509Certificate;
-use Icinga\Module\X509\Model\X509CertificateChain;
 use Icinga\Module\X509\Model\X509Target;
 use ipl\Sql\Expression;
 use ipl\Stdlib\Filter;
 
 class CheckCommand extends Command
 {
-    public const UNIT_PERCENT = 'percent';
-    public const UNIT_INTERVAL = 'interval';
-
     /**
      * Check a host's certificate
      *
@@ -127,8 +125,8 @@ class CheckCommand extends Command
         }
 
         $allowSelfSigned = (bool) $this->params->get('allow-self-signed', false);
-        list($warningThreshold, $warningUnit) = $this->splitThreshold($this->params->get('warning', '25%'));
-        list($criticalThreshold, $criticalUnit) = $this->splitThreshold($this->params->get('critical', '10%'));
+        $warningThreshold = $this->splitThreshold($this->params->get('warning', '25%'));
+        $criticalThreshold = $this->splitThreshold($this->params->get('critical', '10%'));
 
         $output = [];
         $perfData = [];
@@ -144,8 +142,8 @@ class CheckCommand extends Command
             $now = new DateTime();
             $validFrom = DateTime::createFromFormat('U.u', sprintf('%F', $target->valid_from / 1000.0));
             $validTo = DateTime::createFromFormat('U.u', sprintf('%F', $target->valid_to / 1000.0));
-            $criticalAfter = $this->thresholdToDateTime($validFrom, $validTo, $criticalThreshold, $criticalUnit);
-            $warningAfter = $this->thresholdToDateTime($validFrom, $validTo, $warningThreshold, $warningUnit);
+            $criticalAfter = $this->thresholdToDateTime($validFrom, $validTo, $criticalThreshold);
+            $warningAfter = $this->thresholdToDateTime($validFrom, $validTo, $warningThreshold);
 
             if ($now > $criticalAfter) {
                 $state = 2;
@@ -203,11 +201,11 @@ class CheckCommand extends Command
     /**
      * Parse the given threshold definition
      *
-     * @param   string  $threshold
+     * @param string $threshold
      *
-     * @return  array
+     * @return int|DateInterval
      */
-    protected function splitThreshold($threshold)
+    protected function splitThreshold(string $threshold)
     {
         $match = preg_match('/(\d+)([%\w]{1})/', $threshold, $matches);
         if (! $match) {
@@ -217,7 +215,7 @@ class CheckCommand extends Command
 
         switch ($matches[2]) {
             case '%':
-                return [(int) $matches[1], self::UNIT_PERCENT];
+                return (int) $matches[1];
             case 'y':
             case 'Y':
                 $intervalSpec = 'P' . $matches[1] . 'Y';
@@ -245,7 +243,7 @@ class CheckCommand extends Command
                 exit(3);
         }
 
-        return [new \DateInterval($intervalSpec), self::UNIT_INTERVAL];
+        return new DateInterval($intervalSpec);
     }
 
     /**
@@ -253,19 +251,18 @@ class CheckCommand extends Command
      *
      * @param   DateTime           $from
      * @param   DateTime           $to
-     * @param   int|\DateInterval   $thresholdValue
-     * @param   string              $thresholdUnit
+     * @param   int|DateInterval   $thresholdValue
      *
-     * @return  DateTime
+     * @return DateTimeInterface
      */
-    protected function thresholdToDateTime(DateTime $from, DateTime $to, $thresholdValue, $thresholdUnit)
+    protected function thresholdToDateTime(DateTime $from, DateTime $to, $thresholdValue): DateTimeInterface
     {
         $to = clone $to;
-        if ($thresholdUnit === self::UNIT_INTERVAL) {
+        if ($thresholdValue instanceof DateInterval) {
             return $to->sub($thresholdValue);
         }
 
         $coveredDays = (int) round($from->diff($to)->days * ($thresholdValue / 100));
-        return $to->sub(new \DateInterval('P' . $coveredDays . 'D'));
+        return $to->sub(new DateInterval('P' . $coveredDays . 'D'));
     }
 }

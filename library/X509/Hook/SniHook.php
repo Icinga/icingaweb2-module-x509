@@ -27,8 +27,8 @@ abstract class SniHook
         // the caller is expected to handle it as map of sequences though
         $sni = [];
 
+        /** @var self $hook */
         foreach (Hook::all('X509\Sni') as $hook) {
-            /** @var self $hook */
             foreach ($hook->getHosts() as $ip => $hostname) {
                 $sni[$ip][$hostname] = $hostname;
             }

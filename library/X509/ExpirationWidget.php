@@ -74,7 +74,7 @@ class ExpirationWidget extends BaseHtmlElement
         $progressBarStyle = (new Style())
             ->setModule('x509')
             ->setNonce(Csp::getStyleNonce())
-            ->addFor($progressBar, ['width' => $ratio]);
+            ->addFor($progressBar, ['width' => sprintf('%F%%', $ratio)]);
 
         $this->addHtml(Html::tag('span', ['class' => 'progress-bar-label', 'title' => $dateTip], $message));
         $this->addHtml($progressBarStyle, Html::tag('div', ['class' => 'progress-bar dont-print'], $progressBar));

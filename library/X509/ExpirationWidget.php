@@ -5,13 +5,17 @@
 namespace Icinga\Module\X509;
 
 use Icinga\Date\DateFormatter;
+use Icinga\Util\Csp;
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
 use ipl\Html\HtmlString;
+use ipl\Web\Style;
 
 class ExpirationWidget extends BaseHtmlElement
 {
     protected $tag = 'div';
+
+    protected $defaultAttributes = ['class' => 'expiration-widget'];
 
     protected $from;
 
@@ -66,21 +70,13 @@ class ExpirationWidget extends BaseHtmlElement
             $state = 'state-ok';
         }
 
-        $this->add([
-            Html::tag(
-                'span',
-                ['class' => '', 'style' => 'font-size: 0.9em;', 'title' => $dateTip],
-                $message
-            ),
-            Html::tag(
-                'div',
-                ['class' => 'progress-bar dont-print'],
-                Html::tag(
-                    'div',
-                    ['style' => sprintf('width: %.2F%%;', $ratio), 'class' => "bg-stateful {$state}"],
-                    new HtmlString('&nbsp;')
-                )
-            )
-        ]);
+        $progressBar = Html::tag('div', ['class' => "bg-stateful $state"], new HtmlString('&nbsp;'));
+        $progressBarStyle = (new Style())
+            ->setModule('x509')
+            ->setNonce(Csp::getStyleNonce())
+            ->addFor($progressBar, ['width' => $ratio]);
+
+        $this->addHtml(Html::tag('span', ['class' => 'progress-bar-label', 'title' => $dateTip], $message));
+        $this->addHtml($progressBarStyle, Html::tag('div', ['class' => 'progress-bar dont-print'], $progressBar));
     }
 }

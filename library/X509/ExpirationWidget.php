@@ -5,11 +5,10 @@
 namespace Icinga\Module\X509;
 
 use Icinga\Date\DateFormatter;
-use Icinga\Util\Csp;
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Html;
 use ipl\Html\HtmlString;
-use ipl\Web\Style;
+use ipl\Web\Compat\StyleWithNonce;
 
 class ExpirationWidget extends BaseHtmlElement
 {
@@ -71,9 +70,8 @@ class ExpirationWidget extends BaseHtmlElement
         }
 
         $progressBar = Html::tag('div', ['class' => "bg-stateful $state"], new HtmlString('&nbsp;'));
-        $progressBarStyle = (new Style())
+        $progressBarStyle = (new StyleWithNonce())
             ->setModule('x509')
-            ->setNonce(Csp::getStyleNonce())
             ->addFor($progressBar, ['width' => sprintf('%F%%', $ratio)]);
 
         $this->addHtml(Html::tag('span', ['class' => 'progress-bar-label', 'title' => $dateTip], $message));

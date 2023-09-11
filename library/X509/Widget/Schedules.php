@@ -33,9 +33,9 @@ class Schedules extends Table
     {
         /** @var X509Schedule $schedule */
         foreach ($this->schedules as $schedule) {
-            $row = ModalOpener::addTo(static::tr());
+            $row = static::tr();
             $row->addHtml(
-                static::td((new Link(Links::updateSchedule($schedule), $schedule->name))->openInModal()),
+                static::td(new Link($schedule->name, Links::updateSchedule($schedule))),
                 static::td($schedule->author),
                 static::td($schedule->ctime->format('Y-m-d H:i')),
                 static::td($schedule->mtime->format('Y-m-d H:i'))

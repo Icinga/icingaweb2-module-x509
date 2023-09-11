@@ -187,7 +187,7 @@ class JobController extends CompatController
                 'schedule_element' => $frequency
             ])
             ->on(JobConfigForm::ON_SUCCESS, function () {
-                $this->redirectNow(Links::schedules($this->job));
+                $this->redirectNow('__BACK__');
             })
             ->handleRequest($this->getServerRequest());
 

@@ -1,12 +1,12 @@
 # <a id="Scanning"></a>Scanning
 
-The Icinga Certificate Monitoring provides CLI commands to scan arbitrary **hosts** and **IPs** in various ways.
+The Icinga Certificate Monitoring provides CLI commands to scan **hosts** and **IPs** in various ways.
 These commands are listed below and can be used individually. It is necessary for all commands to know which IP address
 ranges and ports to scan. These can be configured as described [here](03-Configuration.md#configure-jobs).
 
 ## Scan Command
 
-The scan command, as its name implies, scans targets to find their X.509 certificates and track changes to them.
+The scan command, scans targets to find their X.509 certificates and track changes to them.
 A **target** is an **IP-port** combination that is generated from the job configuration, taking into account configured
 [**SNI**](03-Configuration.md#server-name-indication) maps, so that targets with multiple certificates are also properly
 scanned.

@@ -184,11 +184,21 @@ class JobsCommand extends Command
 
         $scheduler->on(Scheduler::ON_TASK_DONE, function (Job $task, $targets = 0) {
             if ($targets === 0) {
-                Logger::warning(
-                    'Schedule %s of job %s does not have any targets',
-                    $task->getSchedule()->getName(),
-                    $task->getName()
-                );
+                $sinceLastScan = $task->getSinceLastScan();
+                if ($sinceLastScan) {
+                     Logger::info(
+                         'Schedule %s of job %s does not have any targets to be rescanned matching since last scan: %s',
+                         $task->getSchedule()->getName(),
+                         $task->getName(),
+                         $sinceLastScan->format('Y-m-d H:i:s')
+                     );
+                } else {
+                    Logger::warning(
+                        'Schedule %s of job %s does not have any targets',
+                        $task->getSchedule()->getName(),
+                        $task->getName()
+                    );
+                }
             } else {
                 Logger::info(
                     'Scanned %d target(s) by schedule %s of job %s',

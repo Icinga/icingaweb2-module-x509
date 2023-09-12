@@ -20,7 +20,7 @@ trait JobOptions
     /** @var bool Whether this job should perform a full scan */
     protected $fullScan;
 
-    /** @var DateTime Since last scan threshold used to filter out scan targets */
+    /** @var ?DateTime Since last scan threshold used to filter out scan targets */
     protected $sinceLastScan;
 
     /** @var int Used to control how many targets can be scanned in parallel */
@@ -107,6 +107,16 @@ trait JobOptions
         }
 
         return $this;
+    }
+
+    /**
+     * Get the targets since last scan threshold
+     *
+     * @return ?DateTime
+     */
+    public function getSinceLastScan(): ?DateTime
+    {
+        return $this->sinceLastScan;
     }
 
     /**

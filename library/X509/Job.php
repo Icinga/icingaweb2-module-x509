@@ -43,6 +43,7 @@ class Job implements Task
     /** @var int Number of targets to be scanned in parallel by default */
     public const DEFAULT_PARALLEL = 256;
 
+    /** @var string Default since last scan threshold used to filter out scan targets  */
     public const DEFAULT_SINCE_LAST_SCAN = '-24 hours';
 
     /** @var int The database id of this job */

@@ -45,6 +45,7 @@ class JobConfigForm extends CompatForm
         }
 
         $button = $this->getPressedSubmitElement();
+
         return $button && ($button->getName() === 'btn_submit' || $button->getName() === 'btn_remove');
     }
 

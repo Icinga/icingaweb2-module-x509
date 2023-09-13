@@ -69,6 +69,7 @@ class ScheduleForm extends CompatForm
     {
         /** @var RequestInterface $request */
         $request = $this->getRequest();
+
         return $this->scheduleElement->prepareMultipartUpdate($request);
     }
 
@@ -79,6 +80,7 @@ class ScheduleForm extends CompatForm
         }
 
         $button = $this->getPressedSubmitElement();
+
         return $button && ($button->getName() === 'submit' || $button->getName() === 'btn_remove');
     }
 

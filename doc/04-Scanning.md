@@ -22,7 +22,7 @@ are collected. This behavior can be customized through the command [options](#us
 
 ### Usage
 
-This scan command can be used like any other Icinga Web 2 cli operations like this: `icingacli x509 scan [OPTIONS]`
+This scan command can be used like any other Icinga Web cli operations like this: `icingacli x509 scan [OPTIONS]`
 
 **Options:**
 
@@ -72,7 +72,7 @@ too. Since you can have multiple schedules for a single job, all job schedules c
 
 ### Usage
 
-This scan command can be used like any other Icinga Web 2 cli operations like this: `icingacli x509 jobs run [OPTIONS`
+This scan command can be used like any other Icinga Web cli operations like this: `icingacli x509 jobs run [OPTIONS`
 
 **Options:**
 

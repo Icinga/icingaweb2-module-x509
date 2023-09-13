@@ -9,7 +9,7 @@ use Icinga\Module\X509\Model\X509Schedule;
 use ipl\Html\Table;
 use ipl\I18n\Translation;
 use ipl\Orm\Query;
-use ipl\Web\Widget\EmptyState;
+use ipl\Web\Widget\EmptyStateBar;
 use ipl\Web\Widget\Link;
 
 class Schedules extends Table
@@ -45,7 +45,8 @@ class Schedules extends Table
         }
 
         if ($this->isEmpty()) {
-            $this->addHtml(new EmptyState($this->translate('No job schedules.')));
+            $this->setTag('div');
+            $this->addHtml(new EmptyStateBar($this->translate('No job schedules.')));
         } else {
             $row = static::tr();
             $row->addHtml(

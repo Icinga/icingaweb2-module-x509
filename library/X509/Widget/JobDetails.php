@@ -8,7 +8,7 @@ use Icinga\Module\X509\Model\X509JobRun;
 use ipl\Html\Table;
 use ipl\I18n\Translation;
 use ipl\Orm\Query;
-use ipl\Web\Widget\EmptyState;
+use ipl\Web\Widget\EmptyStateBar;
 
 class JobDetails extends Table
 {
@@ -42,7 +42,8 @@ class JobDetails extends Table
         }
 
         if ($this->isEmpty()) {
-            $this->addHtml(new EmptyState($this->translate('Job never run.')));
+            $this->setTag('div');
+            $this->addHtml(new EmptyStateBar($this->translate('Job never run.')));
         } else {
             $row = static::tr();
             $row->addHtml(

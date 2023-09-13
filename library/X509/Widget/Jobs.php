@@ -9,7 +9,7 @@ use Icinga\Module\X509\Model\X509Job;
 use ipl\Html\Table;
 use ipl\I18n\Translation;
 use ipl\Orm\Query;
-use ipl\Web\Widget\EmptyState;
+use ipl\Web\Widget\EmptyStateBar;
 use ipl\Web\Widget\Link;
 
 class Jobs extends Table
@@ -33,7 +33,9 @@ class Jobs extends Table
     {
         $jobs = $this->jobs->execute();
         if (! $jobs->hasResult()) {
-            $this->addHtml(new EmptyState($this->translate('No jobs configured yet.')));
+            $this->setTag('div');
+            $this->addHtml(new EmptyStateBar($this->translate('No jobs configured yet.')));
+
             return;
         }
 

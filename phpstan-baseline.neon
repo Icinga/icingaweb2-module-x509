@@ -1051,16 +1051,6 @@ parameters:
 			path: library/X509/Model/X509Certificate.php
 
 		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509Certificate.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509Certificate.php
-
-		-
 			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate\\:\\:getSearchColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: library/X509/Model/X509Certificate.php
@@ -1076,32 +1066,12 @@ parameters:
 			path: library/X509/Model/X509CertificateChain.php
 
 		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChain\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509CertificateChain.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChain\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509CertificateChain.php
-
-		-
 			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChainLink\\:\\:createBehaviors\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: library/X509/Model/X509CertificateChainLink.php
 
 		-
 			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChainLink\\:\\:createRelations\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: library/X509/Model/X509CertificateChainLink.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChainLink\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509CertificateChainLink.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChainLink\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: library/X509/Model/X509CertificateChainLink.php
 
@@ -1116,16 +1086,6 @@ parameters:
 			path: library/X509/Model/X509CertificateSubjectAltName.php
 
 		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateSubjectAltName\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509CertificateSubjectAltName.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateSubjectAltName\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509CertificateSubjectAltName.php
-
-		-
 			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Dn\\:\\:createBehaviors\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: library/X509/Model/X509Dn.php
@@ -1134,46 +1094,6 @@ parameters:
 			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Dn\\:\\:createRelations\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: library/X509/Model/X509Dn.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Dn\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509Dn.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Dn\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509Dn.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Job\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509Job.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Job\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509Job.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509JobRun\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509JobRun.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509JobRun\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509JobRun.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Schedule\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509Schedule.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Schedule\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509Schedule.php
 
 		-
 			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Target\\:\\:createBehaviors\\(\\) has no return type specified\\.$#"
@@ -1187,16 +1107,6 @@ parameters:
 
 		-
 			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Target\\:\\:getColumnDefinitions\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509Target.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Target\\:\\:getColumns\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Model/X509Target.php
-
-		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Target\\:\\:getKeyName\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: library/X509/Model/X509Target.php
 

@@ -7,6 +7,7 @@ namespace Icinga\Module\X509\Model\Behavior;
 use ipl\Orm\Contract\QueryAwareBehavior;
 use ipl\Orm\Contract\RewriteFilterBehavior;
 use ipl\Orm\Query;
+use ipl\Sql\ExpressionInterface;
 use ipl\Stdlib\Filter;
 
 /**
@@ -44,7 +45,9 @@ class ExpressionInjector implements RewriteFilterBehavior, QueryAwareBehavior
                 $subject = $this->query->getModel();
             }
 
-            $expression = clone $subject->getColumns()[$columnName];
+            /** @var ExpressionInterface $column */
+            $column = $subject->getColumns()[$columnName];
+            $expression = clone $column;
             $expression->setColumns($this->query->getResolver()->qualifyColumns(
                 $this->query->getResolver()->requireAndResolveColumns(
                     $expression->getColumns(),

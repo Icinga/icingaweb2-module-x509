@@ -9,6 +9,7 @@ use Exception;
 use Icinga\Application\Logger;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\Common\JobUtils;
 use Icinga\Module\X509\Hook\SniHook;
 use Icinga\Module\X509\Job;
 use Icinga\Module\X509\Model\X509Job;
@@ -27,6 +28,8 @@ use Throwable;
 
 class JobsCommand extends Command
 {
+    use JobUtils;
+
     /**
      * Run all configured jobs based on their schedule
      *
@@ -142,9 +145,11 @@ class JobsCommand extends Command
         $snimap = SniHook::getAll();
         /** @var X509Job $jobConfig */
         foreach ($jobs as $jobConfig) {
-            $job = (new Job($jobConfig->name, $jobConfig->cidrs, $jobConfig->ports, $snimap))
+            $cidrs = $this->parseCIDRs($jobConfig->cidrs);
+            $ports = $this->parsePorts($jobConfig->ports);
+            $job = (new Job($jobConfig->name, $cidrs, $ports, $snimap))
                 ->setId($jobConfig->id)
-                ->setExcludes($jobConfig->exclude_targets);
+                ->setExcludes($this->parseExcludes($jobConfig->exclude_targets));
 
             /** @var Query $schedules */
             $schedules = $jobConfig->schedule;

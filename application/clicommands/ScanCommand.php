@@ -8,6 +8,7 @@ use Exception;
 use Icinga\Application\Logger;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\Common\JobUtils;
 use Icinga\Module\X509\Hook\SniHook;
 use Icinga\Module\X509\Job;
 use Icinga\Module\X509\Model\X509Job;
@@ -17,6 +18,8 @@ use Throwable;
 
 class ScanCommand extends Command
 {
+    use JobUtils;
+
     /**
      * Scan targets to find their X.509 certificates and track changes to them.
      *
@@ -109,12 +112,14 @@ class ScanCommand extends Command
             throw new Exception(sprintf('The job %s does not specify any CIDRs', $name));
         }
 
-        $job = (new Job($name, $jobConfig->cidrs, $jobConfig->ports, SniHook::getAll()))
+        $cidrs = $this->parseCIDRs($jobConfig->cidrs);
+        $ports = $this->parsePorts($jobConfig->ports);
+        $job = (new Job($name, $cidrs, $ports, SniHook::getAll()))
             ->setId($jobConfig->id)
             ->setFullScan($fullScan)
             ->setRescan($rescan)
             ->setParallel($parallel)
-            ->setExcludes($jobConfig->exclude_targets)
+            ->setExcludes($this->parseExcludes($jobConfig->exclude_targets))
             ->setLastScan($sinceLastScan);
 
         $promise = $job->run();

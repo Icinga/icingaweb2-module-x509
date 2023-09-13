@@ -896,11 +896,6 @@ parameters:
 			path: library/X509/Job.php
 
 		-
-			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:__construct\\(\\) has parameter \\$snimap with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: library/X509/Job.php
-
-		-
 			message: "#^Method Icinga\\\\Module\\\\X509\\\\Job\\:\\:finishTarget\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: library/X509/Job.php

@@ -4,127 +4,59 @@
 
 namespace Icinga\Module\X509\Controllers;
 
-use Icinga\Module\X509\Forms\Config\JobConfigForm;
-use Icinga\Module\X509\JobsIniRepository;
-use Icinga\Web\Url;
-use ipl\Html\HtmlElement;
-use ipl\Scheduler\Contract\Frequency;
-use ipl\Scheduler\Cron;
+use Icinga\Module\X509\Common\Database;
+use Icinga\Module\X509\Forms\Jobs\JobConfigForm;
+use Icinga\Module\X509\Model\X509Job;
+use Icinga\Module\X509\Widget\Jobs;
 use ipl\Web\Compat\CompatController;
-use stdClass;
+use ipl\Web\Url;
+use ipl\Web\Widget\ButtonLink;
 
 class JobsController extends CompatController
 {
-    protected function prepareInit()
-    {
-        parent::prepareInit();
-
-        $this->getTabs()->disableLegacyExtensions();
-    }
+    use Database;
 
     /**
      * List all jobs
      */
     public function indexAction()
     {
-        $this->view->tabs = $this->Module()->getConfigTabs()->activate('jobs');
+        $this->addTitleTab($this->translate('Jobs'));
 
-        $repo = new JobsIniRepository();
+        $jobs = X509Job::on($this->getDb());
+        if ($this->hasPermission('config/x509')) {
+            $this->addControl(
+                (new ButtonLink($this->translate('New Job'), Url::fromPath('x509/jobs/new'), 'plus'))
+                    ->openInModal()
+            );
+        }
 
-        $this->view->jobs = $repo->select(array('name'));
+        $sortControl = $this->createSortControl($jobs, [
+            'name'   => $this->translate('Name'),
+            'author' => $this->translate('Author'),
+            'ctime'  => $this->translate('Date Created'),
+            'mtime'  => $this->translate('Date Modified')
+        ]);
+
+        $this->controls->getAttributes()->add('class', 'default-layout');
+        $this->addControl($sortControl);
+
+        $this->addContent(new Jobs($jobs));
     }
 
-    /**
-     * Create a job
-     */
     public function newAction()
-    {
-        $form = $this->prepareForm(true);
-
-        $this->addTitleTab($this->translate('New Job'));
-        $this->addContent($form);
-    }
-
-    /**
-     * Update a job
-     */
-    public function updateAction()
-    {
-        $name = $this->params->getRequired('name');
-        $form = $this->prepareForm();
-
-        $this->addTitleTab($this->translate('Update Job'));
-
-        $this->addContent($form);
-    }
-
-    /**
-     * Remove a job
-     */
-    public function removeAction()
-    {
-        $name = $this->params->getRequired('name');
-        $form = $this->prepareForm();
-
-        $this->addTitleTab($this->translate('Remove Job'));
-
-        $form->prependHtml(HtmlElement::create('h1', null, sprintf($this->translate('Remove job %s'), $name)));
-        $this->addContent($form);
-    }
-
-    /**
-     * Assert config permission and return a prepared RepositoryForm
-     *
-     * @return  JobConfigForm
-     */
-    protected function prepareForm(bool $isNew = false)
     {
         $this->assertPermission('config/x509');
 
-        $repo = new JobsIniRepository();
+        $this->addTitleTab($this->translate('New Job'));
+
         $form = (new JobConfigForm())
-            ->setRedirectUrl(Url::fromPath('x509/jobs'))
-            ->setRepo($repo);
-
-        $values = [];
-        if (! $isNew) {
-            $name = $this->params->getRequired('name');
-            $query = $repo->select()->where('name', $name);
-            /** @var false|stdClass $data */
-            $data = $query->fetchRow();
-            if ($data === false) {
-                $this->httpNotFound($this->translate('Job not found'));
-            }
-
-            if (! isset($data->frequencyType) && ! empty($data->schedule)) {
-                $frequency = new Cron($data->schedule);
-            } elseif (! empty($data->schedule)) {
-                /** @var Frequency $type */
-                $type = $data->frequencyType;
-                $frequency = $type::fromJson($data->schedule);
-            }
-
-            $values = [
-                'name'             => $data->name,
-                'cidrs'            => $data->cidrs,
-                'ports'            => $data->ports,
-                'exclude_targets'  => $data->exclude_targets,
-                'schedule-element' => $frequency ?? []
-            ];
-        }
-
-        $form
-            ->populate($values)
+            ->setAction((string) Url::fromRequest())
             ->on(JobConfigForm::ON_SUCCESS, function () {
-                $this->redirectNow(Url::fromPath('x509/jobs'));
+                $this->closeModalAndRefreshRelatedView(Url::fromPath('x509/jobs'));
             })
             ->handleRequest($this->getServerRequest());
 
-        $parts = $form->getPartUpdates();
-        if (! empty($parts)) {
-            $this->sendMultipartUpdate(...$parts);
-        }
-
-        return $form;
+        $this->addContent($form);
     }
 }

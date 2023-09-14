@@ -67,18 +67,6 @@ CREATE TABLE x509_dn (
   PRIMARY KEY (`hash`,`type`,`order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE x509_job_run (
-  id int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  total_targets int(10) NOT NULL,
-  finished_targets int(10) NOT NULL,
-  start_time bigint unsigned DEFAULT NULL,
-  end_time bigint unsigned DEFAULT NULL,
-  ctime bigint unsigned DEFAULT NULL,
-  mtime bigint unsigned DEFAULT NULL,
-  PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 CREATE TABLE x509_target (
   id int(10) unsigned NOT NULL AUTO_INCREMENT,
   ip binary(16) NOT NULL,
@@ -90,4 +78,45 @@ CREATE TABLE x509_target (
   mtime bigint unsigned DEFAULT NULL,
   PRIMARY KEY (id),
   INDEX x509_idx_target_ip_port (ip, port)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE x509_job (
+  id int(10) unsigned NOT NULL AUTO_INCREMENT,
+  name varchar(255) NOT NULL COLLATE utf8mb4_unicode_ci,
+  author varchar(255) NOT NULL COLLATE utf8mb4_unicode_ci,
+  cidrs text NOT NULL,
+  ports text NOT NULL,
+  exclude_targets text DEFAULT NULL,
+  ctime bigint unsigned NOT NULL,
+  mtime bigint unsigned NOT NULL,
+
+  PRIMARY KEY (id),
+  UNIQUE (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE x509_schedule (
+  id int(10) unsigned NOT NULL AUTO_INCREMENT,
+  job_id int(10) unsigned NOT NULL,
+  name varchar(255) NOT NULL COLLATE utf8mb4_unicode_ci,
+  author varchar(255) NOT NULL COLLATE utf8mb4_unicode_ci,
+  config text NOT NULL, -- json
+  ctime bigint unsigned NOT NULL,
+  mtime bigint unsigned NOT NULL,
+
+  PRIMARY KEY (id),
+  CONSTRAINT fk_x509_schedule_job FOREIGN KEY (job_id) REFERENCES x509_job (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE x509_job_run (
+  id int(10) unsigned NOT NULL AUTO_INCREMENT,
+  job_id int(10) unsigned NOT NULL,
+  schedule_id int(10) unsigned DEFAULT NULL,
+  total_targets int(10) NOT NULL,
+  finished_targets int(10) NOT NULL,
+  start_time bigint unsigned DEFAULT NULL,
+  end_time bigint unsigned DEFAULT NULL,
+
+  PRIMARY KEY (id),
+  CONSTRAINT fk_x509_job_run_job FOREIGN KEY (job_id) REFERENCES x509_job (id) ON DELETE CASCADE,
+  CONSTRAINT fk_x509_job_run_schedule FOREIGN KEY (schedule_id) REFERENCES x509_schedule (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -30,6 +30,8 @@ parameters:
 
         - '#Binary operation .* between GMP and .* results in an error#'
 
+        - '#Access to an undefined property (Icinga\\Module\\X509\\Model\\.*|ipl\\Orm\\Query::.*)#'
+
     universalObjectCratesClasses:
         - ipl\Orm\Model
         - Icinga\Web\View

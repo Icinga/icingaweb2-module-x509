@@ -4,19 +4,22 @@
 
 namespace Icinga\Module\X509\Clicommands;
 
-use DateTime;
 use Exception;
 use Icinga\Application\Logger;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\Common\JobUtils;
 use Icinga\Module\X509\Hook\SniHook;
 use Icinga\Module\X509\Job;
-use InvalidArgumentException;
+use Icinga\Module\X509\Model\X509Job;
+use ipl\Stdlib\Filter;
 use React\EventLoop\Loop;
 use Throwable;
 
 class ScanCommand extends Command
 {
+    use JobUtils;
+
     /**
      * Scan targets to find their X.509 certificates and track changes to them.
      *
@@ -44,6 +47,10 @@ class ScanCommand extends Command
      *     Scan targets whose last scan is older than the specified date/time,
      *     which can also be an English textual datetime description like "2 days".
      *     Defaults to "-24 hours".
+     *
+     * --parallel=<number>
+     *     Allow parallel scanning of targets up to the specified number. Defaults to 256.
+     *     May cause **too many open files** error if set to a number higher than the configured one (ulimit).
      *
      * --rescan
      *     Rescan only targets that have been scanned before.
@@ -74,51 +81,45 @@ class ScanCommand extends Command
      *
      *     icingacli x509 scan --job <name> --full
      */
-    public function indexAction()
+    public function indexAction(): void
     {
+        /** @var string $name */
         $name = $this->params->shiftRequired('job');
         $fullScan = (bool) $this->params->get('full', false);
         $rescan = (bool) $this->params->get('rescan', false);
 
-        $parallel = (int) $this->Config()->get('scan', 'parallel', 256);
+        /** @var string $sinceLastScan */
+        $sinceLastScan = $this->params->get('since-last-scan', Job::DEFAULT_SINCE_LAST_SCAN);
+        if ($sinceLastScan === 'null') {
+            $sinceLastScan = null;
+        }
+
+        /** @var int $parallel */
+        $parallel = $this->params->get('parallel', Job::DEFAULT_PARALLEL);
         if ($parallel <= 0) {
             throw new Exception('The \'parallel\' option must be set to at least 1');
         }
 
-        $jobs = $this->Config('jobs');
-        if (! $jobs->hasSection($name)) {
+        /** @var X509Job $jobConfig */
+        $jobConfig = X509Job::on($this->getDb())
+            ->filter(Filter::equal('name', $name))
+            ->first();
+        if ($jobConfig === null) {
             throw new Exception(sprintf('Job %s not found', $name));
         }
 
-        $jobDescription = $this->Config('jobs')->getSection($name);
-        if (! strlen($jobDescription->get('cidrs'))) {
+        if (! strlen($jobConfig->cidrs)) {
             throw new Exception(sprintf('The job %s does not specify any CIDRs', $name));
         }
 
-        $sinceLastScan = $this->params->get('since-last-scan', '-24 hours');
-        if ($sinceLastScan === 'null') {
-            $sinceLastScan = null;
-        } else {
-            if ($sinceLastScan[0] !== '-') {
-                // When the user specified "2 days" as a threshold strtotime() will compute the
-                // timestamp NOW() + 2 days, but it has to be NOW() + (-2 days)
-                $sinceLastScan = "-$sinceLastScan";
-            }
-
-            try {
-                $sinceLastScan = new DateTime($sinceLastScan);
-            } catch (Exception $_) {
-                throw new InvalidArgumentException(sprintf(
-                    'The specified last scan time is in an unknown format: %s',
-                    $this->params->get('since-last-scan')
-                ));
-            }
-        }
-
-        $job = (new Job($name, $jobDescription, SniHook::getAll()))
+        $cidrs = $this->parseCIDRs($jobConfig->cidrs);
+        $ports = $this->parsePorts($jobConfig->ports);
+        $job = (new Job($name, $cidrs, $ports, SniHook::getAll()))
+            ->setId($jobConfig->id)
             ->setFullScan($fullScan)
             ->setRescan($rescan)
             ->setParallel($parallel)
+            ->setExcludes($this->parseExcludes($jobConfig->exclude_targets))
             ->setLastScan($sinceLastScan);
 
         $promise = $job->run();

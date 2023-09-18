@@ -71,10 +71,11 @@ class DbMigration extends DbMigrationHook
                 // We have also added Postgres support with x509 version 1.2 and never had an upgrade scripts until now.
                 $this->version = '1.2.0';
             } elseif (static::getColumnType($conn, 'x509_certificate_subject_alt_name', 'hash') !== null) {
-                // We know for sure that x509 version 1.0 has been applied, though not whether x509 version 1.1.0
-                // did too. Therefore, we have modified the 1.1.0 upgrade script to run multiple times without any
-                // errors so that we can use 1.0 as the last (migrated) version.
-                $this->version = '1.0.0';
+                if (static::getColumnType($conn, 'x509_certificate', 'valid_from') === 'bigint(20) unsigned') {
+                    $this->version = '1.0.0';
+                } else {
+                    $this->version = '1.1.0';
+                }
             } else {
                 // X509 version 1.0 was the first release of this module, but due to some reason it also contains
                 // an upgrade script and adds `hash` column. However, if this column doesn't exist yet, we need

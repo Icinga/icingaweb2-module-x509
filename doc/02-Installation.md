@@ -33,7 +33,7 @@ You can use the following sample command for creating the MySQL/MariaDB database
 
 ```
 CREATE DATABASE x509;
-GRANT SELECT, INSERT, UPDATE, DELETE, DROP, CREATE VIEW, INDEX, EXECUTE ON x509.* TO x509@localhost IDENTIFIED BY 'secret';
+GRANT CREATE, SELECT, INSERT, UPDATE, DELETE, DROP, ALTER, CREATE VIEW, INDEX, EXECUTE ON x509.* TO x509@localhost IDENTIFIED BY 'secret';
 ```
 
 After, you can import the schema using the following command:

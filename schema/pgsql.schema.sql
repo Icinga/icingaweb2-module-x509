@@ -146,3 +146,17 @@ CREATE TABLE x509_job_run (
   CONSTRAINT fk_x509_job_run_job FOREIGN KEY (job_id) REFERENCES x509_job (id) ON DELETE CASCADE,
   CONSTRAINT fk_x509_job_run_schedule FOREIGN KEY (schedule_id) REFERENCES x509_schedule (id) ON DELETE CASCADE
 );
+
+CREATE TABLE x509_schema (
+  id serial,
+  version varchar(64) NOT NULL,
+  timestamp bigint NOT NULL,
+  success boolenum DEFAULT NULL,
+  reason text DEFAULT NULL,
+
+  CONSTRAINT pk_x509_schema PRIMARY KEY (id),
+  CONSTRAINT idx_x509_schema_version UNIQUE (version)
+);
+
+INSERT INTO x509_schema (version, timestamp, success)
+  VALUES ('1.3.0', UNIX_TIMESTAMP() * 1000, 'y');

@@ -25,6 +25,11 @@ class Links
         return Url::fromPath('x509/job/schedules', ['id' => $job->id]);
     }
 
+    public static function sni(X509Job $job): Url
+    {
+        return Url::fromPath('x509/sni', ['jobid' => $job->id]);
+    }
+
     public static function scheduleJob(X509Job $job): Url
     {
         return Url::fromPath('x509/job/schedule', ['id' => $job->id]);

@@ -15,7 +15,7 @@
             ]
         ) ?>
     </div>
-    <?php /** @var \Icinga\Repository\RepositoryQuery $sni */ if (! $sni->hasResult()): ?>
+    <?php /** @var array $sni */ if (count($sni) == 0): ?>
         <p><?= $this->escape($this->translate('No SNI maps configured yet.')) ?></p>
     <?php else: ?>
         <table class="common-table table-row-selectable" data-base-target="_next">

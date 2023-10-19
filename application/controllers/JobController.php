@@ -223,6 +223,9 @@ class JobController extends CompatController
             ->add('schedules', [
                 'label' => $this->translate('Schedules'),
                 'url'   => Links::schedules($this->job)
+            ])->add('sni', [
+                'label' => $this->translate('SNI'),
+                'url'   => Links::sni($this->job)
             ]);
     }
 }

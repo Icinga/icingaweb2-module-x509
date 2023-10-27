@@ -20,20 +20,14 @@ $section->add(N_('Certificate Usage'), array(
     'priority'  => 20
 ));
 
-$section->add(N_('Jobs'), [
+$section->add(N_('Configuration'), [
     'url'         => 'x509/jobs',
     'priority'    => 100,
-    'description' => $this->translate('Configure the scan jobs')
+    'description' => $this->translate('Configure the scan jobs and SNI map')
 ]);
 
 $this->provideConfigTab('backend', array(
     'title' => $this->translate('Configure the database backend'),
     'label' => $this->translate('Backend'),
     'url' => 'config/backend'
-));
-
-$this->provideConfigTab('sni', array(
-    'title' => $this->translate('Configure SNI'),
-    'label' => $this->translate('SNI'),
-    'url' => 'sni'
 ));

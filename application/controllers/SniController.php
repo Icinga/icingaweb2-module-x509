@@ -7,17 +7,34 @@ namespace Icinga\Module\X509\Controllers;
 use Icinga\Exception\NotFoundError;
 use Icinga\Module\X509\Forms\Config\SniConfigForm;
 use Icinga\Module\X509\SniIniRepository;
-use Icinga\Web\Controller;
-use Icinga\Web\Url;
+use ipl\Html\HtmlString;
+use ipl\Web\Compat\CompatController;
+use ipl\Web\Url;
+use ipl\Web\Widget\ButtonLink;
 
-class SniController extends Controller
+class SniController extends CompatController
 {
     /**
      * List all maps
      */
     public function indexAction()
     {
-        $this->view->tabs = $this->Module()->getConfigTabs()->activate('sni');
+        $this->getTabs()->add('jobs', [
+            'title'      => $this->translate('Configure Jobs'),
+            'label'      => $this->translate('Jobs'),
+            'url'        => 'x509/jobs',
+            'baseTarget' => '_main'
+
+        ]);
+        $this->addTitleTab($this->translate('SNI'));
+
+        $this->addControl(
+            (new ButtonLink($this->translate('New SNI Map'), Url::fromPath('x509/sni/new'), 'plus'))
+                ->openInModal()
+        );
+        $this->controls->getAttributes()->add('class', 'default-layout');
+
+        $this->view->controls = $this->controls;
 
         $repo = new SniIniRepository();
 
@@ -29,11 +46,13 @@ class SniController extends Controller
      */
     public function newAction()
     {
+        $this->addTitleTab($this->translate('New SNI Map'));
+
         $form = $this->prepareForm()->add();
 
         $form->handleRequest();
 
-        $this->renderForm($form, $this->translate('New SNI Map'));
+        $this->addContent(new HtmlString($form->render()));
     }
 
     /**

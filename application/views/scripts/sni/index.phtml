@@ -1,20 +1,5 @@
-<div class="controls">
-    <?= /** @var \Icinga\Web\Widget\Tabs $tabs */ $tabs ?>
-</div>
+<?= $this->controls->render() ?>
 <div class="content">
-    <div class="actions">
-        <?= $this->qlink(
-            $this->translate('Create a New SNI Map') ,
-            'x509/sni/new',
-            null,
-            [
-                'class'             => 'button-link',
-                'data-base-target'  => '_next',
-                'icon'              => 'plus',
-                'title'             => $this->translate('Create a New SNI Map')
-            ]
-        ) ?>
-    </div>
     <?php /** @var \Icinga\Repository\RepositoryQuery $sni */ if (! $sni->hasResult()): ?>
         <p><?= $this->escape($this->translate('No SNI maps configured yet.')) ?></p>
     <?php else: ?>

@@ -22,6 +22,12 @@ class JobsController extends CompatController
     public function indexAction()
     {
         $this->addTitleTab($this->translate('Jobs'));
+        $this->getTabs()->add('sni', [
+            'title'      => $this->translate('Configure SNI'),
+            'label'      => $this->translate('SNI'),
+            'url'        => 'x509/sni',
+            'baseTarget' => '_main'
+        ]);
 
         $jobs = X509Job::on($this->getDb());
         if ($this->hasPermission('config/x509')) {

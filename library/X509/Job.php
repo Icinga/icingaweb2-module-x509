@@ -305,7 +305,7 @@ class Job implements Task
 
     public function updateLastScan($target)
     {
-        if (! $this->isRescan() || ! isset($target->id)) {
+        if (! $this->isRescan() && ! isset($target->id)) {
             return;
         }
 

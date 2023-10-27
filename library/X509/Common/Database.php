@@ -19,7 +19,7 @@ trait Database
     protected function getDb(): Sql\Connection
     {
         $config = new Sql\Config(ResourceFactory::getResourceConfig(
-            Config::module('x509')->get('backend', 'resource')
+            Config::module('x509')->get('backend', 'resource', 'x509')
         ));
 
         $options = [PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ];

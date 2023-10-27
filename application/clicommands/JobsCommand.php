@@ -6,7 +6,9 @@ namespace Icinga\Module\X509\Clicommands;
 
 use DateTime;
 use Exception;
+use Icinga\Application\Config;
 use Icinga\Application\Logger;
+use Icinga\Data\ResourceFactory;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
 use Icinga\Module\X509\Common\JobUtils;
@@ -81,7 +83,20 @@ class JobsCommand extends Command
         // Periodically check configuration changes to ensure that new jobs are scheduled, jobs are updated,
         // and deleted jobs are canceled.
         $watchdog = function () use (&$watchdog, &$scheduled, $scheduler, $parallel, $jobName, $scheduleName) {
-            $jobs = $this->fetchSchedules($jobName, $scheduleName);
+            $jobs = [];
+            try {
+                // Since this is a long-running daemon, the resources or module config may change meanwhile.
+                // Therefore, reload the resources and module config from disk each time (at 5m intervals)
+                // before reconnecting to the database.
+                ResourceFactory::setConfig(Config::app('resources', true));
+                Config::module('x509', 'config', true);
+
+                $jobs = $this->fetchSchedules($jobName, $scheduleName);
+            } catch (Throwable $err) {
+                Logger::error('Failed to fetch job schedules from the database: %s', $err);
+                Logger::debug($err->getTraceAsString());
+            }
+
             $outdatedJobs = array_diff_key($scheduled, $jobs);
             foreach ($outdatedJobs as $job) {
                 Logger::info(

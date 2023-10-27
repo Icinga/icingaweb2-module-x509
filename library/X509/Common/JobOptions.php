@@ -146,8 +146,8 @@ trait JobOptions
 
         /** @var stdClass $config */
         $config = $schedule->getConfig();
-        $this->setRescan($config->rescan);
-        $this->setFullScan($config->full_scan);
+        $this->setFullScan($config->full_scan ?? false);
+        $this->setRescan($config->rescan ?? false);
         $this->setLastScan($config->since_last_scan ?? Job::DEFAULT_SINCE_LAST_SCAN);
 
         return $this;

@@ -20,7 +20,7 @@ trait JobOptions
     /** @var bool Whether this job should perform a full scan */
     protected $fullScan;
 
-    /** @var ?DateTime Since last scan threshold used to filter out scan targets */
+    /** @var ?string Since last scan threshold used to filter out scan targets */
     protected $sinceLastScan;
 
     /** @var int Used to control how many targets can be scanned in parallel */
@@ -97,7 +97,10 @@ trait JobOptions
             }
 
             try {
-                $this->sinceLastScan = new DateTime($sinceLastScan);
+                // Ensure it's a valid date time string representation.
+                new DateTime($sinceLastScan);
+
+                $this->sinceLastScan = $sinceLastScan;
             } catch (Exception $_) {
                 throw new InvalidArgumentException(sprintf(
                     'The specified last scan time is in an unknown format: %s',
@@ -116,7 +119,11 @@ trait JobOptions
      */
     public function getSinceLastScan(): ?DateTime
     {
-        return $this->sinceLastScan;
+        if (! $this->sinceLastScan) {
+            return null;
+        }
+
+        return new DateTime($this->sinceLastScan);
     }
 
     /**

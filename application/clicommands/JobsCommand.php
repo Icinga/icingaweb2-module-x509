@@ -172,7 +172,6 @@ class JobsCommand extends Command
                 $schedules->filter(Filter::equal('name', $scheduleName));
             }
 
-            $jobSchedules = [];
             /** @var X509Schedule $scheduleModel */
             foreach ($schedules as $scheduleModel) {
                 $schedule = Schedule::fromModel($scheduleModel);

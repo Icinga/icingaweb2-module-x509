@@ -162,9 +162,6 @@ class JobsCommand extends Command
         foreach ($jobs as $jobConfig) {
             $cidrs = $this->parseCIDRs($jobConfig->cidrs);
             $ports = $this->parsePorts($jobConfig->ports);
-            $job = (new Job($jobConfig->name, $cidrs, $ports, $snimap))
-                ->setId($jobConfig->id)
-                ->setExcludes($this->parseExcludes($jobConfig->exclude_targets));
 
             /** @var Query $schedules */
             $schedules = $jobConfig->schedule;
@@ -172,18 +169,25 @@ class JobsCommand extends Command
                 $schedules->filter(Filter::equal('name', $scheduleName));
             }
 
+            $schedules = $schedules->execute();
+            $hasSchedules = $schedules->hasResult();
+
             /** @var X509Schedule $scheduleModel */
             foreach ($schedules as $scheduleModel) {
-                $schedule = Schedule::fromModel($scheduleModel);
-                $job = (clone $job)
-                    ->setSchedule($schedule)
-                    ->setUuid(Uuid::fromBytes($job->getChecksum()));
+                $job = (new Job($jobConfig->name, $cidrs, $ports, $snimap, Schedule::fromModel($scheduleModel)))
+                    ->setId($jobConfig->id)
+                    ->setExcludes($this->parseExcludes($jobConfig->exclude_targets));
+
+                // The Job class sets the uuid in its constructor, but since the excluded targets are also hashed as
+                // part of the job's uuid and the excluded targets are set after the job construction, we have to
+                // reset the uuid afterwards. Otherwise, it won't notice when updating the "exclude_targets" column.
+                $job->setUuid(Uuid::fromBytes($job->getChecksum()));
 
                 $jobSchedules[$job->getUuid()->toString()] = $job;
             }
 
-            if (! isset($jobSchedules[$job->getUuid()->toString()])) {
-                Logger::info('Skipping job %s because no schedules are configured', $job->getName());
+            if (! $hasSchedules) {
+                Logger::info('Skipping job %s because no schedules are configured', $jobConfig->name);
             }
         }
 

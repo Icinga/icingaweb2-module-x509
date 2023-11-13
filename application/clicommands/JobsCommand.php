@@ -107,10 +107,12 @@ class JobsCommand extends Command
                 );
 
                 $scheduler->remove($job);
+
+                unset($scheduled[$job->getUuid()->toString()]);
             }
 
             $newJobs = array_diff_key($jobs, $scheduled);
-            foreach ($newJobs as $job) {
+            foreach ($newJobs as $key => $job) {
                 $job->setParallel($parallel);
 
                 /** @var stdClass $config */
@@ -131,9 +133,9 @@ class JobsCommand extends Command
                 }
 
                 $scheduler->schedule($job, $frequency);
-            }
 
-            $scheduled = $jobs;
+                $scheduled[$key] = $job;
+            }
 
             Loop::addTimer(5 * 60, $watchdog);
         };

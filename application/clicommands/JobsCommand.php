@@ -22,7 +22,6 @@ use ipl\Orm\Query;
 use ipl\Scheduler\Contract\Frequency;
 use ipl\Scheduler\Scheduler;
 use ipl\Stdlib\Filter;
-use Ramsey\Uuid\Uuid;
 use React\EventLoop\Loop;
 use React\Promise\ExtendedPromiseInterface;
 use stdClass;
@@ -179,11 +178,6 @@ class JobsCommand extends Command
                 $job = (new Job($jobConfig->name, $cidrs, $ports, $snimap, Schedule::fromModel($scheduleModel)))
                     ->setId($jobConfig->id)
                     ->setExcludes($this->parseExcludes($jobConfig->exclude_targets));
-
-                // The Job class sets the uuid in its constructor, but since the excluded targets are also hashed as
-                // part of the job's uuid and the excluded targets are set after the job construction, we have to
-                // reset the uuid afterwards. Otherwise, it won't notice when updating the "exclude_targets" column.
-                $job->setUuid(Uuid::fromBytes($job->getChecksum()));
 
                 $jobSchedules[$job->getUuid()->toString()] = $job;
             }

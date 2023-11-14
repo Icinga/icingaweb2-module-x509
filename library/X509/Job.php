@@ -24,6 +24,7 @@ use ipl\Sql\Expression;
 use ipl\Stdlib\Filter;
 use LogicException;
 use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 use React\EventLoop\Loop;
 use React\Promise;
 use React\Socket\ConnectionInterface;
@@ -110,7 +111,6 @@ class Job implements Task
         }
 
         $this->setName($name);
-        $this->setUuid(Uuid::fromBytes($this->getChecksum()));
     }
 
     /**
@@ -205,6 +205,15 @@ class Job implements Task
         $this->id = $id;
 
         return $this;
+    }
+
+    public function getUuid(): UuidInterface
+    {
+        if (! $this->uuid) {
+            $this->setUuid(Uuid::fromBytes($this->getChecksum()));
+        }
+
+        return $this->uuid;
     }
 
     /**

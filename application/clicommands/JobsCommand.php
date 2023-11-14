@@ -22,7 +22,6 @@ use ipl\Orm\Query;
 use ipl\Scheduler\Contract\Frequency;
 use ipl\Scheduler\Scheduler;
 use ipl\Stdlib\Filter;
-use Ramsey\Uuid\Uuid;
 use React\EventLoop\Loop;
 use React\Promise\ExtendedPromiseInterface;
 use stdClass;
@@ -107,10 +106,12 @@ class JobsCommand extends Command
                 );
 
                 $scheduler->remove($job);
+
+                unset($scheduled[$job->getUuid()->toString()]);
             }
 
             $newJobs = array_diff_key($jobs, $scheduled);
-            foreach ($newJobs as $job) {
+            foreach ($newJobs as $key => $job) {
                 $job->setParallel($parallel);
 
                 /** @var stdClass $config */
@@ -131,9 +132,9 @@ class JobsCommand extends Command
                 }
 
                 $scheduler->schedule($job, $frequency);
-            }
 
-            $scheduled = $jobs;
+                $scheduled[$key] = $job;
+            }
 
             Loop::addTimer(5 * 60, $watchdog);
         };
@@ -162,9 +163,6 @@ class JobsCommand extends Command
         foreach ($jobs as $jobConfig) {
             $cidrs = $this->parseCIDRs($jobConfig->cidrs);
             $ports = $this->parsePorts($jobConfig->ports);
-            $job = (new Job($jobConfig->name, $cidrs, $ports, $snimap))
-                ->setId($jobConfig->id)
-                ->setExcludes($this->parseExcludes($jobConfig->exclude_targets));
 
             /** @var Query $schedules */
             $schedules = $jobConfig->schedule;
@@ -172,18 +170,20 @@ class JobsCommand extends Command
                 $schedules->filter(Filter::equal('name', $scheduleName));
             }
 
+            $schedules = $schedules->execute();
+            $hasSchedules = $schedules->hasResult();
+
             /** @var X509Schedule $scheduleModel */
             foreach ($schedules as $scheduleModel) {
-                $schedule = Schedule::fromModel($scheduleModel);
-                $job = (clone $job)
-                    ->setSchedule($schedule)
-                    ->setUuid(Uuid::fromBytes($job->getChecksum()));
+                $job = (new Job($jobConfig->name, $cidrs, $ports, $snimap, Schedule::fromModel($scheduleModel)))
+                    ->setId($jobConfig->id)
+                    ->setExcludes($this->parseExcludes($jobConfig->exclude_targets));
 
                 $jobSchedules[$job->getUuid()->toString()] = $job;
             }
 
-            if (! isset($jobSchedules[$job->getUuid()->toString()])) {
-                Logger::info('Skipping job %s because no schedules are configured', $job->getName());
+            if (! $hasSchedules) {
+                Logger::info('Skipping job %s because no schedules are configured', $jobConfig->name);
             }
         }
 

@@ -6,6 +6,7 @@ namespace Icinga\Module\X509\Controllers;
 
 use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\CertificateUtils;
+use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\Donut;
 use Icinga\Module\X509\Model\X509Certificate;
@@ -22,7 +23,7 @@ class DashboardController extends Controller
         $this->getTabs()->disableLegacyExtensions();
 
         try {
-            $db = $this->getDb();
+            $db = Database::get();
         } catch (ConfigurationError $_) {
             $this->render('missing-resource', null, true);
             return;

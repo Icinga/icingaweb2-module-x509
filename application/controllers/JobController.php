@@ -26,8 +26,6 @@ use stdClass;
 
 class JobController extends CompatController
 {
-    use Database;
-
     /** @var X509Job */
     protected $job;
 
@@ -41,7 +39,7 @@ class JobController extends CompatController
         $jobId = $this->params->getRequired('id');
 
         /** @var X509Job $job */
-        $job = X509Job::on($this->getDb())
+        $job = X509Job::on(Database::get())
             ->filter(Filter::equal('id', $jobId))
             ->first();
 
@@ -164,7 +162,7 @@ class JobController extends CompatController
         /** @var int $id */
         $id = $this->params->getRequired('scheduleId');
         /** @var X509Schedule $schedule */
-        $schedule = X509Schedule::on($this->getDb())
+        $schedule = X509Schedule::on(Database::get())
             ->filter(Filter::equal('id', $id))
             ->first();
         if ($schedule === null) {

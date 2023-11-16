@@ -8,6 +8,7 @@ use Exception;
 use Icinga\Application\Logger;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Common\JobUtils;
 use Icinga\Module\X509\Hook\SniHook;
 use Icinga\Module\X509\Job;
@@ -101,7 +102,7 @@ class ScanCommand extends Command
         }
 
         /** @var X509Job $jobConfig */
-        $jobConfig = X509Job::on($this->getDb())
+        $jobConfig = X509Job::on(Database::get())
             ->filter(Filter::equal('name', $name))
             ->first();
         if ($jobConfig === null) {
@@ -142,7 +143,7 @@ class ScanCommand extends Command
                 Logger::info('Scanned %d target(s) from job %s', $targets, $job->getName());
 
                 try {
-                    $verified = CertificateUtils::verifyCertificates($this->getDb());
+                    $verified = CertificateUtils::verifyCertificates(Database::get());
 
                     Logger::info('Checked %d certificate chain(s)', $verified);
                 } catch (Exception $err) {

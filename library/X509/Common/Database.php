@@ -9,14 +9,35 @@ use Icinga\Data\ResourceFactory;
 use ipl\Sql;
 use PDO;
 
-trait Database
+final class Database
 {
+    /** @var Sql\Connection Database connection */
+    private static $instance;
+
+    private function __construct()
+    {
+    }
+
+    /**
+     * Get the database connection
+     *
+     * @return Sql\Connection
+     */
+    public static function get(): Sql\Connection
+    {
+        if (self::$instance === null) {
+            self::$instance = self::getDb();
+        }
+
+        return self::$instance;
+    }
+
     /**
      * Get the connection to the X.509 database
      *
      * @return  Sql\Connection
      */
-    protected function getDb(): Sql\Connection
+    private static function getDb(): Sql\Connection
     {
         $config = new Sql\Config(ResourceFactory::getResourceConfig(
             Config::module('x509')->get('backend', 'resource', 'x509')

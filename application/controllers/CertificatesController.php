@@ -6,6 +6,7 @@ namespace Icinga\Module\X509\Controllers;
 
 use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\CertificatesTable;
+use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\Model\X509Certificate;
 use Icinga\Module\X509\Web\Control\SearchBar\ObjectSuggestions;
@@ -21,7 +22,7 @@ class CertificatesController extends Controller
         $this->getTabs()->enableDataExports();
 
         try {
-            $conn = $this->getDb();
+            $conn = Database::get();
         } catch (ConfigurationError $_) {
             $this->render('missing-resource', null, true);
 
@@ -105,7 +106,7 @@ class CertificatesController extends Controller
 
     public function searchEditorAction()
     {
-        $editor = $this->createSearchEditor(X509Certificate::on($this->getDb()), [
+        $editor = $this->createSearchEditor(X509Certificate::on(Database::get()), [
             LimitControl::DEFAULT_LIMIT_PARAM,
             SortControl::DEFAULT_SORT_PARAM
         ]);

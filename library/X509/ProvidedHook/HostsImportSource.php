@@ -4,6 +4,7 @@
 
 namespace Icinga\Module\X509\ProvidedHook;
 
+use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Job;
 use Icinga\Module\X509\Model\X509Target;
 use ipl\Sql;
@@ -12,7 +13,8 @@ class HostsImportSource extends X509ImportSource
 {
     public function fetchData()
     {
-        $targets = X509Target::on($this->getDb())
+        $conn = Database::get();
+        $targets = X509Target::on($conn)
             ->utilize('chain')
             ->utilize('chain.certificate')
             ->columns([
@@ -25,7 +27,7 @@ class HostsImportSource extends X509ImportSource
             ->where(new Sql\Expression('target_chain_link.order = 0'))
             ->groupBy(['ip', 'hostname']);
 
-        if ($this->getDb()->getAdapter() instanceof Sql\Adapter\Pgsql) {
+        if ($conn->getAdapter() instanceof Sql\Adapter\Pgsql) {
             $targets->withColumns([
                 'host_ports' => new Sql\Expression("ARRAY_TO_STRING(ARRAY_AGG(DISTINCT port), ',')")
             ]);

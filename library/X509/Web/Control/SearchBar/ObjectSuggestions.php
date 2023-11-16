@@ -18,8 +18,6 @@ use ipl\Web\Control\SearchBar\Suggestions;
 
 class ObjectSuggestions extends Suggestions
 {
-    use Database;
-
     /** @var Model */
     protected $model;
 
@@ -57,7 +55,7 @@ class ObjectSuggestions extends Suggestions
     protected function createQuickSearchFilter($searchTerm)
     {
         $model = $this->model;
-        $resolver = $model::on($this->getDb())->getResolver();
+        $resolver = $model::on(Database::get())->getResolver();
 
         $quickFilter = Filter::any();
         foreach ($model->getSearchColumns() as $column) {
@@ -72,7 +70,7 @@ class ObjectSuggestions extends Suggestions
     protected function fetchValueSuggestions($column, $searchTerm, Filter\Chain $searchFilter)
     {
         $model = $this->model;
-        $query = $model::on($this->getDb());
+        $query = $model::on(Database::get());
         $query->limit(static::DEFAULT_LIMIT);
 
         if (strpos($column, ' ') !== false) {
@@ -149,7 +147,7 @@ class ObjectSuggestions extends Suggestions
     protected function fetchColumnSuggestions($searchTerm)
     {
         $model = $this->model;
-        $query = $model::on($this->getDb());
+        $query = $model::on(Database::get());
 
         yield from self::collectFilterColumns($model, $query->getResolver());
     }

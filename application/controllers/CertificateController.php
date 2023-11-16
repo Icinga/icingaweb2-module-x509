@@ -6,6 +6,7 @@ namespace Icinga\Module\X509\Controllers;
 
 use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\CertificateDetails;
+use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\Model\X509Certificate;
 use ipl\Stdlib\Filter;
@@ -20,7 +21,7 @@ class CertificateController extends Controller
         $certId = $this->params->getRequired('cert');
 
         try {
-            $conn = $this->getDb();
+            $conn = Database::get();
         } catch (ConfigurationError $_) {
             $this->render('missing-resource', null, true);
 

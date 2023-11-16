@@ -8,6 +8,7 @@ use DateTime;
 use Icinga\Application\Logger;
 use Icinga\Authentication\Auth;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Job;
 use Icinga\Repository\IniRepository;
 use Icinga\User;
@@ -64,7 +65,7 @@ class MigrateCommand extends Command
             ];
         };
 
-        $conn = $this->getDb();
+        $conn = Database::get();
         $conn->transaction(function (Connection $conn) use ($repo) {
             /** @var User $user */
             $user = Auth::getInstance()->getUser();

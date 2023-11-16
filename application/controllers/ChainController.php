@@ -6,6 +6,7 @@ namespace Icinga\Module\X509\Controllers;
 
 use Icinga\Exception\ConfigurationError;
 use Icinga\Module\X509\ChainDetails;
+use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Controller;
 use Icinga\Module\X509\Model\X509Certificate;
 use Icinga\Module\X509\Model\X509CertificateChain;
@@ -23,7 +24,7 @@ class ChainController extends Controller
         $id = $this->params->getRequired('id');
 
         try {
-            $conn = $this->getDb();
+            $conn = Database::get();
         } catch (ConfigurationError $_) {
             $this->render('missing-resource', null, true);
             return;

@@ -14,8 +14,6 @@ use ipl\Web\Widget\ButtonLink;
 
 class JobsController extends CompatController
 {
-    use Database;
-
     /**
      * List all jobs
      */
@@ -29,7 +27,7 @@ class JobsController extends CompatController
             'baseTarget' => '_main'
         ]);
 
-        $jobs = X509Job::on($this->getDb());
+        $jobs = X509Job::on(Database::get());
         if ($this->hasPermission('config/x509')) {
             $this->addControl(
                 (new ButtonLink($this->translate('New Job'), Url::fromPath('x509/jobs/new'), 'plus'))

@@ -5,7 +5,6 @@
 namespace Icinga\Module\X509;
 
 use Icinga\File\Csv;
-use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Web\Control\SearchBar\ObjectSuggestions;
 use Icinga\Util\Json;
 use ipl\Html\Html;
@@ -17,7 +16,6 @@ use ipl\Web\Filter\QueryString;
 
 class Controller extends CompatController
 {
-    use Database;
     use SearchControls;
 
     /** @var Filter\Rule */

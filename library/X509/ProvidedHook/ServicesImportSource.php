@@ -4,6 +4,7 @@
 
 namespace Icinga\Module\X509\ProvidedHook;
 
+use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Job;
 use Icinga\Module\X509\Model\X509CertificateSubjectAltName;
 use Icinga\Module\X509\Model\X509Target;
@@ -13,7 +14,8 @@ class ServicesImportSource extends X509ImportSource
 {
     public function fetchData()
     {
-        $targets = X509Target::on($this->getDb())
+        $conn = Database::get();
+        $targets = X509Target::on($conn)
             ->with([
                 'chain',
                 'chain.certificate',
@@ -41,13 +43,13 @@ class ServicesImportSource extends X509ImportSource
             ->where(new Sql\Expression('target_chain_link.order = 0'))
             ->groupBy(['ip, hostname, port']);
 
-        $certAltName = X509CertificateSubjectAltName::on($this->getDb());
+        $certAltName = X509CertificateSubjectAltName::on($conn);
         $certAltName
             ->getSelectBase()
             ->where(new Sql\Expression('certificate_id = target_chain_certificate.id'))
             ->groupBy(['alt_name.certificate_id']);
 
-        if ($this->getDb()->getAdapter() instanceof Sql\Adapter\Pgsql) {
+        if ($conn->getAdapter() instanceof Sql\Adapter\Pgsql) {
             $targets
                 ->withColumns([
                     'cert_fingerprint' => new Sql\Expression("ENCODE(%s, 'hex')", [

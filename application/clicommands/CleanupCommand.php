@@ -9,6 +9,7 @@ use Exception;
 use Icinga\Application\Logger;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\Common\Database;
 use InvalidArgumentException;
 use Throwable;
 
@@ -62,7 +63,7 @@ class CleanupCommand extends Command
         }
 
         try {
-            $conn = $this->getDb();
+            $conn = Database::get();
             $query = $conn->delete(
                 'x509_target',
                 ['last_scan < ?' => $sinceLastScan->format('Uv')]

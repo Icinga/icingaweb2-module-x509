@@ -66,27 +66,7 @@ parameters:
 			path: application/clicommands/CheckCommand.php
 
 		-
-			message: "#^Cannot access offset 0 on mixed\\.$#"
-			count: 1
-			path: application/clicommands/CleanupCommand.php
-
-		-
 			message: "#^Method Icinga\\\\Module\\\\X509\\\\Clicommands\\\\CleanupCommand\\:\\:indexAction\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: application/clicommands/CleanupCommand.php
-
-		-
-			message: "#^Parameter \\#1 \\$datetime of class DateTime constructor expects string, mixed given\\.$#"
-			count: 1
-			path: application/clicommands/CleanupCommand.php
-
-		-
-			message: "#^Parameter \\#2 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#"
-			count: 1
-			path: application/clicommands/CleanupCommand.php
-
-		-
-			message: "#^Part \\$lastScan \\(mixed\\) of encapsed string cannot be cast to string\\.$#"
 			count: 1
 			path: application/clicommands/CleanupCommand.php
 

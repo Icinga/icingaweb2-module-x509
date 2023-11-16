@@ -24,6 +24,10 @@ class CleanupCommand extends Command
      * after the specified period. Any certificates that are no longer used are also removed. This can either be
      * because the associated target has been removed or because it is presenting a new certificate chain.
      *
+     * This command will also remove jobs activities created before the given date/time. Jobs activities are usually
+     * some stats about the job runs performed by the scheduler or/and manually executed using the `scan` and/or
+     * `jobs` command.
+     *
      * USAGE
      *
      *     icingacli x509 cleanup [OPTIONS]
@@ -45,6 +49,7 @@ class CleanupCommand extends Command
      */
     public function indexAction()
     {
+        /** @var string $sinceLastScan */
         $sinceLastScan = $this->params->get('since-last-scan', '-1 month');
         $lastScan = $sinceLastScan;
         if ($lastScan[0] !== '-') {
@@ -75,6 +80,11 @@ class CleanupCommand extends Command
                     $query->rowCount(),
                     $sinceLastScan->format('Y-m-d H:i:s')
                 );
+            }
+
+            $query = $conn->delete('x509_job_run', ['start_time < ?' => $sinceLastScan->getTimestamp() * 1000]);
+            if ($query->rowCount() > 0) {
+                Logger::info('Removed %d jobs activities', $query->rowCount());
             }
 
             CertificateUtils::cleanupNoLongerUsedCertificates($conn);

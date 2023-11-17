@@ -23,8 +23,6 @@ use ipl\Web\Compat\CompatForm;
  */
 class JobConfigForm extends CompatForm
 {
-    use Database;
-
     /** @var ?X509Job */
     protected $job;
 
@@ -110,7 +108,7 @@ class JobConfigForm extends CompatForm
 
     protected function onSuccess(): void
     {
-        $conn = $this->getDb();
+        $conn = Database::get();
         /** @var FormSubmitElement $submitElement */
         $submitElement = $this->getPressedSubmitElement();
         if ($submitElement->getName() === 'btn_remove') {

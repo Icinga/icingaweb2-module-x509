@@ -9,6 +9,7 @@ use DateTime;
 use DateTimeInterface;
 use Icinga\Application\Logger;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Model\X509Certificate;
 use Icinga\Module\X509\Model\X509Target;
 use ipl\Sql\Expression;
@@ -67,8 +68,7 @@ class CheckCommand extends Command
             exit(3);
         }
 
-        $conn = $this->getDb();
-        $targets = X509Target::on($conn)->with([
+        $targets = X509Target::on(Database::get())->with([
             'chain',
             'chain.certificate',
             'chain.certificate.issuer_certificate'

@@ -11,6 +11,7 @@ use Icinga\Application\Logger;
 use Icinga\Data\ResourceFactory;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Common\JobUtils;
 use Icinga\Module\X509\Hook\SniHook;
 use Icinga\Module\X509\Job;
@@ -152,7 +153,13 @@ class JobsCommand extends Command
      */
     protected function fetchSchedules(?string $jobName, ?string $scheduleName): array
     {
-        $jobs = X509Job::on($this->getDb());
+        $conn = Database::get();
+        // Even if the Job class regularly pings the same connection whenever its frequency becomes due and is run by
+        // the scheduler, we need to explicitly ping that same connection here, as the interval of the schedule jobs
+        // could be larger than the daemon configuration reload interval (5m).
+        $conn->ping();
+
+        $jobs = X509Job::on($conn);
         if ($jobName) {
             $jobs->filter(Filter::equal('name', $jobName));
         }
@@ -227,7 +234,7 @@ class JobsCommand extends Command
                 );
 
                 try {
-                    $verified = CertificateUtils::verifyCertificates($this->getDb());
+                    $verified = CertificateUtils::verifyCertificates(Database::get());
 
                     Logger::info('Checked %d certificate chain(s)', $verified);
                 } catch (Exception $err) {

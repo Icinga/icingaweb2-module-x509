@@ -7,6 +7,7 @@ namespace Icinga\Module\X509\Clicommands;
 use Icinga\Application\Logger;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\Common\Database;
 
 class VerifyCommand extends Command
 {
@@ -19,9 +20,7 @@ class VerifyCommand extends Command
      */
     public function indexAction()
     {
-        $db = $this->getDb();
-
-        $verified = CertificateUtils::verifyCertificates($db);
+        $verified = CertificateUtils::verifyCertificates(Database::get());
 
         Logger::info("Checked %d certificate chain%s.", $verified, $verified !== 1 ? 's' : '');
     }

@@ -27,8 +27,6 @@ use function ipl\Stdlib\get_php_type;
 
 class ScheduleForm extends CompatForm
 {
-    use Database;
-
     /** @var int */
     protected $jobId;
 
@@ -160,7 +158,7 @@ class ScheduleForm extends CompatForm
     {
         /** @var X509Schedule $schedule */
         $schedule = $this->schedule;
-        $conn = $this->getDb();
+        $conn = Database::get();
         /** @var FormSubmitElement $submitElement */
         $submitElement = $this->getPressedSubmitElement();
         if ($submitElement->getName() === 'btn_remove') {

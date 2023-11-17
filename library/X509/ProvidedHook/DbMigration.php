@@ -13,10 +13,6 @@ use ipl\Sql\Adapter\Pgsql;
 
 class DbMigration extends DbMigrationHook
 {
-    use Database {
-        getDb as private getX509Db;
-    }
-
     public function getName(): string
     {
         return $this->translate('Icinga Certificate Monitoring');
@@ -89,7 +85,7 @@ class DbMigration extends DbMigrationHook
 
     public function getDb(): Sql\Connection
     {
-        return $this->getX509Db();
+        return Database::get();
     }
 
     protected function getSchemaQuery(): Query

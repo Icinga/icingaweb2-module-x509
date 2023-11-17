@@ -5,9 +5,7 @@
 namespace Icinga\Module\X509\ProvidedHook;
 
 use Icinga\Module\Director\Hook\ImportSourceHook;
-use Icinga\Module\X509\Common\Database;
 
 abstract class X509ImportSource extends ImportSourceHook
 {
-    use Database;
 }

@@ -36,7 +36,6 @@ use Throwable;
 
 class Job implements Task
 {
-    use Database;
     use JobOptions;
     use TaskProperties;
 
@@ -100,7 +99,7 @@ class Job implements Task
     public function __construct(string $name, array $cidrs, array $ports, array $snimap, Schedule $schedule = null)
     {
         $this->name = $name;
-        $this->db = $this->getDb();
+        $this->db = Database::get();
         $this->dbTool = new DbTool($this->db);
         $this->snimap = $snimap;
         $this->cidrs = $cidrs;

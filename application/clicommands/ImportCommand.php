@@ -7,6 +7,7 @@ namespace Icinga\Module\X509\Clicommands;
 use Icinga\Application\Logger;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
+use Icinga\Module\X509\Common\Database;
 use ipl\Sql\Connection;
 use ipl\Sql\Expression;
 
@@ -32,13 +33,11 @@ class ImportCommand extends Command
             exit(1);
         }
 
-        $db = $this->getDb();
-
         $bundle = CertificateUtils::parseBundle($file);
 
         $count = 0;
 
-        $db->transaction(function (Connection $db) use ($bundle, &$count) {
+        Database::get()->transaction(function (Connection $db) use ($bundle, &$count) {
             foreach ($bundle as $data) {
                 $cert = openssl_x509_read($data);
 

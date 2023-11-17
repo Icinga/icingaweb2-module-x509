@@ -1,0 +1,96 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Parameter \\#1 \\$x509certdata of function openssl_x509_read expects resource\\|string, mixed given\\.$#"
+			count: 1
+			path: application/clicommands/ImportCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$data of function bin2hex expects string, mixed given\\.$#"
+			count: 2
+			path: library/X509/CertificateDetails.php
+
+		-
+			message: "#^Parameter \\#1 \\$x509cert of function openssl_x509_parse expects resource\\|string, mixed given\\.$#"
+			count: 1
+			path: library/X509/CertificateDetails.php
+
+		-
+			message: "#^Parameter \\#2 \\$pieces of function implode expects array, array\\<int, string\\>\\|false given\\.$#"
+			count: 1
+			path: library/X509/CertificateDetails.php
+
+		-
+			message: "#^Parameter \\#1 \\$certificate of function openssl_pkey_get_public expects resource\\|string, mixed given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#1 \\$key of function openssl_pkey_get_details expects resource, resource\\|false given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#1 \\$x509 of function openssl_x509_export expects resource\\|string, mixed given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#1 \\$x509 of function openssl_x509_fingerprint expects resource\\|string, mixed given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#1 \\$x509cert of function openssl_x509_parse expects resource\\|string, mixed given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#2 \\$str of function explode expects string, string\\|false given\\.$#"
+			count: 1
+			path: library/X509/CertificateUtils.php
+
+		-
+			message: "#^Parameter \\#1 \\$a of function gmp_add expects GMP\\|int\\|string, GMP\\|null given\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Parameter \\#1 \\$a of function gmp_and expects GMP\\|int\\|string, GMP\\|null given\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Parameter \\#1 \\$input of function str_pad expects string, string\\|false given\\.$#"
+			count: 1
+			path: library/X509/Job.php
+
+		-
+			message: "#^Parameter \\#1 \\$str of function base64_encode expects string, mixed given\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/DERBase64.php
+
+		-
+			message: "#^Parameter \\#2 \\$str of function explode expects string, mixed given\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/DERBase64.php
+
+		-
+			message: "#^Parameter \\#1 \\$in_addr of function inet_ntop expects string, mixed given\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/Ip.php
+
+		-
+			message: "#^Parameter \\#1 \\$input of function str_pad expects string, string\\|false given\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/Ip.php
+
+		-
+			message: "#^Parameter \\#1 \\$ip_address of function inet_pton expects string, mixed given\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/Ip.php
+
+		-
+			message: "#^Parameter \\#1 \\$str of function ltrim expects string, mixed given\\.$#"
+			count: 1
+			path: library/X509/Model/Behavior/Ip.php

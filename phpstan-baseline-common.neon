@@ -76,11 +76,6 @@ parameters:
 			path: application/clicommands/ImportCommand.php
 
 		-
-			message: "#^Parameter \\#1 \\$certificate of function openssl_x509_read expects OpenSSLCertificate\\|string, mixed given\\.$#"
-			count: 1
-			path: application/clicommands/ImportCommand.php
-
-		-
 			message: "#^Parameter \\#1 \\$file of static method Icinga\\\\Module\\\\X509\\\\CertificateUtils\\:\\:parseBundle\\(\\) expects string, mixed given\\.$#"
 			count: 1
 			path: application/clicommands/ImportCommand.php
@@ -376,21 +371,6 @@ parameters:
 			path: library/X509/CertificateDetails.php
 
 		-
-			message: "#^Parameter \\#1 \\$certificate of function openssl_x509_parse expects OpenSSLCertificate\\|string, mixed given\\.$#"
-			count: 1
-			path: library/X509/CertificateDetails.php
-
-		-
-			message: "#^Parameter \\#1 \\$string of function bin2hex expects string, mixed given\\.$#"
-			count: 2
-			path: library/X509/CertificateDetails.php
-
-		-
-			message: "#^Parameter \\#2 \\$array of function implode expects array\\|null, array\\<int, string\\>\\|false given\\.$#"
-			count: 1
-			path: library/X509/CertificateDetails.php
-
-		-
 			message: "#^Cannot access offset 'bits' on array\\|false\\.$#"
 			count: 1
 			path: library/X509/CertificateUtils.php
@@ -506,37 +486,12 @@ parameters:
 			path: library/X509/CertificateUtils.php
 
 		-
-			message: "#^Parameter \\#1 \\$certificate of function openssl_x509_export expects OpenSSLCertificate\\|string, mixed given\\.$#"
-			count: 1
-			path: library/X509/CertificateUtils.php
-
-		-
-			message: "#^Parameter \\#1 \\$certificate of function openssl_x509_fingerprint expects OpenSSLCertificate\\|string, mixed given\\.$#"
-			count: 1
-			path: library/X509/CertificateUtils.php
-
-		-
-			message: "#^Parameter \\#1 \\$certificate of function openssl_x509_parse expects OpenSSLCertificate\\|string, mixed given\\.$#"
-			count: 1
-			path: library/X509/CertificateUtils.php
-
-		-
 			message: "#^Parameter \\#1 \\$chainId of closure expects int, mixed given\\.$#"
 			count: 1
 			path: library/X509/CertificateUtils.php
 
 		-
-			message: "#^Parameter \\#1 \\$key of function openssl_pkey_get_details expects OpenSSLAsymmetricKey, OpenSSLAsymmetricKey\\|false given\\.$#"
-			count: 1
-			path: library/X509/CertificateUtils.php
-
-		-
 			message: "#^Parameter \\#1 \\$orderBy of method ipl\\\\Orm\\\\Query\\:\\:orderBy\\(\\) expects array\\|int\\|string, ipl\\\\Sql\\\\Expression given\\.$#"
-			count: 1
-			path: library/X509/CertificateUtils.php
-
-		-
-			message: "#^Parameter \\#1 \\$public_key of function openssl_pkey_get_public expects array\\|OpenSSLAsymmetricKey\\|OpenSSLCertificate\\|string, mixed given\\.$#"
 			count: 1
 			path: library/X509/CertificateUtils.php
 
@@ -547,11 +502,6 @@ parameters:
 
 		-
 			message: "#^Parameter \\#2 \\$groupBy of function ipl\\\\Stdlib\\\\yield_groups expects callable\\(mixed, mixed\\)\\: array\\{0\\: mixed, 1\\?\\: mixed, 2\\?\\: mixed\\}, Closure\\(Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate\\)\\: array\\{mixed, mixed\\} given\\.$#"
-			count: 1
-			path: library/X509/CertificateUtils.php
-
-		-
-			message: "#^Parameter \\#2 \\$string of function explode expects string, string\\|false given\\.$#"
 			count: 1
 			path: library/X509/CertificateUtils.php
 
@@ -946,21 +896,6 @@ parameters:
 			path: library/X509/Job.php
 
 		-
-			message: "#^Parameter \\#1 \\$num1 of function gmp_add expects GMP\\|int\\|string, GMP\\|null given\\.$#"
-			count: 1
-			path: library/X509/Job.php
-
-		-
-			message: "#^Parameter \\#1 \\$num1 of function gmp_and expects GMP\\|int\\|string, GMP\\|null given\\.$#"
-			count: 1
-			path: library/X509/Job.php
-
-		-
-			message: "#^Parameter \\#1 \\$string of function str_pad expects string, string\\|false given\\.$#"
-			count: 1
-			path: library/X509/Job.php
-
-		-
 			message: "#^Parameter \\#2 \\$value of static method ipl\\\\Stdlib\\\\Filter\\:\\:equal\\(\\) expects array\\|bool\\|float\\|int\\|string, mixed given\\.$#"
 			count: 1
 			path: library/X509/Job.php
@@ -969,16 +904,6 @@ parameters:
 			message: "#^Parameter \\#2 \\$value of static method ipl\\\\Stdlib\\\\Filter\\:\\:lessThan\\(\\) expects float\\|int\\|string, DateTime given\\.$#"
 			count: 1
 			path: library/X509/Job.php
-
-		-
-			message: "#^Parameter \\#1 \\$string of function base64_encode expects string, mixed given\\.$#"
-			count: 1
-			path: library/X509/Model/Behavior/DERBase64.php
-
-		-
-			message: "#^Parameter \\#2 \\$string of function explode expects string, mixed given\\.$#"
-			count: 1
-			path: library/X509/Model/Behavior/DERBase64.php
 
 		-
 			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\Behavior\\\\ExpressionInjector\\:\\:__construct\\(\\) has parameter \\$columns with no type specified\\.$#"
@@ -994,26 +919,6 @@ parameters:
 			message: "#^Property Icinga\\\\Module\\\\X509\\\\Model\\\\Behavior\\\\ExpressionInjector\\:\\:\\$columns type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: library/X509/Model/Behavior/ExpressionInjector.php
-
-		-
-			message: "#^Parameter \\#1 \\$ip of function inet_ntop expects string, mixed given\\.$#"
-			count: 1
-			path: library/X509/Model/Behavior/Ip.php
-
-		-
-			message: "#^Parameter \\#1 \\$ip of function inet_pton expects string, mixed given\\.$#"
-			count: 1
-			path: library/X509/Model/Behavior/Ip.php
-
-		-
-			message: "#^Parameter \\#1 \\$string of function ltrim expects string, mixed given\\.$#"
-			count: 1
-			path: library/X509/Model/Behavior/Ip.php
-
-		-
-			message: "#^Parameter \\#1 \\$string of function str_pad expects string, string\\|false given\\.$#"
-			count: 1
-			path: library/X509/Model/Behavior/Ip.php
 
 		-
 			message: "#^Method Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate\\:\\:createBehaviors\\(\\) has no return type specified\\.$#"

@@ -56,3 +56,22 @@ In case you are serving multiple virtual hosts under a single IP you can configu
 Each entry defines an IP with multiple hostnames associated with it. These are then utilized when jobs run.
 
 Modules may also provide sources for SNI. At this time the module monitoring is the only one with known support.
+
+## Icinga Certificate Monitoring Daemon
+
+The default `systemd` service of this module, shipped with package installations, uses the [jobs command](04-Scanning.md#scheduling-jobs)
+and runs all your configured jobs and schedules.
+
+<!-- {% if not icingaDocs %} -->
+
+> **Note**
+>
+> If you haven't installed this module from packages, you have to configure this as a `systemd` service yourself by just
+> copying the example service definition from `/usr/share/icingaweb2/modules/x509/config/systemd/icinga-x509.service`
+> to `/etc/systemd/system/icinga-x509.service`.
+<!-- {% endif %} -->
+
+You can run the following command to enable and start the daemon.
+```
+systemctl enable --now icinga-x509.service
+```

@@ -95,6 +95,7 @@ class UsageController extends Controller
         $this->addControl($searchBar);
 
         $this->handleFormatRequest($targets, function (Query $targets) {
+            /** @var X509Certificate $usage */
             foreach ($targets as $usage) {
                 $usage->valid_from = $usage->valid_from->format('l F jS, Y H:i:s e');
                 $usage->valid_to = $usage->valid_to->format('l F jS, Y H:i:s e');

@@ -241,23 +241,8 @@ parameters:
 			path: application/controllers/SniController.php
 
 		-
-			message: "#^Cannot access property \\$chain on mixed\\.$#"
-			count: 4
-			path: application/controllers/UsageController.php
-
-		-
-			message: "#^Cannot access property \\$hostname on mixed\\.$#"
-			count: 1
-			path: application/controllers/UsageController.php
-
-		-
-			message: "#^Cannot access property \\$ip on mixed\\.$#"
-			count: 1
-			path: application/controllers/UsageController.php
-
-		-
-			message: "#^Cannot access property \\$port on mixed\\.$#"
-			count: 1
+			message: "#^Cannot access property \\$target on mixed\\.$#"
+			count: 3
 			path: application/controllers/UsageController.php
 
 		-
@@ -266,18 +251,8 @@ parameters:
 			path: application/controllers/UsageController.php
 
 		-
-			message: "#^Cannot access property \\$valid_from on mixed\\.$#"
+			message: "#^Cannot call method format\\(\\) on mixed\\.$#"
 			count: 2
-			path: application/controllers/UsageController.php
-
-		-
-			message: "#^Cannot access property \\$valid_to on mixed\\.$#"
-			count: 2
-			path: application/controllers/UsageController.php
-
-		-
-			message: "#^Cannot call method getExportableColumns\\(\\) on mixed\\.$#"
-			count: 1
 			path: application/controllers/UsageController.php
 
 		-
@@ -292,11 +267,6 @@ parameters:
 
 		-
 			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\UsageController\\:\\:searchEditorAction\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: application/controllers/UsageController.php
-
-		-
-			message: "#^Parameter \\#1 \\$iterator of function iterator_to_array expects Traversable, mixed given\\.$#"
 			count: 1
 			path: application/controllers/UsageController.php
 

@@ -32,4 +32,6 @@ $this->provideConfigTab('backend', array(
     'url' => 'config/backend'
 ));
 
-$this->providePermission('config/x509', $this->translate('allow to create/update jobs/schedules/snis if permission config/* is missing'));
+$this->providePermission('config/x509',
+    $this->translate('allow to create/update jobs/schedules/snis if permission config/* is missing')
+);

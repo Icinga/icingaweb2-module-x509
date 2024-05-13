@@ -106,11 +106,6 @@ parameters:
 			path: application/controllers/CertificateController.php
 
 		-
-			message: "#^Parameter \\#1 \\$cert of method Icinga\\\\Module\\\\X509\\\\CertificateDetails\\:\\:setCert\\(\\) expects Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate, Icinga\\\\Module\\\\X509\\\\Model\\\\X509Certificate\\|null given\\.$#"
-			count: 1
-			path: application/controllers/CertificateController.php
-
-		-
 			message: "#^Parameter \\#2 \\$value of static method ipl\\\\Stdlib\\\\Filter\\:\\:equal\\(\\) expects array\\|bool\\|float\\|int\\|string, mixed given\\.$#"
 			count: 1
 			path: application/controllers/CertificateController.php
@@ -156,28 +151,18 @@ parameters:
 			path: application/controllers/ChainController.php
 
 		-
-			message: "#^Cannot access property \\$target on Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChain\\|null\\.$#"
-			count: 3
-			path: application/controllers/ChainController.php
-
-		-
 			message: "#^Method Icinga\\\\Module\\\\X509\\\\Controllers\\\\ChainController\\:\\:indexAction\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: application/controllers/ChainController.php
-
-		-
-			message: "#^Offset 'invalid_reason' does not exist on Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChain\\|null\\.$#"
-			count: 1
-			path: application/controllers/ChainController.php
-
-		-
-			message: "#^Offset 'valid' does not exist on Icinga\\\\Module\\\\X509\\\\Model\\\\X509CertificateChain\\|null\\.$#"
 			count: 1
 			path: application/controllers/ChainController.php
 
 		-
 			message: "#^Parameter \\#2 \\$value of static method ipl\\\\Stdlib\\\\Filter\\:\\:equal\\(\\) expects array\\|bool\\|float\\|int\\|string, mixed given\\.$#"
 			count: 2
+			path: application/controllers/ChainController.php
+
+		-
+			message: "#^Parameter \\#2 \\.\\.\\.\\$values of function sprintf expects bool\\|float\\|int\\|string\\|null, mixed given\\.$#"
+			count: 1
 			path: application/controllers/ChainController.php
 
 		-

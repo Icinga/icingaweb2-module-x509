@@ -723,7 +723,7 @@ class Job implements Task
                     ->filter(Filter::equal('self_signed', true))
                     ->first();
 
-                if ($rootCa && $rootCa->id !== $lastCertInfo[0]) {
+                if ($rootCa && $rootCa->id !== (int) $lastCertInfo[0]) {
                     $this->db->update(
                         'x509_certificate_chain',
                         ['length' => count($chain) + 1],

@@ -71,7 +71,7 @@ CREATE TABLE x509_target (
   id int(10) unsigned NOT NULL AUTO_INCREMENT,
   ip binary(16) NOT NULL,
   `port` smallint unsigned NOT NULL,
-  hostname varchar(255) NULL DEFAULT NULL,
+  hostname text NULL DEFAULT NULL,
   latest_certificate_chain_id int(10) unsigned NULL DEFAULT NULL,
   last_scan bigint unsigned NOT NULL,
   ctime bigint unsigned DEFAULT NULL,

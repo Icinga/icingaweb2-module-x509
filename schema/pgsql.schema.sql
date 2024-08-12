@@ -100,7 +100,7 @@ CREATE TABLE x509_target (
   id serial PRIMARY KEY,
   ip bytea NOT NULL,
   port uint2 NOT NULL,
-  hostname varchar(255) NULL DEFAULT NULL,
+  hostname text NULL DEFAULT NULL,
   latest_certificate_chain_id int NULL DEFAULT NULL,
   last_scan biguint NOT NULL,
   ctime biguint NOT NULL,

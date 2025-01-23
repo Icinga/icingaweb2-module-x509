@@ -17,6 +17,8 @@ use Icinga\Module\X509\Model\X509JobRun;
 use Icinga\Module\X509\Model\X509Target;
 use Icinga\Module\X509\React\StreamOptsCaptureConnector;
 use Icinga\Util\Json;
+use ipl\Orm\Behavior\Binary;
+use ipl\Orm\Query;
 use ipl\Scheduler\Common\TaskProperties;
 use ipl\Scheduler\Contract\Task;
 use ipl\Sql\Connection;
@@ -696,34 +698,38 @@ class Job implements Task
 
                 $chainId = $this->db->lastInsertId();
 
-                $lastCertInfo = [];
+                $lastCertInfo = null;
                 foreach ($chain as $index => $cert) {
                     $lastCertInfo = CertificateUtils::findOrInsertCert($this->db, $cert);
-                    list($certId, $_) = $lastCertInfo;
-
                     $this->db->insert(
                         'x509_certificate_chain_link',
                         [
                             'certificate_chain_id'              => $chainId,
                             $this->db->quoteIdentifier('order') => $index,
-                            'certificate_id'                    => $certId,
+                            'certificate_id'                    => $lastCertInfo->certId,
                             'ctime'                             => new Expression('UNIX_TIMESTAMP() * 1000')
                         ]
                     );
 
-                    $lastCertInfo[] = $index;
+                    $lastCertInfo->order = $index;
                 }
 
                 // There might be chains that do not include the self-signed top-level Ca,
                 // so we need to include it manually here, as we need to display the full
                 // chain in the UI.
+                $binaryBehavior = (new Binary([]))->setQuery((new Query())->setDb($this->db));
                 $rootCa = X509Certificate::on($this->db)
                     ->columns(['id'])
-                    ->filter(Filter::equal('subject_hash', $lastCertInfo[1]))
+                    ->filter(Filter::equal('subject_hash', $lastCertInfo->issuerHash))
                     ->filter(Filter::equal('self_signed', true))
+                    // Since we don't enforce the subject_hash of the certificates to be unambiguous, we might end up
+                    // with more than one self-signed CA with the same hash and CN but different validity timestamps,
+                    // and in such situations we need to make sure to retrieve the correct certificate (the one
+                    // containing the expected fingerprint).
+                    ->orderBy(new Expression('%s = ?', ['fingerprint'], $binaryBehavior->toDb($lastCertInfo->fingerprint, 'fingerprint', '')), SORT_DESC)
                     ->first();
 
-                if ($rootCa && $rootCa->id !== (int) $lastCertInfo[0]) {
+                if ($rootCa && $rootCa->id !== (int) $lastCertInfo->certId) {
                     $this->db->update(
                         'x509_certificate_chain',
                         ['length' => count($chain) + 1],
@@ -734,7 +740,7 @@ class Job implements Task
                         'x509_certificate_chain_link',
                         [
                             'certificate_chain_id'              => $chainId,
-                            $this->db->quoteIdentifier('order') => $lastCertInfo[2] + 1,
+                            $this->db->quoteIdentifier('order') => $lastCertInfo->order + 1,
                             'certificate_id'                    => $rootCa->id,
                             'ctime'                             => new Expression('UNIX_TIMESTAMP() * 1000')
                         ]

@@ -68,23 +68,16 @@ class CheckCommand extends Command
             exit(3);
         }
 
-        $targets = X509Target::on(Database::get())->with([
-            'chain',
-            'chain.certificate',
-            'chain.certificate.issuer_certificate'
-        ]);
-
-        $targets->getWith()['target.chain.certificate.issuer_certificate']->setJoinType('LEFT');
+        $targets = X509Target::on(Database::get())
+            ->with(['chain', 'chain.certificate'])
+            ->without('target.chain.certificate.issuer_certificate');
 
         $targets->columns([
             'port',
             'chain.valid',
             'chain.invalid_reason',
             'subject'     => 'chain.certificate.subject',
-            'self_signed' => new Expression('COALESCE(%s, %s)', [
-                'chain.certificate.issuer_certificate.self_signed',
-                'chain.certificate.self_signed'
-            ])
+            'self_signed' => 'chain.certificate.self_signed'
         ]);
 
         // Sub query for `valid_from` column

@@ -83,7 +83,7 @@ class CheckCommand extends Command
         // Sub query for `valid_from` column
         $validFrom = $targets->createSubQuery(new X509Certificate(), 'chain.certificate');
         $validFrom
-            ->columns([new Expression('MAX(GREATEST(%s, %s))', ['valid_from', 'issuer_certificate.valid_from'])])
+            ->columns([new Expression('MAX(%s)', ['valid_from'])])
             ->getSelectBase()
             ->resetWhere()
             ->where(new Expression('sub_certificate_link.certificate_chain_id = target_chain.id'));
@@ -91,7 +91,7 @@ class CheckCommand extends Command
         // Sub query for `valid_to` column
         $validTo = $targets->createSubQuery(new X509Certificate(), 'chain.certificate');
         $validTo
-            ->columns([new Expression('MIN(LEAST(%s, %s))', ['valid_to', 'issuer_certificate.valid_to'])])
+            ->columns([new Expression('MIN(%s)', ['valid_to'])])
             ->getSelectBase()
             // Reset the where clause generated within the createSubQuery() method.
             ->resetWhere()

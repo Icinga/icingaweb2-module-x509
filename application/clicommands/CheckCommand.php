@@ -100,6 +100,9 @@ class CheckCommand extends Command
         list($validFromSelect, $_) = $validFrom->dump();
         list($validToSelect, $_) = $validTo->dump();
         $targets
+            // When the host or IP being checked is part of multiple targets and the user did not provide a filter
+            // on a specific port, we want to render the result with least valid_to timestamp.
+            ->orderBy('valid_to', SORT_DESC)
             ->withColumns([
                 'valid_from' => new Expression($validFromSelect),
                 'valid_to'   => new Expression($validToSelect)

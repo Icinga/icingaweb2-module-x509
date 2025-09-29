@@ -39,7 +39,13 @@ class ScheduleForm extends CompatForm
     public function __construct(X509Schedule $schedule = null)
     {
         $this->schedule = $schedule;
-        $this->scheduleElement = new ScheduleElement('schedule_element');
+
+        if (method_exists($this, 'applyDefaultElementDecorators')) {
+            $this->applyDefaultElementDecorators();
+            $this->scheduleElement = $this->createElement('schedule', 'schedule_element');
+        } else {
+            $this->scheduleElement = new ScheduleElement('schedule_element');
+        }
 
         /** @var Web $app */
         $app = Icinga::app();
@@ -148,9 +154,9 @@ class ScheduleForm extends CompatForm
             ]);
             $this->registerElement($removeButton);
 
-            /** @var HtmlDocument $wrapper */
-            $wrapper = $this->getElement('submit')->getWrapper();
-            $wrapper->prepend($removeButton);
+            $this->getElement('submit')->prependWrapper(
+                (new HtmlDocument())->addHtml($removeButton)
+            );
         }
     }
 

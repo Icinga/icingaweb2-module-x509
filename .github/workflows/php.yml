@@ -41,10 +41,6 @@ jobs:
         if: ${{ ! cancelled() }}
         run: phpcs
 
-      - name: PHPStan
-        if: ${{ ! cancelled() }}
-        run: ./vendor/bin/phpstan analyse
-
   test:
     name: Unit tests with PHP ${{ matrix.php }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}

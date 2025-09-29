@@ -29,6 +29,10 @@ class JobConfigForm extends CompatForm
     public function __construct(X509Job $job = null)
     {
         $this->job = $job;
+
+        if (method_exists($this, 'applyDefaultElementDecorators')) {
+            $this->applyDefaultElementDecorators();
+        }
     }
 
     protected function isUpdating(): bool
@@ -100,9 +104,9 @@ class JobConfigForm extends CompatForm
             ]);
             $this->registerElement($removeButton);
 
-            /** @var HtmlDocument $wrapper */
-            $wrapper = $this->getElement('btn_submit')->getWrapper();
-            $wrapper->prepend($removeButton);
+            $this->getElement('btn_submit')->prependWrapper(
+                (new HtmlDocument())->addHtml($removeButton)
+            );
         }
     }
 

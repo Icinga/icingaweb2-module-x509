@@ -26,7 +26,7 @@ class JobConfigForm extends CompatForm
     /** @var ?X509Job */
     protected $job;
 
-    public function __construct(X509Job $job = null)
+    public function __construct(?X509Job $job = null)
     {
         $this->job = $job;
 

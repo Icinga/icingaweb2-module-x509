@@ -46,9 +46,9 @@ abstract class SniHook
     /**
      * Aggregate pairs of ip => hostname
      *
-     * @param   Filter  $filter
+     * @param   ?Filter  $filter
      *
      * @return \Generator
      */
-    abstract public function getHosts(Filter $filter = null);
+    abstract public function getHosts(?Filter $filter = null);
 }

@@ -154,7 +154,7 @@ class ScanCommand extends Command
         }, function (Throwable $err) use ($job) {
             Logger::error('Failed to run job %s: %s', $job->getName(), $err->getMessage());
             Logger::debug($err->getTraceAsString());
-        })->always(function () {
+        })->finally(function () {
             Loop::futureTick(function () {
                 Loop::stop();
             });

@@ -329,7 +329,7 @@ class CertificateUtils
 
         $data = '';
         foreach ($dn as $key => $value) {
-            if (!is_array($value)) {
+            if (! is_array($value)) {
                 $values = [$value];
             } else {
                 $values = $value;
@@ -357,7 +357,7 @@ class CertificateUtils
 
         $index = 0;
         foreach ($dn as $key => $value) {
-            if (!is_array($value)) {
+            if (! is_array($value)) {
                 $values = [$value];
             } else {
                 $values = $value;

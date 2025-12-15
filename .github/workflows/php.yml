@@ -6,8 +6,6 @@ on:
       - main
       - support/*
   pull_request:
-    branches:
-      - main
 
 jobs:
   php:

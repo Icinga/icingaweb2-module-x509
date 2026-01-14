@@ -68,29 +68,22 @@ class CheckCommand extends Command
             exit(3);
         }
 
-        $targets = X509Target::on(Database::get())->with([
-            'chain',
-            'chain.certificate',
-            'chain.certificate.issuer_certificate'
-        ]);
-
-        $targets->getWith()['target.chain.certificate.issuer_certificate']->setJoinType('LEFT');
+        $targets = X509Target::on(Database::get())
+            ->with(['chain', 'chain.certificate'])
+            ->without('target.chain.certificate.issuer_certificate');
 
         $targets->columns([
             'port',
             'chain.valid',
             'chain.invalid_reason',
             'subject'     => 'chain.certificate.subject',
-            'self_signed' => new Expression('COALESCE(%s, %s)', [
-                'chain.certificate.issuer_certificate.self_signed',
-                'chain.certificate.self_signed'
-            ])
+            'self_signed' => 'chain.certificate.self_signed'
         ]);
 
         // Sub query for `valid_from` column
         $validFrom = $targets->createSubQuery(new X509Certificate(), 'chain.certificate');
         $validFrom
-            ->columns([new Expression('MAX(GREATEST(%s, %s))', ['valid_from', 'issuer_certificate.valid_from'])])
+            ->columns([new Expression('MAX(%s)', ['valid_from'])])
             ->getSelectBase()
             ->resetWhere()
             ->where(new Expression('sub_certificate_link.certificate_chain_id = target_chain.id'));
@@ -98,7 +91,7 @@ class CheckCommand extends Command
         // Sub query for `valid_to` column
         $validTo = $targets->createSubQuery(new X509Certificate(), 'chain.certificate');
         $validTo
-            ->columns([new Expression('MIN(LEAST(%s, %s))', ['valid_to', 'issuer_certificate.valid_to'])])
+            ->columns([new Expression('MIN(%s)', ['valid_to'])])
             ->getSelectBase()
             // Reset the where clause generated within the createSubQuery() method.
             ->resetWhere()
@@ -107,6 +100,9 @@ class CheckCommand extends Command
         list($validFromSelect, $_) = $validFrom->dump();
         list($validToSelect, $_) = $validTo->dump();
         $targets
+            // When the host or IP being checked is part of multiple targets and the user did not provide a filter
+            // on a specific port, we want to render the result with least valid_to timestamp.
+            ->orderBy('valid_to', SORT_DESC)
             ->withColumns([
                 'valid_from' => new Expression($validFromSelect),
                 'valid_to'   => new Expression($validToSelect)

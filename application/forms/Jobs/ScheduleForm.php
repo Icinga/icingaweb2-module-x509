@@ -36,7 +36,7 @@ class ScheduleForm extends CompatForm
     /** @var ScheduleElement */
     protected $scheduleElement;
 
-    public function __construct(X509Schedule $schedule = null)
+    public function __construct(?X509Schedule $schedule = null)
     {
         $this->schedule = $schedule;
 

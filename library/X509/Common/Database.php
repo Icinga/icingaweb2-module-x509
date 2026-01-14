@@ -45,7 +45,15 @@ final class Database
 
         $options = [PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ];
         if ($config->db === 'mysql') {
-            $options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET SESSION SQL_MODE='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE"
+            // In PHP 8.5+, driver-specific constants of the PDO class are deprecated,
+            // but the replacements are only available since php 8.4
+            if (version_compare(PHP_VERSION, '8.4.0', '<')) {
+                $mysqlAttrInitCommand = PDO::MYSQL_ATTR_INIT_COMMAND;
+            } else {
+                $mysqlAttrInitCommand = Pdo\Mysql::ATTR_INIT_COMMAND;
+            }
+
+            $options[$mysqlAttrInitCommand] = "SET SESSION SQL_MODE='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE"
                 . ",NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'";
         }
 

@@ -96,7 +96,7 @@ class Job implements Task
      * @param array<string, array<string>> $snimap The configured SNI maps to be used by this job
      * @param ?Schedule $schedule
      */
-    public function __construct(string $name, array $cidrs, array $ports, array $snimap, Schedule $schedule = null)
+    public function __construct(string $name, array $cidrs, array $ports, array $snimap, ?Schedule $schedule = null)
     {
         $this->name = $name;
         $this->db = Database::get();

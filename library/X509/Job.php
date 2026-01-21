@@ -507,8 +507,6 @@ class Job implements Task
                 $capturedStreamOptions = $streamCapture->getCapturedStreamOptions();
 
                 $this->processChain($target, $capturedStreamOptions['ssl']['peer_certificate_chain']);
-
-                $this->finishTarget();
             },
             function (Exception $exception) use ($target, $streamCapture) {
                 Logger::debug("Cannot connect to server: %s", $exception->getMessage());
@@ -539,10 +537,9 @@ class Job implements Task
                 if ($this->finishedTargets % (int) $step == 0) {
                     $this->updateJobStats();
                 }
-
-                $this->finishTarget();
             }
         )->always(function () use ($target) {
+            $this->finishTarget();
             $this->updateLastScan($target);
         })->otherwise(function (Throwable $e) {
             Logger::error($e->getMessage());

@@ -41,7 +41,7 @@ class ImportCommand extends Command
             foreach ($bundle as $data) {
                 $cert = openssl_x509_read($data);
 
-                list($id, $_) = CertificateUtils::findOrInsertCert($db, $cert);
+                $certInfo = CertificateUtils::findOrInsertCert($db, $cert);
 
                 $db->update(
                     'x509_certificate',
@@ -49,7 +49,7 @@ class ImportCommand extends Command
                         'trusted' => 'y',
                         'mtime'   => new Expression('UNIX_TIMESTAMP() * 1000')
                     ],
-                    ['id = ?' => $id]
+                    ['id = ?' => $certInfo->certId]
                 );
 
                 $count++;

@@ -1,0 +1,350 @@
+{
+    "ExternalCommand": {
+        "icingacli-x509": {
+            "arguments": {
+                "--allow-self-signed": {
+                    "description": "Ignore if a certificate or its issuer has been self-signed",
+                    "set_if": "$icingacli_x509_allow_self_signed$"
+                },
+                "--critical": {
+                    "description": "Less remaining time results in state CRITICAL",
+                    "value": "$icingacli_x509_critical$"
+                },
+                "--host": {
+                    "description": "A hosts name",
+                    "value": "$icingacli_x509_host$"
+                },
+                "--ip": {
+                    "description": "A hosts IP address",
+                    "value": "$icingacli_x509_ip$"
+                },
+                "--port": {
+                    "description": "The port to check in particular",
+                    "value": "$icingacli_x509_port$"
+                },
+                "--warning": {
+                    "description": "Less remaining time results in state WARNING",
+                    "value": "$icingacli_x509_warning$"
+                }
+            },
+            "command": "/usr/bin/icingacli x509 check host",
+            "fields": [
+                {
+                    "datafield_id": 7,
+                    "is_required": "n",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 5,
+                    "is_required": "n",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 1,
+                    "is_required": "n",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 2,
+                    "is_required": "n",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 6,
+                    "is_required": "n",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 4,
+                    "is_required": "n",
+                    "var_filter": null
+                }
+            ],
+            "methods_execute": "PluginCheck",
+            "object_name": "icingacli-x509",
+            "object_type": "external_object",
+            "timeout": 60,
+            "uuid": "c4a44f82-3b53-4e2d-a716-8404db97941d"
+        }
+    },
+    "ServiceTemplate": {
+        "x509-host-check": {
+            "check_command": "icingacli-x509",
+            "check_interval": 3600,
+            "fields": [
+                {
+                    "datafield_id": 7,
+                    "is_required": "n",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 5,
+                    "is_required": "n",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 1,
+                    "is_required": "y",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 2,
+                    "is_required": "y",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 6,
+                    "is_required": "n",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 4,
+                    "is_required": "n",
+                    "var_filter": null
+                }
+            ],
+            "icon_image": "check",
+            "max_check_attempts": "3",
+            "notes_url": "https://icinga.com/docs/icinga-certificate-monitoring/latest/doc/10-Monitoring/",
+            "object_name": "x509-host-check",
+            "object_type": "template",
+            "retry_interval": 60,
+            "uuid": "74094e79-69b5-4382-8846-b9032be13c6d"
+        }
+    },
+    "HostTemplate": {
+        "x509-template": {
+            "check_command": "hostalive",
+            "check_interval": 3600,
+            "fields": [
+                {
+                    "datafield_id": 3,
+                    "is_required": "y",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 1,
+                    "is_required": "y",
+                    "var_filter": null
+                },
+                {
+                    "datafield_id": 2,
+                    "is_required": "y",
+                    "var_filter": null
+                }
+            ],
+            "icon_image": "file-excel",
+            "max_check_attempts": "3",
+            "notes": "is used by hosts that come from the x509 Host Sync rule.",
+            "notes_url": "https://icinga.com/docs/icinga-certificate-monitoring/latest/doc/10-Monitoring/",
+            "object_name": "x509-template",
+            "object_type": "template",
+            "retry_interval": 60,
+            "uuid": "5dccc207-733f-4e6c-b81c-408b9e32f240"
+        }
+    },
+    "ImportSource": {
+        "x509 Hosts": {
+            "description": "Imports a Hostlist from the icingweb x509 module",
+            "key_column": "host_name_or_ip",
+            "modifiers": [
+                {
+                    "priority": "1",
+                    "property_name": "host_ports",
+                    "provider_class": "Icinga\\Module\\Director\\PropertyModifier\\PropertyModifierSplit",
+                    "settings": {
+                        "delimiter": ",",
+                        "when_empty": "empty_array"
+                    }
+                }
+            ],
+            "provider_class": "Icinga\\Module\\X509\\ProvidedHook\\HostsImportSource",
+            "settings": {},
+            "source_name": "x509 Hosts"
+        }
+    },
+    "SyncRule": {
+        "x509 Host Sync": {
+            "description": "Syncs the x509 Host list to icinga host objects",
+            "object_type": "host",
+            "properties": [
+                {
+                    "destination_field": "object_name",
+                    "filter_expression": null,
+                    "merge_policy": "override",
+                    "priority": "1",
+                    "source": "x509 Hosts",
+                    "source_expression": "${host_name_or_ip}"
+                },
+                {
+                    "destination_field": "import",
+                    "filter_expression": null,
+                    "merge_policy": "override",
+                    "priority": "2",
+                    "source": "x509 Hosts",
+                    "source_expression": "x509-template"
+                },
+                {
+                    "destination_field": "address",
+                    "filter_expression": null,
+                    "merge_policy": "override",
+                    "priority": "3",
+                    "source": "x509 Hosts",
+                    "source_expression": "${host_address}"
+                },
+                {
+                    "destination_field": "address6",
+                    "filter_expression": null,
+                    "merge_policy": "override",
+                    "priority": "4",
+                    "source": "x509 Hosts",
+                    "source_expression": "${host_address6}"
+                },
+                {
+                    "destination_field": "vars.certified_ports",
+                    "filter_expression": null,
+                    "merge_policy": "merge",
+                    "priority": "5",
+                    "source": "x509 Hosts",
+                    "source_expression": "${host_ports}"
+                },
+                {
+                    "destination_field": "vars.icingacli_x509_ip",
+                    "filter_expression": null,
+                    "merge_policy": "merge",
+                    "priority": "6",
+                    "source": "x509 Hosts",
+                    "source_expression": "${host_ip}"
+                },
+                {
+                    "destination_field": "vars.icingacli_x509_host",
+                    "filter_expression": null,
+                    "merge_policy": "merge",
+                    "priority": "7",
+                    "source": "x509 Hosts",
+                    "source_expression": "${host_name}"
+                }
+            ],
+            "purge_action": "delete",
+            "purge_existing": true,
+            "rule_name": "x509 Host Sync",
+            "update_policy": "override"
+        }
+    },
+    "ServiceSet": {
+        "All x509 certified ports health": {
+            "assign_filter": "host.vars.certified_ports=true",
+            "description": "based on x509 module and automation",
+            "object_name": "All x509 certified ports health",
+            "object_type": "template",
+            "services": [
+                {
+                    "apply_for": "host.vars.certified_ports",
+                    "assign_filter": "host.vars.certified_ports=true",
+                    "fields": [],
+                    "imports": [
+                        "x509-host-check"
+                    ],
+                    "object_name": "Certified Port $config$ Health",
+                    "object_type": "apply",
+                    "uuid": "e182d174-d853-4d93-890a-866b670140f4",
+                    "vars": {
+                        "icingacli_x509_host": "$host.vars.icingacli_x509_host$",
+                        "icingacli_x509_ip": "$host.vars.icingacli_x509_ip$",
+                        "icingacli_x509_port": "$config$"
+                    }
+                }
+            ],
+            "uuid": "5af92967-7c9b-4198-b1f9-e5bfc951151e"
+        }
+    },
+    "Datafield": {
+        "7": {
+            "uuid": "613aadfd-a07b-4697-8466-b11eab3187bc",
+            "varname": "icingacli_x509_allow_self_signed",
+            "caption": "Allow Self Signed (x509)",
+            "description": "Ignore if a certificate or its issuer has been self-signed",
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeBoolean",
+            "format": null,
+            "settings": {},
+            "category": "x509"
+        },
+        "5": {
+            "uuid": "a02fa742-95d3-42b3-9c84-6e7413e337d4",
+            "varname": "icingacli_x509_critical",
+            "caption": "Critical Threshold (x509)",
+            "description": "Less remaining time results in state CRITICAL",
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeString",
+            "format": null,
+            "settings": {
+                "visibility": "visible"
+            },
+            "category": "x509"
+        },
+        "1": {
+            "uuid": "f957a69f-4fef-4fe6-8276-a23524a177ac",
+            "varname": "icingacli_x509_host",
+            "caption": "Hostname (x509)",
+            "description": "A hosts name",
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeString",
+            "format": null,
+            "settings": {
+                "visibility": "visible"
+            },
+            "category": "x509"
+        },
+        "2": {
+            "uuid": "bd01291b-cdb9-491c-8c7b-f45243487526",
+            "varname": "icingacli_x509_ip",
+            "caption": "IP Address (x509)",
+            "description": "A hosts IP address",
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeString",
+            "format": null,
+            "settings": {
+                "visibility": "visible"
+            },
+            "category": "x509"
+        },
+        "6": {
+            "uuid": "9f042891-5305-41a3-9067-001beb10bce7",
+            "varname": "icingacli_x509_port",
+            "caption": "Port (x509)",
+            "description": "The port to check in particular",
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeString",
+            "format": null,
+            "settings": {
+                "visibility": "visible"
+            },
+            "category": "x509"
+        },
+        "4": {
+            "uuid": "b64f466d-2bd4-40f8-bb1d-c468f610b148",
+            "varname": "icingacli_x509_warning",
+            "caption": "Warning Threshold (x509)",
+            "description": "Less remaining time results in state WARNING",
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeString",
+            "format": null,
+            "settings": {
+                "visibility": "visible"
+            },
+            "category": "x509"
+        },
+        "3": {
+            "uuid": "f6dc15e7-c2d4-44d0-91c2-60e96ea5d996",
+            "varname": "certified_ports",
+            "caption": "Cerified Ports (x509)",
+            "description": null,
+            "datatype": "Icinga\\Module\\Director\\DataType\\DataTypeArray",
+            "format": null,
+            "settings": {},
+            "category": "x509"
+        }
+    },
+    "DatafieldCategory": {
+        "x509": {
+            "category_name": "x509",
+            "description": "Certificate Monitoring",
+            "originalId": "1"
+        }
+    }
+}

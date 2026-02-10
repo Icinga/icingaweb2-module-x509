@@ -11,11 +11,11 @@
                     "value": "$icingacli_x509_critical$"
                 },
                 "--host": {
-                    "description": "A hosts name",
+                    "description": "A host's name",
                     "value": "$icingacli_x509_host$"
                 },
                 "--ip": {
-                    "description": "A hosts IP address",
+                    "description": "A host's IP address",
                     "value": "$icingacli_x509_ip$"
                 },
                 "--port": {

@@ -145,7 +145,7 @@
     },
     "ImportSource": {
         "x509 Hosts": {
-            "description": "Imports a Hostlist from the icingweb x509 module",
+            "description": "Imports a Hostlist from the Icinga Web x509 module",
             "key_column": "host_name_or_ip",
             "modifiers": [
                 {

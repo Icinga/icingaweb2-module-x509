@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: 2023 Icinga GmbH <https://icinga.com>
+-- SPDX-License-Identifier: GPL-3.0-or-later
+
 CREATE TABLE x509_job (
   id int(10) unsigned NOT NULL AUTO_INCREMENT,
   name varchar(255) NOT NULL COLLATE utf8mb4_unicode_ci,

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: 2019 Icinga GmbH <https://icinga.com>
+-- SPDX-License-Identifier: GPL-3.0-or-later
+
 ALTER TABLE x509_target MODIFY COLUMN `port` smallint unsigned NOT NULL;
 
 ALTER TABLE x509_certificate_subject_alt_name DROP FOREIGN KEY x509_fk_certificate_subject_alt_name_certificate_id;

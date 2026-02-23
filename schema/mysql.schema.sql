@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: 2018 Icinga GmbH <https://icinga.com>
+-- SPDX-License-Identifier: GPL-3.0-or-later
+
 CREATE TABLE x509_certificate (
   id int(10) unsigned NOT NULL AUTO_INCREMENT,
   `subject` varchar(255) NOT NULL COMMENT 'CN of the subject DN if present else full subject DN',

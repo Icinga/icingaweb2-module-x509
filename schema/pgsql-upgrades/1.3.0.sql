@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: 2023 Icinga GmbH <https://icinga.com>
+-- SPDX-License-Identifier: GPL-3.0-or-later
+
 CREATE TABLE x509_job (
   id serial PRIMARY KEY,
   name varchar(255) NOT NULL,

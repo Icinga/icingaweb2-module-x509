@@ -24,7 +24,7 @@ use ipl\Scheduler\Contract\Frequency;
 use ipl\Scheduler\Scheduler;
 use ipl\Stdlib\Filter;
 use React\EventLoop\Loop;
-use React\Promise\ExtendedPromiseInterface;
+use React\Promise\PromiseInterface;
 use stdClass;
 use Throwable;
 
@@ -254,7 +254,7 @@ class JobsCommand extends Command
             Logger::debug($e->getTraceAsString());
         });
 
-        $scheduler->on(Scheduler::ON_TASK_RUN, function (Job $task, ExtendedPromiseInterface $_) {
+        $scheduler->on(Scheduler::ON_TASK_RUN, function (Job $task, PromiseInterface $_) {
             Logger::info('Running schedule %s of job %s', $task->getSchedule()->getName(), $task->getName());
         });
 

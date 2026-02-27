@@ -27,6 +27,7 @@ use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use React\EventLoop\Loop;
 use React\Promise;
+use React\Promise\PromiseInterface;
 use React\Socket\ConnectionInterface;
 use React\Socket\Connector;
 use React\Socket\ConnectorInterface;
@@ -542,15 +543,15 @@ class Job implements Task
 
                 $this->finishTarget();
             }
-        )->always(function () use ($target) {
+        )->finally(function () use ($target) {
             $this->updateLastScan($target);
-        })->otherwise(function (Throwable $e) {
+        })->catch(function (Throwable $e) {
             Logger::error($e->getMessage());
             Logger::error($e->getTraceAsString());
         });
     }
 
-    public function run(): Promise\ExtendedPromiseInterface
+    public function run(): PromiseInterface
     {
         $this->jobRunStart = new DateTime();
         // Update the job statistics regardless of whether the job was successful, failed, or canceled.
@@ -559,7 +560,7 @@ class Job implements Task
             $this->updateJobStats(true);
         };
         $this->deferred = new Promise\Deferred($updateJobStats);
-        $this->deferred->promise()->always($updateJobStats);
+        $this->deferred->promise()->finally($updateJobStats);
 
         Loop::futureTick(function () {
             if (! $this->db->ping()) {
@@ -604,7 +605,7 @@ class Job implements Task
             }
         });
 
-        /** @var Promise\ExtendedPromiseInterface $promise */
+        /** @var PromiseInterface $promise */
         $promise = $this->deferred->promise();
         return $promise;
     }

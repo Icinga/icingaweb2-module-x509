@@ -27,7 +27,7 @@ class ExpressionInjector implements RewriteFilterBehavior, QueryAwareBehavior
         $this->columns = $columns;
     }
 
-    public function setQuery(Query $query)
+    public function setQuery(Query $query): static
     {
         $this->query = $query;
 

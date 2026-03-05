@@ -51,6 +51,10 @@ class JobsCommand extends Command
      * --parallel=<number>
      *     Allow parallel scanning of targets up to the specified number. Defaults to 256.
      *     May cause **too many open files** error if set to a number higher than the configured one (ulimit).
+     *
+     * --import-ca-file=<file>
+     *     Import all X.509 certificates from the given file and mark them as trusted
+     *     before starting the scheduler. Behaves the same as the "import" command.
      */
     public function runAction(): void
     {
@@ -63,6 +67,16 @@ class JobsCommand extends Command
         $scheduleName = (string) $this->params->get('schedule');
         if (! $jobName && $scheduleName) {
             throw new InvalidArgumentException('You cannot provide a schedule without a job');
+        }
+
+        if ($importCaFile = (string) $this->params->get('import-ca-file')) {
+            if (! is_file($importCaFile)) {
+                $this->fail('The specified certificate file does not exist.');
+            }
+
+            $count = CertificateUtils::trustBundle($importCaFile);
+
+            Logger::info('Processed %d X.509 certificate%s.', $count, $count !== 1 ? 's' : '');
         }
 
         $scheduler = new Scheduler();

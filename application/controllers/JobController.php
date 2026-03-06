@@ -8,12 +8,13 @@ namespace Icinga\Module\X509\Controllers;
 use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Common\Links;
 use Icinga\Module\X509\Forms\Jobs\JobConfigForm;
+use Icinga\Module\X509\Forms\Jobs\ScheduleForm;
 use Icinga\Module\X509\Model\X509Job;
 use Icinga\Module\X509\Model\X509Schedule;
-use Icinga\Module\X509\Forms\Jobs\ScheduleForm;
 use Icinga\Module\X509\Widget\JobDetails;
 use Icinga\Module\X509\Widget\Schedules;
 use Icinga\Util\Json;
+use ipl\Html\Contract\Form;
 use ipl\Html\Contract\FormSubmitElement;
 use ipl\Html\ValidHtml;
 use ipl\Scheduler\Contract\Frequency;
@@ -185,8 +186,11 @@ class JobController extends CompatController
                 'since_last_scan'  => $config->since_last_scan ?? null,
                 'schedule_element' => $frequency
             ])
-            ->on(JobConfigForm::ON_SUCCESS, function () {
-                $this->redirectNow('__BACK__');
+            ->on(Form::ON_SUBMIT, function (ScheduleForm $form) {
+                if ($form->getPressedSubmitElement()->getName() === 'btn_remove') {
+                    $this->redirectNow('__CLOSE__');
+                }
+                $this->redirectNow('__REFRESH__');
             })
             ->handleRequest($this->getServerRequest());
 

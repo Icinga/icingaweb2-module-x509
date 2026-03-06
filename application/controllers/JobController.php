@@ -92,7 +92,7 @@ class JobController extends CompatController
                 'ports'           => $this->job->ports,
                 'exclude_targets' => $this->job->exclude_targets
             ])
-            ->on(JobConfigForm::ON_SUCCESS, function (JobConfigForm $form) {
+            ->on(Form::ON_SUBMIT, function (JobConfigForm $form) {
                 /** @var FormSubmitElement $button */
                 $button = $form->getPressedSubmitElement();
                 if ($button->getName() === 'btn_remove') {
@@ -141,7 +141,7 @@ class JobController extends CompatController
         $form = (new ScheduleForm())
             ->setAction((string) Url::fromRequest())
             ->setJobId($this->job->id)
-            ->on(JobConfigForm::ON_SUCCESS, function () {
+            ->on(Form::ON_SUBMIT, function () {
                 $this->redirectNow(Links::schedules($this->job));
             })
             ->handleRequest($this->getServerRequest());

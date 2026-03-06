@@ -7,6 +7,7 @@ namespace Icinga\Module\X509;
 use Exception;
 use Icinga\Application\Logger;
 use Icinga\File\Storage\TemporaryLocalFileStorage;
+use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Model\X509Certificate;
 use Icinga\Module\X509\Model\X509CertificateSubjectAltName;
 use Icinga\Module\X509\Model\X509Dn;
@@ -198,6 +199,39 @@ class CertificateUtils
                 yield '-----BEGIN CERTIFICATE-----' . substr($block, 0, $end) . '-----END CERTIFICATE-----';
             }
         }
+    }
+
+    /**
+     * Import all X.509 certificates from the given bundle file and mark them as trusted
+     *
+     * @param string $file Path to the PEM-encoded certificate bundle
+     *
+     * @return int The number of certificates processed
+     */
+    public static function trustBundle(string $file): int
+    {
+        $count = 0;
+
+        Database::get()->transaction(function (Connection $db) use ($file, &$count) {
+            foreach (CertificateUtils::parseBundle($file) as $data) {
+                $cert = openssl_x509_read($data);
+
+                [$id, $_] = CertificateUtils::findOrInsertCert($db, $cert);
+
+                $db->update(
+                    'x509_certificate',
+                    [
+                        'trusted' => 'y',
+                        'mtime'   => new Expression('UNIX_TIMESTAMP() * 1000')
+                    ],
+                    ['id = ?' => $id]
+                );
+
+                $count++;
+            }
+        });
+
+        return $count;
     }
 
     /**

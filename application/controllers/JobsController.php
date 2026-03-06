@@ -9,6 +9,7 @@ use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Forms\Jobs\JobConfigForm;
 use Icinga\Module\X509\Model\X509Job;
 use Icinga\Module\X509\Widget\Jobs;
+use ipl\Html\Contract\Form;
 use ipl\Web\Compat\CompatController;
 use ipl\Web\Url;
 use ipl\Web\Widget\ButtonLink;
@@ -57,7 +58,7 @@ class JobsController extends CompatController
 
         $form = (new JobConfigForm())
             ->setAction((string) Url::fromRequest())
-            ->on(JobConfigForm::ON_SUCCESS, function () {
+            ->on(Form::ON_SUBMIT, function () {
                 $this->closeModalAndRefreshRelatedView(Url::fromPath('x509/jobs'));
             })
             ->handleRequest($this->getServerRequest());

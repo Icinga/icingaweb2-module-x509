@@ -25,13 +25,12 @@ class ImportCommand extends Command
     {
         $file = $this->params->getRequired('file');
 
-        if (! file_exists($file)) {
-            Logger::warning('The specified certificate file does not exist.');
-            exit(1);
+        if (! is_file($file)) {
+            $this->fail('The specified certificate file does not exist.');
         }
 
         $count = CertificateUtils::trustBundle($file);
 
-        printf("Processed %d X.509 certificate%s.\n", $count, $count !== 1 ? 's' : '');
+        Logger::info('Processed %d X.509 certificate%s.', $count, $count !== 1 ? 's' : '');
     }
 }

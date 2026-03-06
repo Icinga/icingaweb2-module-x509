@@ -27,14 +27,14 @@ class ExpressionInjector implements RewriteFilterBehavior, QueryAwareBehavior
         $this->columns = $columns;
     }
 
-    public function setQuery(Query $query)
+    public function setQuery(Query $query): static
     {
         $this->query = $query;
 
         return $this;
     }
 
-    public function rewriteCondition(Filter\Condition $condition, $relation = null)
+    public function rewriteCondition(Filter\Condition $condition, $relation = null): null
     {
         $columnName = $condition->metaData()->get('columnName');
         if (in_array($columnName, $this->columns, true)) {
@@ -58,5 +58,7 @@ class ExpressionInjector implements RewriteFilterBehavior, QueryAwareBehavior
 
             $condition->setColumn($this->query->getDb()->getQueryBuilder()->buildExpression($expression));
         }
+
+        return null;
     }
 }

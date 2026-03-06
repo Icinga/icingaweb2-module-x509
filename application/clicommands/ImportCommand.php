@@ -7,9 +7,6 @@ namespace Icinga\Module\X509\Clicommands;
 use Icinga\Application\Logger;
 use Icinga\Module\X509\CertificateUtils;
 use Icinga\Module\X509\Command;
-use Icinga\Module\X509\Common\Database;
-use ipl\Sql\Connection;
-use ipl\Sql\Expression;
 
 class ImportCommand extends Command
 {
@@ -33,28 +30,7 @@ class ImportCommand extends Command
             exit(1);
         }
 
-        $bundle = CertificateUtils::parseBundle($file);
-
-        $count = 0;
-
-        Database::get()->transaction(function (Connection $db) use ($bundle, &$count) {
-            foreach ($bundle as $data) {
-                $cert = openssl_x509_read($data);
-
-                list($id, $_) = CertificateUtils::findOrInsertCert($db, $cert);
-
-                $db->update(
-                    'x509_certificate',
-                    [
-                        'trusted' => 'y',
-                        'mtime'   => new Expression('UNIX_TIMESTAMP() * 1000')
-                    ],
-                    ['id = ?' => $id]
-                );
-
-                $count++;
-            }
-        });
+        $count = CertificateUtils::trustBundle($file);
 
         printf("Processed %d X.509 certificate%s.\n", $count, $count !== 1 ? 's' : '');
     }

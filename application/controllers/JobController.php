@@ -188,7 +188,7 @@ class JobController extends CompatController
             ])
             ->on(Form::ON_SUBMIT, function (ScheduleForm $form) {
                 if ($form->getPressedSubmitElement()->getName() === 'btn_remove') {
-                    $this->redirectNow('__CLOSE__');
+                    $this->switchToSingleColumnLayout();
                 }
                 $this->redirectNow('__REFRESH__');
             })

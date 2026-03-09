@@ -22,4 +22,23 @@ enum ScanType: string
             default           => self::PARTIAL
         };
     }
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::FULL    => t('Full Scan'),
+            self::PARTIAL => t('Partial Scan'),
+            self::RE      => t('Rescan')
+        };
+    }
+
+    public function description(): string
+    {
+        return match ($this) {
+            self::FULL    => t('Scan all known and unknown targets of this job.'),
+            self::PARTIAL => t('Scanning both, targets not yet scanned and targets'
+                . ' whose scan is older than the specified time.'),
+            self::RE      => t('Scan only targets that have been scanned before.')
+        };
+    }
 }

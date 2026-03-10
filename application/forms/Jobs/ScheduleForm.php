@@ -10,14 +10,17 @@ use Icinga\Application\Icinga;
 use Icinga\Application\Web;
 use Icinga\Authentication\Auth;
 use Icinga\Module\X509\Common\Database;
+use Icinga\Module\X509\Common\ScanType;
 use Icinga\Module\X509\Model\X509Schedule;
 use Icinga\User;
 use Icinga\Util\Json;
 use Icinga\Web\Notification;
+use ipl\Html\Attributes;
 use ipl\Html\BaseHtmlElement;
 use ipl\Html\Contract\FormSubmitElement;
 use ipl\Html\HtmlDocument;
 use ipl\Html\HtmlElement;
+use ipl\Html\Text;
 use ipl\Validator\CallbackValidator;
 use ipl\Web\Compat\CompatForm;
 use ipl\Web\FormElement\ScheduleElement;
@@ -96,23 +99,68 @@ class ScheduleForm extends CompatForm
             'description' => $this->translate('Schedule name'),
         ]);
 
-        $this->addElement('checkbox', 'full_scan', [
-            'required'    => false,
-            'class'       => 'autosubmit',
-            'label'       => $this->translate('Full Scan'),
-            'description' => $this->translate(
-                'Scan all known and unknown targets of this job. (Defaults to only scan unknown targets)'
-            )
-        ]);
+        $typeSwitcher = HtmlElement::create('fieldset', Attributes::create(['class' => 'type-switcher']));
+        $descriptions = HtmlElement::create('div');
+        $populatedScanType = $this->getPopulatedValue('scan_type') ?? ScanType::PARTIAL->value;
+        $request = Icinga::app()->getRequest();
 
-        if ($this->getPopulatedValue('full_scan', 'n') === 'n') {
-            $this->addElement('checkbox', 'rescan', [
-                'required'    => false,
-                'class'       => 'autosubmit',
-                'label'       => $this->translate('Rescan'),
-                'description' => $this->translate('Rescan only targets that have been scanned before')
+        foreach (ScanType::cases() as $type) {
+            // Protect the id for the case that the form is open in multiple containers
+            $protectedId = $request->protectId('scan_type-' . $type->value);
+            $chosenType = $type->value === $populatedScanType;
+
+            $descriptions->addHtml(HtmlElement::create('p', null, [
+                // Render bold label for the chosen type
+                $chosenType ? HtmlElement::create('strong', null, $type->label()) : Text::create($type->label()),
+                Text::create(': ' . $type->description())
+            ]));
+
+            $radio = $this->createElement('input', 'scan_type', [
+                'type'    => 'radio',
+                'class'   => 'autosubmit',
+                'id'      => $protectedId,
+                'value'   => $type->value,
+                'checked' => $chosenType
             ]);
 
+            // Register only the chosen element
+            if ($chosenType) {
+                $this->registerElement($radio);
+            }
+
+            $typeSwitcher->addHtml(
+                $radio,
+                HtmlElement::create(
+                    'label',
+                    Attributes::create(['for' => $protectedId, 'title' => $type->description()]),
+                    Text::create($type->label())
+                )
+            );
+        }
+
+        $this->addHtml(HtmlElement::create(
+            'div',
+            Attributes::create(['class' => 'control-group']),
+            [
+                HtmlElement::create(
+                    'div',
+                    Attributes::create(['class' => 'control-label-group']),
+                    Text::create($this->translate('Scan Type'))
+                ),
+                $typeSwitcher
+            ]
+        ));
+
+        $this->addHtml(HtmlElement::create(
+            'div',
+            Attributes::create(['class' => 'control-group no-flex-wrap']),
+            [
+                HtmlElement::create('div', Attributes::create(['class' => 'control-label-group no-flex-shrink'])),
+                $descriptions
+            ]
+        ));
+
+        if (ScanType::from($populatedScanType) !== ScanType::FULL) {
             $this->addElement('text', 'since_last_scan', [
                 'required'    => false,
                 'label'       => $this->translate('Since Last Scan'),
@@ -175,10 +223,15 @@ class ScheduleForm extends CompatForm
             $config = $this->getValues();
             unset($config['name']);
             unset($config['schedule_element']);
+            unset($config['scan_type']);
 
             $frequency = $this->scheduleElement->getValue();
             $config['type'] = get_php_type($frequency);
             $config['frequency'] = Json::encode($frequency);
+
+            $scanType = ScanType::from($this->getValue('scan_type'));
+            $config['full_scan'] = $scanType === ScanType::FULL ? 'y' : 'n';
+            $config['rescan'] = $scanType === ScanType::RE ? 'y' : 'n';
 
             /** @var User $user */
             $user = Auth::getInstance()->getUser();

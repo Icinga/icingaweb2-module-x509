@@ -6,6 +6,7 @@ namespace Icinga\Module\X509\Widget;
 
 use Icinga\Module\X509\Common\Links;
 use Icinga\Module\X509\Model\X509Job;
+use ipl\Html\HtmlString;
 use ipl\Html\Table;
 use ipl\I18n\Translation;
 use ipl\Orm\Query;
@@ -43,6 +44,8 @@ class Jobs extends Table
         $headers->addHtml(
             static::th($this->translate('Name')),
             static::th($this->translate('Author')),
+            static::th($this->translate('CIDRs')),
+            static::th($this->translate('Ports')),
             static::th($this->translate('Date Created')),
             static::th($this->translate('Date Modified'))
         );
@@ -54,6 +57,10 @@ class Jobs extends Table
             $row->addHtml(
                 static::td(new Link($job->name, Links::job($job))),
                 static::td($job->author),
+                // Add <wbr> tags to break CIDRs string only after commas
+                static::td(HtmlString::create(str_replace(',', ',<wbr>', $job->cidrs))),
+                // Add <wbr> tags to break ports string only after commas
+                static::td(HtmlString::create(str_replace(',', ',<wbr>', $job->ports))),
                 static::td($job->ctime->format('Y-m-d H:i')),
                 static::td($job->mtime->format('Y-m-d H:i'))
             );

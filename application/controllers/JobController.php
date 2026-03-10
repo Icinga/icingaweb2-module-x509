@@ -7,6 +7,7 @@ namespace Icinga\Module\X509\Controllers;
 
 use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Common\Links;
+use Icinga\Module\X509\Common\ScanType;
 use Icinga\Module\X509\Forms\Jobs\JobConfigForm;
 use Icinga\Module\X509\Forms\Jobs\ScheduleForm;
 use Icinga\Module\X509\Model\X509Job;
@@ -181,8 +182,7 @@ class JobController extends CompatController
             ->setAction((string) Url::fromRequest())
             ->populate([
                 'name'             => $schedule->name,
-                'full_scan'        => $config->full_scan ?? 'n',
-                'rescan'           => $config->rescan ?? 'n',
+                'scan_type'        => ScanType::fromConfig($config->full_scan ?? '', $config->rescan ?? '')->value,
                 'since_last_scan'  => $config->since_last_scan ?? null,
                 'schedule_element' => $frequency
             ])

@@ -1,6 +1,7 @@
 <?php
 
-/* Icinga Web 2 X.509 Module | (c) 2023 Icinga GmbH | GPLv2 */
+// SPDX-FileCopyrightText: 2023 Icinga GmbH <https://icinga.com>
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 namespace Icinga\Module\X509\Model;
 

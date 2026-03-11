@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: 2022 Icinga GmbH <https://icinga.com>
+-- SPDX-License-Identifier: GPL-3.0-or-later
+
 ALTER TABLE x509_certificate
     MODIFY self_signed enum('n', 'y', 'yes', 'no') NOT NULL DEFAULT 'n',
     MODIFY ca enum('n', 'y', 'yes', 'no') NOT NULL,

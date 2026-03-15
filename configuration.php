@@ -37,3 +37,5 @@ $this->providePermission(
     'config/x509',
     $this->translate('allow to create/update jobs/schedules/snis if permission config/* is missing')
 );
+
+$this->provideCssFile('type-switcher.less');

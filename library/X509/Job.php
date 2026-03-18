@@ -6,6 +6,7 @@
 namespace Icinga\Module\X509;
 
 use DateTime;
+use DateTimeInterface;
 use Exception;
 use Generator;
 use GMP;
@@ -550,6 +551,16 @@ class Job implements Task
             Logger::error($e->getMessage());
             Logger::error($e->getTraceAsString());
         });
+    }
+
+    public function getLastRun(): DateTimeInterface|false|null
+    {
+        return X509JobRun::on($this->db)
+            ->columns(['start_time'])
+            ->filter(Filter::equal('schedule_id', $this->getSchedule()->getId()))
+            ->orderBy('start_time', SORT_DESC)
+            ->first()
+            ?->start_time;
     }
 
     public function run(): PromiseInterface

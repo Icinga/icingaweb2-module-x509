@@ -8,12 +8,13 @@ namespace Icinga\Module\X509\Controllers;
 use Icinga\Module\X509\Common\Database;
 use Icinga\Module\X509\Common\Links;
 use Icinga\Module\X509\Forms\Jobs\JobConfigForm;
+use Icinga\Module\X509\Forms\Jobs\ScheduleForm;
 use Icinga\Module\X509\Model\X509Job;
 use Icinga\Module\X509\Model\X509Schedule;
-use Icinga\Module\X509\Forms\Jobs\ScheduleForm;
 use Icinga\Module\X509\Widget\JobDetails;
 use Icinga\Module\X509\Widget\Schedules;
 use Icinga\Util\Json;
+use ipl\Html\Contract\Form;
 use ipl\Html\Contract\FormSubmitElement;
 use ipl\Html\ValidHtml;
 use ipl\Scheduler\Contract\Frequency;
@@ -92,7 +93,7 @@ class JobController extends CompatController
                 'ports'           => $this->job->ports,
                 'exclude_targets' => $this->job->exclude_targets
             ])
-            ->on(JobConfigForm::ON_SUCCESS, function (JobConfigForm $form) {
+            ->on(Form::ON_SUBMIT, function (JobConfigForm $form) {
                 /** @var FormSubmitElement $button */
                 $button = $form->getPressedSubmitElement();
                 if ($button->getName() === 'btn_remove') {
@@ -141,7 +142,7 @@ class JobController extends CompatController
         $form = (new ScheduleForm())
             ->setAction((string) Url::fromRequest())
             ->setJobId($this->job->id)
-            ->on(JobConfigForm::ON_SUCCESS, function () {
+            ->on(Form::ON_SUBMIT, function () {
                 $this->redirectNow(Links::schedules($this->job));
             })
             ->handleRequest($this->getServerRequest());
@@ -185,8 +186,11 @@ class JobController extends CompatController
                 'since_last_scan'  => $config->since_last_scan ?? null,
                 'schedule_element' => $frequency
             ])
-            ->on(JobConfigForm::ON_SUCCESS, function () {
-                $this->redirectNow('__BACK__');
+            ->on(Form::ON_SUBMIT, function (ScheduleForm $form) {
+                if ($form->getPressedSubmitElement()->getName() === 'btn_remove') {
+                    $this->switchToSingleColumnLayout();
+                }
+                $this->redirectNow('__REFRESH__');
             })
             ->handleRequest($this->getServerRequest());
 

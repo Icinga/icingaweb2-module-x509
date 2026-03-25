@@ -1,0 +1,41 @@
+// SPDX-FileCopyrightText: 2026 Icinga GmbH <https://icinga.com>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+// Values are copied from Icinga Kubernetes .view-mode-switcher
+.type-switcher {
+  display: flex;
+  padding: 0;
+
+  input {
+    display: none;
+  }
+
+  label {
+    padding: 14/16*.25em 14/16*.5em;
+
+    background: @low-sat-blue;
+    color: @control-color;
+
+    cursor: pointer;
+
+    &:first-of-type {
+      border-top-left-radius: 0.25em;
+      border-bottom-left-radius: 0.25em;
+    }
+
+    &:last-of-type {
+      border-top-right-radius: 0.25em;
+      border-bottom-right-radius: 0.25em;
+    }
+
+    &:not(:last-of-type) {
+      border-right: 1px solid @low-sat-blue-dark;
+    }
+  }
+
+  input[checked] + label {
+    background-color: @control-color;
+    color: @text-color-on-icinga-blue;
+    cursor: default;
+  }
+}

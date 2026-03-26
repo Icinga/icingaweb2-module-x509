@@ -9,7 +9,7 @@ Make sure you use `x509` as the module name. The following requirements must als
 * PHP ≥ 8.2
 * MySQL or PostgreSQL PDO PHP libraries
 * The following PHP modules must be installed: `gmp`, `pcntl`, `openssl`
-* [Icinga Web](https://github.com/Icinga/icingaweb2) ≥ 2.9
+* [Icinga Web](https://github.com/Icinga/icingaweb2) ≥ 2.12.5
 * [Icinga PHP Library (ipl)](https://github.com/Icinga/icinga-php-library) ≥ 1.0.0
 * [Icinga PHP Thirdparty](https://github.com/Icinga/icinga-php-thirdparty) ≥ 1.0.0
 

@@ -64,6 +64,18 @@ If you don't want to use the Director, know that Icinga 2 already provides
 an appropriate template for the host check command in its template library:
 https://icinga.com/docs/icinga2/latest/doc/10-icinga-template-library/#x509
 
+To speed up integration, there is a [Director basket][] in
+`contrib/director-basket.json` that already contains templates, customized
+fields and a multi-service *apply_for* rule. You can upload it in the Director
+Configuration Baskets view or use
+`icingacli director basket restore < /path/to/director-basket.json`.
+
+For hosts discovered via the x509 module, the basket also includes Director
+automation. The included sync rule replaces matching x509-managed hosts and
+purges hosts that disappear from the x509 import source.
+
+[Director basket]: https://icinga.com/docs/icinga-director/latest/doc/30-Configuration-Baskets
+
 ### Director Import Sources
 
 The module provides two different import sources:

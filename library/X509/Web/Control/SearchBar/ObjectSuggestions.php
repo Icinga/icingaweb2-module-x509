@@ -5,6 +5,7 @@
 
 namespace Icinga\Module\X509\Web\Control\SearchBar;
 
+use DateTime;
 use Exception;
 use Icinga\Module\X509\Common\Database;
 use ipl\Orm\Exception\InvalidColumnException;
@@ -140,7 +141,7 @@ class ObjectSuggestions extends Suggestions
                     $value = $value ? 'y' : 'n';
                 }
 
-                yield $value;
+                yield $value instanceof DateTime ? $value->getTimestamp() :  $value;
             }
         } catch (InvalidColumnException $e) {
             throw new SearchException(sprintf(t('"%s" is not a valid column'), $e->getColumn()));

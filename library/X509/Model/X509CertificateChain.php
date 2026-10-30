@@ -48,7 +48,7 @@ class X509CertificateChain extends Model
 
     public function createRelations(Relations $relations)
     {
-        $relations->belongsTo('target', X509Target::class)
+        $relations->hasMany('target', X509Target::class)
             ->setCandidateKey('id')
             ->setForeignKey('latest_certificate_chain_id');
 

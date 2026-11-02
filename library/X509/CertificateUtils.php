@@ -217,7 +217,7 @@ class CertificateUtils
             foreach (CertificateUtils::parseBundle($file) as $data) {
                 $cert = openssl_x509_read($data);
 
-                [$id, $_] = CertificateUtils::findOrInsertCert($db, $cert);
+                $certInfo = CertificateUtils::findOrInsertCert($db, $cert);
 
                 $db->update(
                     'x509_certificate',
@@ -225,7 +225,7 @@ class CertificateUtils
                         'trusted' => 'y',
                         'mtime'   => new Expression('UNIX_TIMESTAMP() * 1000')
                     ],
-                    ['id = ?' => $id]
+                    ['id = ?' => $certInfo->certId]
                 );
 
                 $count++;
@@ -241,7 +241,7 @@ class CertificateUtils
      * @param   Connection  $db
      * @param   mixed       $cert
      *
-     * @return  array
+     * @return object
      */
     public static function findOrInsertCert(Connection $db, $cert)
     {
@@ -258,7 +258,7 @@ class CertificateUtils
 
         $row = $row->first();
         if ($row) {
-            return [$row->id, $row->issuer_hash];
+            return (object) ['certId' => $row->id, 'issuerHash' => $row->issuer_hash, 'fingerprint' => $fingerprint];
         }
 
         Logger::debug("Importing certificate: %s", $certInfo['name']);
@@ -316,7 +316,7 @@ class CertificateUtils
 
         CertificateUtils::insertSANs($db, $certId, $sans);
 
-        return [$certId, $issuerHash];
+        return (object) ['certId' => $certId, 'issuerHash' => $issuerHash, 'fingerprint' => $fingerprint];
     }
 
     private static function insertSANs($db, $certId, iterable $sans): void

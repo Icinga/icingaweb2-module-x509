@@ -1,6 +1,5 @@
 includes:
-	- phpstan-baseline-common.neon
-	- phpstan-baseline-by-php-version.php
+	- phpstan-baseline.neon
 
 parameters:
     level: max
